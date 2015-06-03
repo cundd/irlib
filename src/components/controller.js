@@ -18,6 +18,8 @@ IrLib.Controller = IrLib.CoreObject.extend({
     init: function(view) {
         if (arguments.length > 0) {
             this.setView(view);
+        } else if (this.view) {
+            this.setView(this.view);
         }
     },
 
@@ -35,15 +37,15 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * Initialize the event listeners
      */
     initializeEventListeners: function() {
-        var _view = this.view;
+        var _view = this.view,
+        _eventNames, i;
         if (_view) {
-            var _eventNames = this.eventNames(),
-                eventName, i;
+            _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                eventName = _eventNames[i];
-                console.log('ev', eventName);
+                var eventName = _eventNames[i];
+                var callback = this.events[eventName];
+                _view.addEventListener(eventName, callback.bind(this));
             }
-            //document.addEventListener
         }
     },
 
