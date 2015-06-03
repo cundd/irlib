@@ -1,0 +1,27 @@
+{
+  "name": "irlib",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/irlib.js",
+  "scripts": {
+    "test": "grunt"
+  },
+  "author": "Daniel Corn",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-karma": "^0.11.0",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-shell": "^1.1.2",
+    "jsdom": "^5.4.3",
+    "karma": "^0.12.35",
+    "karma-mocha": "^0.1.10",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "mocha": "^2.2.5",
+    "mocha-jsdom": "^0.4.0",
+    "phantomjs": "^1.9.17"
+  }
+}
