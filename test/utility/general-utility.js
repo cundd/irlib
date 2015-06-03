@@ -2,6 +2,7 @@
  * Created by COD on 03.06.15.
  */
 /*global describe, it */
+'use strict';
 var jsdom = require('mocha-jsdom');
 var assert = require('chai').assert;
 var IrLib = require('../../dist/irlib.js');
@@ -14,20 +15,33 @@ describe('Utility', function () {
         });
 
         describe('#domNode()', function () {
-            it('passing a dom node should return the dom node', function () {
+            it('should return the dom node when passing a dom node', function () {
                 var view = document.createElement('div');
-                assert.equal(IrLib.Utility.GeneralUtility.domNode(view), view);
+                assert.strictEqual(IrLib.Utility.GeneralUtility.domNode(view), view);
             });
-            it('passing a string should return a matching dom node (ID)', function () {
+            it('should return a matching dom node when passing an ID string', function () {
                 var node = IrLib.Utility.GeneralUtility.domNode('#my-id');
                 assert.notEqual(node, null);
-                assert.equal(node.id, 'my-id')
+                assert.strictEqual(node.id, 'my-id')
             });
-            it('passing a string should return a matching dom node (class)', function () {
+            it('should return a matching dom node when passing a class string', function () {
                 var node = IrLib.Utility.GeneralUtility.domNode('.my-class');
                 assert.notEqual(node, null);
-                assert.equal(node.id, 'my-id')
+                assert.strictEqual(node.id, 'my-id')
             });
-        })
+        });
+
+        describe('#isDomNode()', function () {
+            it('should return true if a dom node is given', function () {
+                assert.isTrue(IrLib.Utility.GeneralUtility.isDomNode(document));
+                assert.isTrue(IrLib.Utility.GeneralUtility.isDomNode(document.getElementById('my-id')));
+            });
+            it('should return false if no dom node is given', function () {
+                assert.isFalse(IrLib.Utility.GeneralUtility.isDomNode());
+                assert.isFalse(IrLib.Utility.GeneralUtility.isDomNode(""));
+                assert.isFalse(IrLib.Utility.GeneralUtility.isDomNode('.my-class'));
+                assert.isFalse(IrLib.Utility.GeneralUtility.isDomNode(document.getElementById('my-not-existing-id')));
+            });
+        });
     })
 });

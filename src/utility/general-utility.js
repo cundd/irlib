@@ -12,7 +12,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @returns {Boolean}
      */
     isDomNode: function(element) {
-        return element && element.nodeName;
+        return !!(element && element.nodeName);
     },
 
     /**
