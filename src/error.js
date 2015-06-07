@@ -7,9 +7,11 @@ var _Error = IrLib.Error = function (message, code, userInfo) {
     this.userInfo = userInfo;
 };
 
+_Error.prototype = Object.create(Error.prototype);
 _Error.prototype = {
+    constructor: _Error,
     toString: function() {
-        return '[KungFu.Error] ' +
+        return '[IrLib.Error] ' +
             (this.code ? '#' + this.code + ':' : '') +
             this.message;
     }
