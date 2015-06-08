@@ -2,8 +2,8 @@
  * Created by COD on 03.06.15.
  */
 /*global describe, it */
-var assert = require('chai').assert;
-var IrLib = require('../../dist/irlib.js');
+//var assert = require('chai').assert;
+//var IrLib = require('../../dist/irlib.js');
 
 describe('ServiceLocator', function () {
     var ef = function () {

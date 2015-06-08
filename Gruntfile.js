@@ -26,9 +26,14 @@ module.exports = function (grunt) {
                     //reporter: 'spec',
                     //captureFile: 'results.txt', // Optionally capture the reporter output to a file
                     quiet: false, // Optionally suppress output to standard out (defaults to false)
-                    clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
+                    clearRequireCache: false, // Optionally clear the require cache before running tests (defaults to false)
+                    require: [
+                        'chai',
+                        'tests/bootstrap-common.js',
+                        'tests/bootstrap-mocha-cli.js'
+                        ]
                 },
-                src: ['test/**/*.js']
+                src: ['tests/**/*-test.js']
             }
         },
 
@@ -42,7 +47,7 @@ module.exports = function (grunt) {
         },
 
         watch: {
-            files: ['<%= jshint.files %>', 'test/**/*.js'],
+            files: ['<%= jshint.files %>', 'tests/**/*.js'],
             tasks: ['jshint', 'shell', 'mochaTest']
         }
     });
@@ -53,6 +58,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-shell');
 
+    grunt.registerTask('test', ['jshint', 'shell', 'mochaTest', 'karma']);
     grunt.registerTask('default', ['jshint', 'shell', 'mochaTest']);
 
 };
