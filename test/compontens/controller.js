@@ -223,5 +223,99 @@ describe('Controller', function(){
             assert.equal(target, childNode);
             assert.equal(handler, controller);
         });
+        it('should invoke event methods only once', function(){
+            var domNode = document.createElement('div'),
+                clicked = 0,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                controller;
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    'click': function(event) {
+                        target = event.target;
+                        handler = this;
+                        clicked++;
+                    },
+                    'keydown': function() {
+                        keyPressed = true;
+                    }
+                }
+            }));
+            controller.initializeEventListeners();
+            controller.initializeEventListeners();
+            controller.initializeEventListeners();
+
+            domNode.dispatchEvent(buildEvent('click'));
+            assert.equal(clicked, 1);
+            assert.isFalse(keyPressed);
+            assert.equal(handler, controller);
+            assert.equal(target, domNode);
+        });
+    });
+    describe('#removeEventListeners', function(){
+        it('should unbind event listeners (div)', function(){
+            var domNode = document.createElement('div'),
+                clicked = false,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                controller;
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    'click': function(event) {
+                        target = event.target;
+                        handler = this;
+                        clicked = true;
+                    },
+                    'keydown': function() {
+                        keyPressed = true;
+                    }
+                }
+            }));
+            controller.initializeEventListeners();
+            controller.removeEventListeners();
+
+            domNode.dispatchEvent(buildEvent('click'));
+            assert.isFalse(clicked);
+            assert.isFalse(keyPressed);
+            assert.isNull(handler);
+            assert.isNull(target);
+        });
+        it('should unbind event listeners (selector)', function(){
+            var domNode = document.querySelector('#my-id'),
+                clicked = false,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                controller;
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    'click': function(event) {
+                        target = event.target;
+                        handler = this;
+                        clicked = true;
+                    },
+                    'keydown': function() {
+                        keyPressed = true;
+                    }
+
+                }
+            }));
+            controller.initializeEventListeners();
+            controller.removeEventListeners();
+
+            domNode.dispatchEvent(buildEvent('click'));
+            assert.isFalse(clicked);
+            assert.isFalse(keyPressed);
+            assert.isNull(handler);
+            assert.isNull(target);
+        });
     });
 });

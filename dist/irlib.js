@@ -224,6 +224,22 @@ IrLib.Controller = IrLib.CoreObject.extend({
     },
 
     /**
+     * Removes the event listeners
+     */
+    removeEventListeners: function() {
+        var _view = this.view,
+        _eventNames, i;
+        if (_view) {
+            _eventNames = this.eventNames();
+            for (i = 0; i < _eventNames.length; i++) {
+                var eventName = _eventNames[i];
+                var callback = this.events[eventName];
+                _view.removeEventListener(eventName, callback.bind(this));
+            }
+        }
+    },
+
+    /**
      * Returns the event names
      *
      * @returns {Array}
