@@ -18,7 +18,6 @@ module.exports = function(config) {
         {pattern: 'tests/bootstrap-common.js', included: true, watched: false},
         {pattern: 'tests/bootstrap-karma.js', included: true, watched: false},
         {pattern: 'node_modules/mocha-jsdom/index.js', included: false, watched: false},
-        //{pattern: 'node_modules/chai/chai.js', included: false, watched: false, served: true},
         'dist/irlib.js',
         'tests/**/*-test.js'
     ],

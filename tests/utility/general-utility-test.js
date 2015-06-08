@@ -3,16 +3,10 @@
  */
 /*global describe, it */
 'use strict';
-//var jsdom = require('mocha-jsdom');
-//var assert = require('chai').assert;
-//var IrLib = require('../../dist/irlib.js');
+var assert = chai.assert;
 
 describe('Utility', function () {
     describe('GeneralUtility', function () {
-        //jsdom({globalize: true, skipWindowCheck: true});
-        //jsdom({
-        //    html:'<div class="outer">\n    <div class="my-class" id="my-id"></div>\n    <div id="my-id-inner"><a href="#">A link</a></div>\n</div>'
-        //});
         bootstrapDocument();
 
         describe('#domNode()', function () {

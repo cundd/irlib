@@ -21,8 +21,6 @@ var util = {
 };
 
 var require= function(module) {
-    console.log(module);
-
     if (module === 'util') {
         return util;
     }
@@ -41,11 +39,9 @@ var require= function(module) {
     request.send(null);
 
     if (request.status === 200) {
-        //console.log(request.responseText);
         return eval(request.responseText);
-    } else {
-        console.log(request.status)
     }
+    return {};
 };
 
 global.bootstrapDocument = function (html) {
