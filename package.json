@@ -20,6 +20,7 @@
     "karma": "^0.12.35",
     "karma-mocha": "^0.1.10",
     "karma-phantomjs-launcher": "^0.2.0",
+    "karma-chrome-launcher": "~0.1",
     "mocha": "^2.2.5",
     "mocha-jsdom": "^0.4.0",
     "phantomjs": "^1.9.17"
