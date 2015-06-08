@@ -23,4 +23,8 @@
         outer.appendChild(emptyChild).appendChild(linkChild);
         return outer;
     };
-})(this);
+
+    root.TestRunner = {
+        name: ''
+    };
+})(typeof global !== 'undefined' ? global : window);

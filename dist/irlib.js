@@ -204,8 +204,6 @@ IrLib.Controller = IrLib.CoreObject.extend({
      */
     handleEvent: function(event) {
         var _events = this.events;
-        console.log('evc', _events[event.type]);
-
         if (_events[event.type]) {
             _events[event.type].call(this, event);
         } else {
@@ -232,8 +230,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                console.log('add evl for ' + _eventNames[i]);
-                _view.addEventListener(_eventNames[i], this);
+                _view.addEventListener(_eventNames[i], this, false);
             }
         }
     },
@@ -247,7 +244,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                _view.removeEventListener(_eventNames[i], this);
+                _view.removeEventListener(_eventNames[i], this, false);
             }
         }
     },

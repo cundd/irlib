@@ -1,16 +1,17 @@
 /**
  * Created by COD on 08.06.15.
  */
+/* global createDomFixture */
 global.chai = require('chai');
 global.IrLib = require('../dist/irlib.js');
-var jsdom = global.jsdom = require('mocha-jsdom');
+//var jsdom = global.jsdom = require('mocha-jsdom');
+var jsdom = global.jsdom = require('jsdom');
 
-global.bootstrapDocument = function (html) {
-    if (arguments.length == 0) {
-        html = '<div class="outer">\n    <div class="my-class" id="my-id"></div>\n    <div id="my-id-inner"><a href="#">A link</a></div>\n</div>';
-    }
-    return jsdom({
-        html:html
-    });
+global.bootstrapDocument = function () {
+    var _document = global.document = jsdom.jsdom(
+        '<html><body><div id="mocha-fixtures"></div></body></html>',
+        {}
+    );
+    _document.getElementById('mocha-fixtures').appendChild(createDomFixture());
 };
-global.TestRunner = 'mocha-cli';
+TestRunner.name = 'mocha-cli';

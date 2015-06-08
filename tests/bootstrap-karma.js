@@ -1,6 +1,7 @@
 /**
  * Created by COD on 08.06.15.
  */
+/* global createDomFixture */
 var global = this;
 
 var util = {
@@ -44,8 +45,11 @@ var require= function(module) {
     return {};
 };
 
-global.bootstrapDocument = function (html) {
-    document.getElementsByTagName('body')[0].appendChild(createDomFixture());
+global.bootstrapDocument = function () {
+    var mochaFixturesDiv = document.createElement('div');
+    mochaFixturesDiv.id = 'mocha-fixtures';
+    mochaFixturesDiv.appendChild(createDomFixture());
+    document.getElementsByTagName('body')[0].appendChild(mochaFixturesDiv);
 };
 
-global.TestRunner = 'karma';
+global.TestRunner.name = 'karma';
