@@ -198,6 +198,22 @@ IrLib.Controller = IrLib.CoreObject.extend({
     },
 
     /**
+     * Handle the DOM event
+     *
+     * @param {Event} event
+     */
+    handleEvent: function(event) {
+        var _events = this.events;
+        console.log('evc', _events[event.type]);
+
+        if (_events[event.type]) {
+            _events[event.type].call(this, event);
+        } else {
+            console.log(event);
+        }
+    },
+
+    /**
      * Sets the view
      *
      * @param {HTMLElement|String} view A dom node or selector
@@ -216,9 +232,8 @@ IrLib.Controller = IrLib.CoreObject.extend({
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                var eventName = _eventNames[i];
-                var callback = this.events[eventName];
-                _view.addEventListener(eventName, callback.bind(this));
+                console.log('add evl for ' + _eventNames[i]);
+                _view.addEventListener(_eventNames[i], this);
             }
         }
     },
@@ -232,9 +247,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                var eventName = _eventNames[i];
-                var callback = this.events[eventName];
-                _view.removeEventListener(eventName, callback.bind(this));
+                _view.removeEventListener(_eventNames[i], this);
             }
         }
     },
@@ -263,6 +276,9 @@ IrLib.Controller = IrLib.CoreObject.extend({
         }
     },
 
+    /**
+     * Registered event handler methods
+     */
     events: {
 
     }
