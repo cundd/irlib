@@ -365,6 +365,24 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
     },
 
     /**
+     * Register multiple factory/constructor-identifier combinations
+     *
+     * @param {Object} configuration
+     * @returns {IrLib.ServiceLocator}
+     */
+    registerMultiple: function(configuration) {
+        var identifiers = Object.keys(configuration),
+            identifier, i;
+        for (i = 0; i < identifiers.length; i++) {
+            identifier = identifiers[i];
+            console.log(identifier, typeof identifier);
+
+            this.register(identifier, configuration[identifier]);
+        }
+        return this;
+    },
+
+    /**
      * Register the factory/constructor for the given service identifier
      *
      * @param {String} identifier

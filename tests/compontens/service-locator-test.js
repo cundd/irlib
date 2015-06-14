@@ -87,6 +87,43 @@ describe('ServiceLocator', function () {
         });
     });
 
+    describe('#registerMultiple', function () {
+        it('should fail for wrong factory type (string)', function () {
+            var sl = new IrLib.ServiceLocator();
+            assert.throws(function () {
+                sl.registerMultiple({'serviceId': 'invalid'});
+            });
+        });
+        it('should fail for wrong factory type (number)', function () {
+            var sl = new IrLib.ServiceLocator();
+            assert.throws(function () {
+                sl.registerMultiple({'serviceId': 1});
+            });
+        });
+        it('should fail for wrong factory type (array)', function () {
+            var sl = new IrLib.ServiceLocator();
+            assert.throws(function () {
+                sl.registerMultiple({'serviceId': []});
+            });
+        });
+        it('should fail for wrong factory type (object)', function () {
+            var sl = new IrLib.ServiceLocator();
+            assert.throws(function () {
+                sl.registerMultiple({'serviceId': {}});
+            });
+        });
+
+        it('should accept subclasses of IrLib.CoreObject', function () {
+            var sl = new IrLib.ServiceLocator();
+            var AnotherNewClass = IrLib.CoreObject.extend({
+                'name': 'AnotherNewClass'
+            });
+            sl.registerMultiple({myService: NewClass, anotherService: AnotherNewClass});
+            assert.ok(sl.get('myService') instanceof NewClass);
+            assert.ok(sl.get('anotherService') instanceof AnotherNewClass);
+        });
+    });
+
     describe('#set', function () {
         it('should fail for wrong identifier type (number)', function () {
             var sl = new IrLib.ServiceLocator();
@@ -201,6 +238,9 @@ describe('ServiceLocator', function () {
                 sl.get('factoryShouldBeOnlyCalledOnce');
             }
         });
+    });
+
+    describe('#resolveDependencies', function () {
         it('should resolve dependencies', function () {
             var sl = new IrLib.ServiceLocator();
             sl.register('myService', NewClassWithDependency);
