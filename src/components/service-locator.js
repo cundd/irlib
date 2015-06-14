@@ -8,19 +8,21 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
     /**
      * @type {Object}
      */
-    services: {},
+    services: null,
 
     /**
      * @type {Object}
      */
-    serviceFactory: {},
+    serviceFactory: null,
 
     /**
      * Initialize the Service Locator
      */
     init: function () {
-        this.set('serviceLocator', this);
+        this.services = {};
+        this.serviceFactory = {};
 
+        this.set('serviceLocator', this);
     },
 
     /**

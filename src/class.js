@@ -1,11 +1,54 @@
 /* Simple JavaScript Inheritance
  * By John Resig http://ejohn.org/
  * MIT Licensed.
+ *
+ * Edited by Daniel Corn
  */
 // jshint ignore: start
 // Inspired by base2 and Prototype
-(function(){
+(function(root){
     var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+    //var hasUnderscoreJs = root['_'] && root._['clone'];
+    //var hasJQuery = root['jQuery'] && root.jQuery().jquery;
+    //
+    //var simpleClone = function(source, isDeep) {
+    //    var target = {};
+    //    for (var prop in source) {
+    //        if (!source.hasOwnProperty(prop)) {
+    //            console.log('skip: ' + prop)
+    //            continue;
+    //        }
+    //        if (source[prop] instanceof Date) {
+    //            console.log('copy: Date ' + prop);
+    //            target[prop] = source[prop];
+    //
+    //            continue;
+    //
+    //        }
+    //        if (isDeep && typeof source[prop] === 'object') {
+    //            target[prop] = simpleClone(target[prop], source[prop]);
+    //        } else {
+    //            target[prop] = source[prop];
+    //        }
+    //    }
+    //    return target;
+    //};
+    //var createLocalProperty = function(source) {
+    //    if (!source) {
+    //        return source;
+    //    }
+    //    if (typeof source === 'object') {
+    //        console.log('is object');
+    //        if (hasJQuery) {
+    //            return jQuery.extend({}, source);
+    //        }
+    //        if (hasUnderscoreJs) {
+    //            return _.clone(source)
+    //        }
+    //        return simpleClone(source, false);
+    //    }
+    //    return source;
+    //};
 
     // The base Class implementation (does nothing)
     this.Class = function(){};
@@ -22,6 +65,12 @@
 
         // Copy the properties over onto the new prototype
         for (var name in prop) {
+            //if (typeof prop[name] === 'object') {
+            //    IrLib.Logger.warn(
+            //        'Detected object type prototype member "' + name + '". ' +
+            //        'You should initialize member objects inside init()'
+            //    );
+            //}
             // Check if we're overwriting an existing function
             prototype[name] = typeof prop[name] == "function" &&
             typeof _super[name] == "function" && fnTest.test(prop[name]) ?
@@ -42,6 +91,8 @@
                     };
                 })(name, prop[name]) :
                 prop[name];
+                //createLocalProperty(prop[name]);
+                //(typeof prop[name] === 'object' ? simpleClone(prop[name]) : prop[name]);
         }
 
         // The dummy class constructor
@@ -62,4 +113,4 @@
 
         return Class;
     };
-})();
+})(this);

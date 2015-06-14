@@ -31,19 +31,14 @@ module.exports = function (grunt) {
                         'chai',
                         'tests/bootstrap-common.js',
                         'tests/bootstrap-mocha-cli.js'
-                        ]
+                    ]
                 },
                 src: ['tests/**/*-test.js']
             }
         },
 
         jshint: {
-            files: ['Gruntfile.js', 'src/**/*.js'],
-            options: {
-                globals: {
-                    jQuery: true
-                }
-            }
+            files: ['Gruntfile.js', 'src/**/*.js']
         },
 
         watch: {
