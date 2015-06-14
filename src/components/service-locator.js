@@ -16,6 +16,11 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
     serviceFactory: null,
 
     /**
+     * @type {Number}
+     */
+    recursionLevel: 0,
+
+    /**
      * Initialize the Service Locator
      */
     init: function () {
@@ -74,11 +79,38 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
                 throw new _Error('Could not find service with identifier ' + identifier);
             }
             if (_serviceFactoryCallback.prototype && _serviceFactoryCallback.prototype.constructor) {
-                instance = new _serviceFactoryCallback();
+                instance = this.resolveDependencies(
+                    new _serviceFactoryCallback(),
+                    _serviceFactoryCallback
+                );
             } else {
                 instance = _serviceFactoryCallback();
             }
             this.set(identifier, instance);
+        }
+        return instance;
+    },
+
+    /**
+     * Resolves the dependencies defined in the prototype's "needs" property
+     *
+     * @param {Object} instance
+     * @param {Class} serviceClass
+     * @returns {Object}
+     */
+    resolveDependencies: function(instance, serviceClass) {
+        if (serviceClass.prototype && typeof serviceClass.prototype.needs === 'object') {
+            var dependencies = serviceClass.prototype.needs,
+                dependency, i;
+
+            if (++this.recursionLevel > 100) {
+                throw new _Error('Maximum recursion level exceeded', 1434301204);
+            }
+            for (i = 0; i < dependencies.length; i++) {
+                dependency = dependencies[i];
+                instance[dependency] = this.get(dependency);
+            }
+            this.recursionLevel--;
         }
         return instance;
     },

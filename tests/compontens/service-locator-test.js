@@ -7,11 +7,26 @@ var assert = chai.assert;
 
 describe('ServiceLocator', function () {
     var ef = function () {
-    };
-
-    var NewClass = IrLib.CoreObject.extend({
-        'name': 'NewClass'
-    });
+        },
+        NewClass = IrLib.CoreObject.extend({
+            'name': 'NewClass'
+        }),
+        NewClassWithDependency = NewClass.extend({
+            'needs': ['serviceLocator'],
+            'name': 'NewClassWithDependency'
+        }),
+        NewClassWithNestedDependency = NewClass.extend({
+            'needs': ['classWithDependency'],
+            'name': 'NewClassWithNestedDependency'
+        }),
+        NewClassWithNestedDependencyWithRecursion = IrLib.CoreObject.extend({
+            'needs': ['classWithDependencyThatWillProduceRecursion'],
+            'name': 'NewClassWithNestedDependencyWithRecursion'
+        }),
+        NewClassWithDependencyThatWillProduceRecursion = IrLib.CoreObject.extend({
+            'needs': ['classWithNestedDependencyWithRecursion'],
+            'name': 'NewClassWithDependencyThatWillProduceRecursion'
+        });
 
     describe('#register', function () {
         it('should fail for wrong identifier type (number)', function () {
@@ -149,7 +164,7 @@ describe('ServiceLocator', function () {
         });
         it('should return new instance for factory method', function () {
             var sl = new IrLib.ServiceLocator();
-            sl.register('myFactoryMethodProvidedService', function() {
+            sl.register('myFactoryMethodProvidedService', function () {
                 return new NewClass();
             });
             var newService = sl.get('myFactoryMethodProvidedService');
@@ -167,7 +182,7 @@ describe('ServiceLocator', function () {
             var sl = new IrLib.ServiceLocator(),
                 instance = new NewClass();
             sl.set('myInjectedInstance', instance);
-            sl.register('myInjectedInstance', function() {
+            sl.register('myInjectedInstance', function () {
                 throw "Should not use factory";
             });
             assert.strictEqual(sl.get('myInjectedInstance'), instance);
@@ -175,7 +190,7 @@ describe('ServiceLocator', function () {
         it('should run factory only once', function () {
             var sl = new IrLib.ServiceLocator(),
                 runCounter = 0, runs = 10;
-            sl.register('factoryShouldBeOnlyCalledOnce', function() {
+            sl.register('factoryShouldBeOnlyCalledOnce', function () {
                 if (runCounter !== 0) {
                     throw "Should not call factory again" + runCounter;
                 }
@@ -185,6 +200,36 @@ describe('ServiceLocator', function () {
             while (--runs > 0) {
                 sl.get('factoryShouldBeOnlyCalledOnce');
             }
+        });
+        it('should resolve dependencies', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClassWithDependency);
+            var newService = sl.get('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClassWithDependency');
+            assert.ok(newService instanceof NewClass);
+            assert.ok(newService instanceof NewClassWithDependency);
+            assert.strictEqual(newService.serviceLocator, sl);
+        });
+        it('should resolve nested dependencies', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClassWithNestedDependency);
+            sl.register('classWithDependency', NewClassWithDependency);
+            var newService = sl.get('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClassWithNestedDependency');
+            assert.ok(newService instanceof NewClass);
+            assert.ok(newService instanceof NewClassWithNestedDependency);
+            assert.isObject(newService.classWithDependency);
+            assert.strictEqual(newService.classWithDependency.serviceLocator, sl);
+        });
+        it('should throw for infinite recursive dependencies', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('classWithNestedDependencyWithRecursion', NewClassWithNestedDependencyWithRecursion);
+            sl.register('classWithDependencyThatWillProduceRecursion', NewClassWithDependencyThatWillProduceRecursion);
+            assert.throws(function () {
+                sl.get('classWithNestedDependencyWithRecursion');
+            });
         });
     });
 });

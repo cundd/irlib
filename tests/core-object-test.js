@@ -42,10 +42,5 @@ describe('CoreObject', function () {
         it('should overwrite methods', function () {
             assert.strictEqual((new NewSubclass).getAnimal(), 'Wolf');
         });
-        it.skip('should warn when detecting object type members', function () {
-            new (IrLib.CoreObject.extend({
-                internalContainer: {}
-            }));
-        });
     });
 });
