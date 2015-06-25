@@ -8,9 +8,11 @@
     var IrLib = exports;
 
     require('core-object');
-    require('error');
+    require('error/*');
     require('utility/*');
     require('components/*');
+    require('view/interface');
+    require('view/*');
 
 })(typeof exports === 'undefined'? this.IrLib = {}: exports);
 
