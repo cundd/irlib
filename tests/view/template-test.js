@@ -8,21 +8,18 @@ var assert = chai.assert;
 describe('View.Template', function () {
 
     bootstrapDocument();
-    //
-    //var buildEvent = function (eventName) {
-    //        var event = document.createEvent('Event');
-    //        event.initEvent(eventName, true, true);
-    //        return event;
-    //    },
-    //    getFixturesDiv = function () {
-    //        return document.getElementById('mocha-fixtures');
-    //    };
 
     describe('new', function () {
         it('should take the first element as template', function () {
             var template = '<div><h1>Heading</h1></div>',
                 view = new IrLib.View.Template(template);
             assert.strictEqual(view._template, template);
+        });
+        it('should take the second element as variables', function () {
+            var view = new IrLib.View.Template('', {
+                'aKey': 'aValue'
+            });
+            assert.strictEqual(view._variables['aKey'], 'aValue');
         });
         it('should throw exception if the argument is not of type string', function () {
             assert.throws(function () {

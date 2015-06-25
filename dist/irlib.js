@@ -1012,14 +1012,14 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     _lastInsertedNode: null,
 
-    init: function (template) {
+    init: function (template, variables) {
         if (arguments.length > 0) {
             if (typeof template !== 'string') {
                 throw new TypeError('Argument "template" is not of type string');
             }
             this._template = template;
         }
-        this._variables = new IrLib.Dictionary();
+        this.setVariables(variables || {});
     },
 
     /**
