@@ -140,6 +140,12 @@ describe('View.Template', function () {
                 view.appendTo({});
             });
         });
+        it('should throw an exception if the element is not defined', function () {
+            var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>');
+            assert.throws(function () {
+                view.appendTo();
+            });
+        });
         it('should throw an exception if the template is not set', function () {
             var view = new IrLib.View.Template();
             assert.throws(function () {

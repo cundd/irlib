@@ -207,7 +207,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {IrLib.View.Template}
      */
     appendTo: function(element) {
-        if (typeof element.appendChild !== 'function') {
+        if (!element || typeof element.appendChild !== 'function') {
             throw new TypeError('Given element is not a valid DOM Node');
         }
 
