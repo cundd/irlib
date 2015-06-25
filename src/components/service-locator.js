@@ -41,8 +41,6 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
             identifier, i;
         for (i = 0; i < identifiers.length; i++) {
             identifier = identifiers[i];
-            console.log(identifier, typeof identifier);
-
             this.register(identifier, configuration[identifier]);
         }
         return this;
