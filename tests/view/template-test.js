@@ -94,6 +94,15 @@ describe('View.Template', function () {
                 view.render();
             });
         });
+        it('should trim whitespaces', function () {
+            var view = new IrLib.View.Template('    <div><h1>Headline</h1></div> '),
+                ELEMENT_NODE = 1;
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
+
+        });
     });
     describe('appendTo()', function () {
         it('should build a DOM element and insert it to the parent', function () {

@@ -1017,7 +1017,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             if (typeof template !== 'string') {
                 throw new TypeError('Argument "template" is not of type string');
             }
-            this._template = template;
+            this._template = template.trim();
         }
         this.setVariables(variables || {});
     },
