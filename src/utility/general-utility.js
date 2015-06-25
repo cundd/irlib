@@ -29,5 +29,38 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             return document.querySelector(element);
         }
         return null;
+    },
+
+    /**
+     * Tries to transform the given value into an array
+     *
+     * If the value is
+     * - undefined an empty array will be returned
+     * - an array it will be cloned and returned (the elements will not be cloned)
+     * - an object it's values will be returned
+     * - something else a new array will be returned with the value as it's single element
+     *
+     * @param {*} value
+     * @returns {*}
+     */
+    toArray: function(value) {
+        if (typeof value === 'undefined') {
+            return [];
+        }
+        if (value instanceof Array) {
+            return value.slice();
+        }
+        if (typeof value === 'object') {
+            var valueCollection = [],
+                keys = Object.keys(value),
+                keysLength = keys.length;
+            for (var i = 0; i < keysLength; i++) {
+                valueCollection.push(value[keys[i]]);
+            }
+            return valueCollection;
+        }
+        return [value];
     }
+
+
 };

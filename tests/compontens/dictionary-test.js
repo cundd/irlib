@@ -6,7 +6,7 @@
 var assert = chai.assert;
 
 describe('Dictionary', function () {
-    describe('new', function () {
+    describe('new()', function () {
         it('should add elements from given initialization argument', function () {
             var dictionary = new IrLib.Dictionary({
                 'aKey': 'aValue',
@@ -33,7 +33,7 @@ describe('Dictionary', function () {
         });
     });
 
-    describe('keys', function () {
+    describe('keys()', function () {
         it('should return an empty array for empty dictionary', function () {
             var dictionary = new IrLib.Dictionary();
             assert.typeOf(dictionary.keys(), 'array');
@@ -64,7 +64,7 @@ describe('Dictionary', function () {
         });
     });
 
-    describe('values', function () {
+    describe('values()', function () {
         it('should return an empty array for empty dictionary', function () {
             var dictionary = new IrLib.Dictionary();
             assert.typeOf(dictionary.values(), 'array');

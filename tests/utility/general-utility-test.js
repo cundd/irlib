@@ -38,5 +38,40 @@ describe('Utility', function () {
                 assert.isFalse(IrLib.Utility.GeneralUtility.isDomNode(document.getElementById('my-not-existing-id')));
             });
         });
+
+        describe('toArray()', function () {
+            it('should return an array for any value', function () {
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray(document), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray([]), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray(), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray(undefined), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray(1.0), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray('aString'), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray({}), 'array');
+                assert.typeOf(IrLib.Utility.GeneralUtility.toArray({'a': 1}), 'array');
+            });
+            it('should return an object\'s values', function () {
+                var result = IrLib.Utility.GeneralUtility.toArray({'a': 1, 'b': 'string'});
+                assert.typeOf(result, 'array');
+                assert.strictEqual(result.length, 2);
+                assert.strictEqual(result[0], 1);
+                assert.strictEqual(result[1], 'string');
+            });
+            it('should clone an array', function () {
+                var inputArray = ['a', 'b', 'c', 'd'];
+                var result = IrLib.Utility.GeneralUtility.toArray(inputArray);
+                assert.typeOf(result, 'array');
+                assert.strictEqual(result.length, 4);
+                assert.strictEqual(result[0], 'a');
+                assert.strictEqual(result[3], 'd');
+
+                inputArray.pop();
+                assert.strictEqual(inputArray.length, 3);
+
+                assert.strictEqual(result.length, 4);
+                assert.strictEqual(result[0], 'a');
+                assert.strictEqual(result[3], 'd');
+            });
+        });
     })
 });
