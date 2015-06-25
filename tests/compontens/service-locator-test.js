@@ -28,7 +28,7 @@ describe('ServiceLocator', function () {
             'name': 'NewClassWithDependencyThatWillProduceRecursion'
         });
 
-    describe('#register', function () {
+    describe('register', function () {
         it('should fail for wrong identifier type (number)', function () {
             var sl = new IrLib.ServiceLocator();
             assert.throws(function () {
@@ -87,7 +87,7 @@ describe('ServiceLocator', function () {
         });
     });
 
-    describe('#registerMultiple', function () {
+    describe('registerMultiple', function () {
         it('should fail for wrong factory type (string)', function () {
             var sl = new IrLib.ServiceLocator();
             assert.throws(function () {
@@ -124,7 +124,7 @@ describe('ServiceLocator', function () {
         });
     });
 
-    describe('#set', function () {
+    describe('set', function () {
         it('should fail for wrong identifier type (number)', function () {
             var sl = new IrLib.ServiceLocator();
             assert.throws(function () {
@@ -180,7 +180,7 @@ describe('ServiceLocator', function () {
         });
     });
 
-    describe('#get', function () {
+    describe('get', function () {
         it('should return it self for identifier serviceLocator', function () {
             var sl = new IrLib.ServiceLocator();
             assert.strictEqual(sl.get('serviceLocator'), sl);
@@ -240,7 +240,7 @@ describe('ServiceLocator', function () {
         });
     });
 
-    describe('#resolveDependencies', function () {
+    describe('resolveDependencies', function () {
         it('should resolve dependencies', function () {
             var sl = new IrLib.ServiceLocator();
             sl.register('myService', NewClassWithDependency);

@@ -9,7 +9,7 @@ describe('Utility', function () {
     describe('GeneralUtility', function () {
         bootstrapDocument();
 
-        describe('#domNode()', function () {
+        describe('domNode()', function () {
             it('should return the dom node when passing a dom node', function () {
                 var view = document.createElement('div');
                 assert.strictEqual(IrLib.Utility.GeneralUtility.domNode(view), view);
@@ -26,7 +26,7 @@ describe('Utility', function () {
             });
         });
 
-        describe('#isDomNode()', function () {
+        describe('isDomNode()', function () {
             it('should return true if a dom node is given', function () {
                 assert.isTrue(IrLib.Utility.GeneralUtility.isDomNode(document));
                 assert.isTrue(IrLib.Utility.GeneralUtility.isDomNode(document.getElementById('my-id')));

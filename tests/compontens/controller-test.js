@@ -17,7 +17,7 @@ describe('Controller', function () {
             return document.getElementById('mocha-fixtures');
         };
 
-    describe('#view', function () {
+    describe('view', function () {
         it('should return the initialization parameter (div)', function () {
             var view = document.createElement('div');
             var controller = new IrLib.Controller(view);
@@ -57,7 +57,7 @@ describe('Controller', function () {
         });
     });
 
-    describe('#setView', function () {
+    describe('setView', function () {
         it('should set the view (div)', function () {
             var view = document.createElement('div');
             var controller = new IrLib.Controller();
@@ -83,7 +83,7 @@ describe('Controller', function () {
         });
     });
 
-    describe('#eventNames', function () {
+    describe('eventNames', function () {
         it('should return all keys of the controllers "events" property', function () {
             var controller = new (IrLib.Controller.extend({
                 events: {
@@ -98,7 +98,7 @@ describe('Controller', function () {
     });
 
     if (TestRunner.name !== 'mocha-cli') {
-        describe('#initializeEventListeners', function () {
+        describe('initializeEventListeners', function () {
             it('should bind event listeners (div)', function () {
                 var domNode = document.createElement('div'),
                     clicked = false,
@@ -168,7 +168,7 @@ describe('Controller', function () {
                     controller;
 
                 domNode.appendChild(childNode);
-                getFixturesDiv().appendChild(domNode)
+                getFixturesDiv().appendChild(domNode);
 
                 controller = new (IrLib.Controller.extend({
                     view: domNode,
@@ -257,7 +257,7 @@ describe('Controller', function () {
             });
         });
     }
-    describe('#removeEventListeners', function () {
+    describe('removeEventListeners', function () {
         it('should unbind event listeners (div)', function () {
             var domNode = document.createElement('div'),
                 clicked = false,
