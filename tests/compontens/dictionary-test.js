@@ -93,12 +93,84 @@ describe('Dictionary', function () {
             assert.strictEqual(dictionary.values().length, 1);
             assert.typeOf(dictionary.values()[0], 'function');
         });
-        //it('should throw for invalid parameters', function () {
-        //    var controller = new IrLib.Controller();
-        //    assert.throws(function () {
-        //        controller.setView('something bad');
-        //    });
-        //});
     });
 
+    describe('map()', function () {
+        it('should loop through each key value pair', function () {
+            var dictionary = new IrLib.Dictionary({
+                'firstName': 'Daniel',
+                'lastName': 'Corn',
+                'email': 'cod@iresults.li'
+            });
+
+            var result = dictionary.map(function(value, key, dictionaryArgument) {
+                assert.strictEqual(dictionaryArgument, dictionary);
+                return key + ' ' + value;
+            });
+
+            assert.typeOf(result, 'array');
+            assert.strictEqual(result.length, 3);
+            assert.strictEqual(result[0], 'firstName Daniel');
+            assert.strictEqual(result[1], 'lastName Corn');
+            assert.strictEqual(result[2], 'email cod@iresults.li');
+        });
+        it('should bind callback to thisArg argument', function () {
+            var dictionary = new IrLib.Dictionary({
+                'firstName': 'Daniel',
+                'lastName': 'Corn',
+                'email': 'cod@iresults.li'
+            }),
+                thisArg = {'name': 'a new object'};
+
+            var result = dictionary.map(function(value, key, dictionaryArgument) {
+                assert.strictEqual(dictionaryArgument, dictionary);
+                assert.strictEqual(this, thisArg);
+                return key + ' ' + value;
+            }, thisArg);
+
+            assert.typeOf(result, 'array');
+            assert.strictEqual(result.length, 3);
+            assert.strictEqual(result[0], 'firstName Daniel');
+            assert.strictEqual(result[1], 'lastName Corn');
+            assert.strictEqual(result[2], 'email cod@iresults.li');
+        });
+    });
+
+    describe('forEach()', function () {
+        it('should loop through each key value pair', function () {
+            var dictionary = new IrLib.Dictionary({
+                'firstName': 'Daniel',
+                'lastName': 'Corn',
+                'email': 'cod@iresults.li'
+            }),
+                invocationCounter = 0;
+
+            var result = dictionary.forEach(function(value, key, dictionaryArgument) {
+                assert.strictEqual(dictionaryArgument, dictionary);
+                invocationCounter++;
+            });
+
+            assert.isUndefined(result);
+            assert.strictEqual(invocationCounter, 3);
+        });
+        it('should bind callback to thisArg argument', function () {
+            var dictionary = new IrLib.Dictionary({
+                    'firstName': 'Daniel',
+                    'lastName': 'Corn',
+                    'email': 'cod@iresults.li'
+                }),
+                thisArg = {'name': 'a new object'},
+                invocationCounter = 0;
+
+
+            var result = dictionary.forEach(function(value, key, dictionaryArgument) {
+                assert.strictEqual(dictionaryArgument, dictionary);
+                assert.strictEqual(this, thisArg);
+                invocationCounter++;
+            }, thisArg);
+
+            assert.isUndefined(result);
+            assert.strictEqual(invocationCounter, 3);
+        });
+    });
 });
