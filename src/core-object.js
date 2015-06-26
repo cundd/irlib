@@ -5,14 +5,14 @@ require('class');
 
 IrLib.CoreObject = Class.extend({
     /**
-     * @type {Number}
+     * @type {String}
      */
     __guid: null,
 
     /**
      * Returns the global unique ID of the object
      *
-     * @returns {Number}
+     * @returns {String}
      */
     guid: function() {
         if (!this.__guid) {
