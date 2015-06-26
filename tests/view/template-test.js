@@ -21,6 +21,13 @@ describe('View.Template', function () {
             });
             assert.strictEqual(view._variables['aKey'], 'aValue');
         });
+        it('should inherit the template', function () {
+            var template = '<div><h1>Heading</h1></div>',
+                view = new (IrLib.View.Template.extend({
+                    template: template
+                }));
+            assert.strictEqual(view._template, template);
+        });
         it('should throw exception if the argument is not of type string', function () {
             assert.throws(function () {
                 new IrLib.View.Template({});
@@ -33,7 +40,17 @@ describe('View.Template', function () {
                 template = '<div><h1>Heading</h1></div>';
 
             view.setTemplate(template);
-            assert.strictEqual(view._template, template);
+            assert.strictEqual(view.template, template);
+            assert.strictEqual(view.needsRedraw, true);
+        });
+    });
+    describe('template=', function () {
+        it('should overwrite the template and set needsRedraw', function () {
+            var view = new IrLib.View.Template(),
+                template = '<div><h1>Heading</h1></div>';
+
+            view.template = template;
+            assert.strictEqual(view.template, template);
             assert.strictEqual(view.needsRedraw, true);
         });
     });
@@ -102,6 +119,19 @@ describe('View.Template', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
 
+        });
+        it('should inherit the template', function () {
+            var template = '<div><h1>{{headline}}</h1></div>',
+                view = new (IrLib.View.Template.extend({
+                    template: template
+                })),
+                variables = {'headline': 'This worked'},
+                ELEMENT_NODE = 1;
+
+            view.setVariables(variables);
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
         });
     });
     describe('appendTo()', function () {

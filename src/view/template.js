@@ -21,18 +21,18 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _template: '',
 
     /**
+     * Defines if a redraw is required
+     *
+     * @type {Boolean}
+     */
+    _needsRedraw: true,
+
+    /**
      * Dictionary of template variables
      *
      * @type {IrLib.Dictionary}
      */
     _variables: null,
-
-    /**
-     * Defines if a redraw is required
-     *
-     * @type {Boolean}
-     */
-    needsRedraw: true,
 
     /**
      * DOM element
@@ -49,14 +49,29 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _lastInsertedNode: null,
 
     init: function (template, variables) {
-        if (arguments.length > 0) {
+        if (arguments.length > 0) { // Check if the template argument is given
             if (typeof template !== 'string') {
                 throw new TypeError('Argument "template" is not of type string');
             }
-            this._template = template.trim();
+            this.setTemplate(template);
+        } else if (typeof this.template === 'string') { // Check if a template string is inherited
+            this.setTemplate(this.template.slice(0));
         }
+
         this.setVariables(variables || {});
         this.eventListeners = {};
+
+        this.defineProperties({
+            'template': {
+                enumerable: true,
+                get: this.getTemplate,
+                set: this.setTemplate
+            },
+            'needsRedraw': {
+                enumerable: true,
+                get: this.getNeedsRedraw
+            }
+        });
     },
 
     /**
@@ -65,17 +80,17 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @return {Node|HTMLElement}
      */
     render: function () {
-        if (this.needsRedraw) {
-            if (!this._template) {
+        if (this._needsRedraw) {
+            var _template = this.template;
+            if (!_template) {
                 throw new ReferenceError('Template not specified');
             }
 
             this._dom = this._createDom(
-                this._renderVariables(this._template)
+                this._renderVariables(_template)
             );
-            //_template = this._renderActions(_template);
-
-            this.needsRedraw = false;
+            //template = this._renderActions(template);
+            this._needsRedraw = false;
         }
         return this._dom;
     },
@@ -179,7 +194,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         } else {
             this._variables = new IrLib.Dictionary(data);
         }
-        this.needsRedraw = true;
+        this._needsRedraw = true;
         return this;
     },
 
@@ -192,7 +207,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     assignVariable: function (key, value) {
         this._variables[key] = value;
-        this.needsRedraw = true;
+        this._needsRedraw = true;
         return this;
     },
 
@@ -203,9 +218,27 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {IrLib.View.Template}
      */
     setTemplate: function (template) {
-        this._template = template;
-        this.needsRedraw = true;
+        this._template = template.trim();
+        this._needsRedraw = true;
         return this;
+    },
+
+    /**
+     * Returns the template
+     *
+     * @returns {String}
+     */
+    getTemplate: function () {
+        return this._template;
+    },
+
+    /**
+     * Returns if a redraw is required
+     *
+     * @returns {Boolean}
+     */
+    getNeedsRedraw: function () {
+        return this._needsRedraw;
     },
 
     /**
@@ -214,7 +247,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @param {Node|HTMLElement} element
      * @returns {IrLib.View.Template}
      */
-    appendTo: function(element) {
+    appendTo: function (element) {
         if (!element || typeof element.appendChild !== 'function') {
             throw new TypeError('Given element is not a valid DOM Node');
         }
@@ -234,7 +267,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      *
      * @returns {IrLib.View.Template}
      */
-    remove: function() {
+    remove: function () {
         var lastInsertedNode = this._lastInsertedNode;
         if (lastInsertedNode && lastInsertedNode.parentNode) {
             lastInsertedNode.parentNode.removeChild(lastInsertedNode);
@@ -247,7 +280,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      *
      * @param {Event} event
      */
-    handleEvent: function(event) {
+    handleEvent: function (event) {
         /** @type IrLib.Dictionary imps */
         var imps = this.eventListeners[event.type],
             impsArray, patchedEvent, currentImp, i;
@@ -275,7 +308,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {Event}
      * @private
      */
-    _patchEvent: function(event) {
+    _patchEvent: function (event) {
         event.irTarget = this;
         return event;
     },
@@ -287,7 +320,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {string}
      * @private
      */
-    _getListenerId: function(value) {
+    _getListenerId: function (value) {
         if (typeof value === 'function') {
             return value + '';
         }
