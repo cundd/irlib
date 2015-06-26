@@ -14,7 +14,7 @@ IrLib.CoreObject = Class.extend({
      *
      * @returns {String}
      */
-    guid: function() {
+    guid: function () {
         if (!this.__guid) {
             this.__guid = 'irLib-' + (++IrLib.CoreObject.__lastGuid);
         }
@@ -29,7 +29,7 @@ IrLib.CoreObject = Class.extend({
      * @returns {IrLib.CoreObject}
      * @see Object.defineProperty()
      */
-    defineProperty: function(key, descriptor) {
+    defineProperty: function (key, descriptor) {
         if (descriptor.overwrite === false && this[key]) {
             return this;
         }
@@ -44,11 +44,8 @@ IrLib.CoreObject = Class.extend({
      * @returns {IrLib.CoreObject}
      * @see Object.defineProperties()
      */
-    defineProperties: function(properties) {
-        var propertiesDictionary = new IrLib.Dictionary(properties);
-        propertiesDictionary.forEach(function(descriptor, key) {
-            this.defineProperty(key, descriptor);
-        }, this);
+    defineProperties: function (properties) {
+        Object.defineProperties(this, properties);
         return this;
     }
 });

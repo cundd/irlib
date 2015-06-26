@@ -297,7 +297,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 }
             }
         } else {
-            console.log(event);
+            IrLib.Logger.log(event);
         }
     },
 
