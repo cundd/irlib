@@ -136,7 +136,25 @@
 
 
 IrLib.CoreObject = Class.extend({
+    /**
+     * @type {Number}
+     */
+    __guid: null,
+
+    /**
+     * Returns the global unique ID of the object
+     *
+     * @returns {Number}
+     */
+    guid: function() {
+        if (!this.__guid) {
+            this.__guid = 'irLib-' + (++IrLib.CoreObject.__lastGuid);
+        }
+        return this.__guid;
+    }
 });
+IrLib.CoreObject.__lastGuid = 0;
+
 
 
 
@@ -317,7 +335,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
     /**
      * Sets the view
      *
-     * @param {HTMLElement|String} view A dom node or selector
+     * @param {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String} view A View object, dom node or selector
      */
     setView: function(view) {
         this._assertView(view);
@@ -371,7 +389,9 @@ IrLib.Controller = IrLib.CoreObject.extend({
         if (!view) {
             throw new _Error('No view given', 1433355412);
         }
-        if (!GeneralUtility.domNode(view)) {
+
+        var ViewInterface = IrLib.View && IrLib.View.Interface ? IrLib.View.Interface : function() {};
+        if (!GeneralUtility.domNode(view) && !(view instanceof ViewInterface)) {
             throw new _Error('No view given', 1433355412, view);
         }
     },
@@ -916,6 +936,8 @@ IrLib.View = IrLib.View || {};
 
 /**
  * Defines a common interface for Views
+ *
+ * @interface
  */
 IrLib.View.Interface = IrLib.CoreObject.extend({
     /**
@@ -954,7 +976,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      * @param {Node|HTMLElement} element
      * @return {IrLib.View.Interface}
      */
-    appendTo: function(element) {
+    appendTo: function (element) {
         throw new IrLib.MissingImplementationError('appendTo');
     },
 
@@ -963,8 +985,32 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      *
      * @returns {IrLib.View.Interface}
      */
-    remove: function() {
+    remove: function () {
         throw new IrLib.MissingImplementationError('remove');
+    },
+
+    /**
+     * Adds the given event listener to the View
+     *
+     * @param {String} type
+     * @param {EventListener|Function} listener
+     * @param {Boolean} [useCapture]
+     */
+    addEventListener: function (type, listener, useCapture) {
+        throw new IrLib.MissingImplementationError('addEventListener');
+    },
+
+    /**
+     * Dispatches an Event at the View, invoking the affected EventListeners in the appropriate order.
+     *
+     * The normal event processing rules (including the capturing and optional bubbling phase) apply to events
+     * dispatched manually with dispatchEvent().
+     *
+     * @param {Event} event
+     * @return {Boolean}
+     */
+    dispatchEvent: function (event) {
+        throw new IrLib.MissingImplementationError('dispatchEvent');
     }
 });
 
@@ -977,6 +1023,13 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
  * A template based view
  */
 IrLib.View.Template = IrLib.View.Interface.extend({
+    /**
+     * Registry of event listeners
+     *
+     * @type {Object}
+     */
+    eventListeners: {},
+
     /**
      * Template to render
      *
@@ -1020,6 +1073,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             this._template = template.trim();
         }
         this.setVariables(variables || {});
+        this.eventListeners = {};
     },
 
     /**
@@ -1203,6 +1257,94 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             lastInsertedNode.parentNode.removeChild(lastInsertedNode);
         }
         return this;
+    },
+
+    /**
+     * Handle the DOM event
+     *
+     * @param {Event} event
+     */
+    handleEvent: function(event) {
+        /** @type IrLib.Dictionary imps */
+        var imps = this.eventListeners[event.type],
+            impsArray, patchedEvent, currentImp, i;
+
+        if (imps) {
+            impsArray = imps.values();
+            patchedEvent = this._patchEvent(event);
+            for (i = 0; i < impsArray.length; i++) {
+                currentImp = impsArray[i];
+                if (typeof currentImp === 'function') {
+                    currentImp(patchedEvent);
+                } else if (currentImp.handleEvent) {
+                    currentImp.handleEvent.call(currentImp, patchedEvent);
+                }
+            }
+        } else {
+            console.log(event);
+        }
+    },
+
+    /**
+     * Create a patches version of the event and set it's target to the View
+     *
+     * @param {Event} event
+     * @returns {Event}
+     * @private
+     */
+    _patchEvent: function(event) {
+        event.irTarget = this;
+        return event;
+    },
+
+    /**
+     * Returns the ID of the listener
+     *
+     * @param {Function|Object} value
+     * @returns {string}
+     * @private
+     */
+    _getListenerId: function(value) {
+        if (typeof value === 'function') {
+            return value + '';
+        }
+
+        /** @type IrLib.CoreObject value */
+        if (typeof value === 'object' && typeof value.guid === 'function') {
+            return value.guid();
+        }
+        return value + '';
+    },
+
+    /**
+     * Adds the given event listener to the View
+     *
+     * @param {String} type
+     * @param {EventListener|Function} listener
+     * @param {Boolean} [useCapture] Currently ignored
+     */
+    addEventListener: function (type, listener, useCapture) {
+        var _eventListeners = this.eventListeners;
+
+        if (!_eventListeners[type]) {
+            _eventListeners[type] = new IrLib.Dictionary();
+        }
+
+        _eventListeners[type][this._getListenerId(listener)] = listener;
+        this.render().addEventListener(type, this);
+    },
+
+    /**
+     * Dispatches an Event at the View, invoking the affected EventListeners in the appropriate order.
+     *
+     * The normal event processing rules (including the capturing and optional bubbling phase) apply to events
+     * dispatched manually with dispatchEvent().
+     *
+     * @param {Event} event
+     * @return {Boolean}
+     */
+    dispatchEvent: function (event) {
+        this.render().dispatchEvent(event);
     }
 });
 

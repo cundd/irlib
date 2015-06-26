@@ -13,7 +13,7 @@ describe('Controller', function () {
             event.initEvent(eventName, true, true);
             return event;
         },
-        getFixturesDiv = function () {
+        getFixturesDivToEnableBubbling = function () {
             return document.getElementById('mocha-fixtures');
         };
 
@@ -48,7 +48,7 @@ describe('Controller', function () {
             }));
             assert.strictEqual(controller.view, view);
         });
-        it('should throw for invalid initialization parameter (selector)', function () {
+        it('should throw for invalid initialization parameter', function () {
             assert.throws(function () {
                 new (IrLib.Controller.extend({
                     view: 'something bad'
@@ -168,7 +168,7 @@ describe('Controller', function () {
                     controller;
 
                 domNode.appendChild(childNode);
-                getFixturesDiv().appendChild(domNode);
+                getFixturesDivToEnableBubbling().appendChild(domNode);
 
                 controller = new (IrLib.Controller.extend({
                     view: domNode,
