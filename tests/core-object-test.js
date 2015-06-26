@@ -58,7 +58,7 @@ describe('CoreObject', function () {
         });
         it('should return a unique value for each instance', function () {
             var guidCollection = [],
-                i = 10000,
+                i = 100,
                 noFail = 1,
                 guid;
 
