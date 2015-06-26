@@ -12,7 +12,7 @@ describe('Controller', function () {
             var event = document.createEvent('Event');
             event.initEvent(eventName, true, true);
             if (controller) {
-                event.irController = controller;
+                //event.irController = controller;
             }
             return event;
         },
