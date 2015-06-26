@@ -40,7 +40,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
     /**
      * Sets the view
      *
-     * @param {HTMLElement|String} view A dom node or selector
+     * @param {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String} view A View object, dom node or selector
      */
     setView: function(view) {
         this._assertView(view);
@@ -94,7 +94,9 @@ IrLib.Controller = IrLib.CoreObject.extend({
         if (!view) {
             throw new _Error('No view given', 1433355412);
         }
-        if (!GeneralUtility.domNode(view)) {
+
+        var ViewInterface = IrLib.View && IrLib.View.Interface ? IrLib.View.Interface : function() {};
+        if (!GeneralUtility.domNode(view) && !(view instanceof ViewInterface)) {
             throw new _Error('No view given', 1433355412, view);
         }
     },
