@@ -6,8 +6,16 @@
 var assert = chai.assert;
 
 describe('View.Template', function () {
-
     bootstrapDocument();
+
+    var buildEvent = function (eventName) {
+            var event = document.createEvent('Event');
+            event.initEvent(eventName, true, true);
+            return event;
+        },
+        getFixturesDivToEnableBubbling = function () {
+            return document.getElementById('mocha-fixtures');
+        };
 
     describe('new', function () {
         it('should take the first element as template', function () {
@@ -210,4 +218,79 @@ describe('View.Template', function () {
             (new IrLib.View.Template()).remove();
         });
     });
+
+    //if (TestRunner.name !== 'mocha-cli') {
+        describe('addEventListener()', function () {
+            it('should bind event listeners', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null;
+
+                view.addEventListener('click', function (event) {
+                    target = event.irTarget;
+                    handler = this;
+                    clicked = true;
+                });
+
+                view.dispatchEvent(buildEvent('click'));
+                assert.isTrue(clicked);
+                assert.isFalse(keyPressed);
+                assert.equal(target, view);
+            });
+            it('should handle bubbled events', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    childNode = document.createElement('span'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    irTarget = null;
+
+                view.render().appendChild(childNode);
+                getFixturesDivToEnableBubbling().appendChild(view.render());
+
+
+                view.addEventListener('click', function (event) {
+                    target = event.target;
+                    irTarget = event.irTarget;
+                    handler = this;
+                    clicked = true;
+                });
+
+                childNode.dispatchEvent(buildEvent('click'));
+
+                assert.strictEqual(view.render().firstChild, childNode);
+                assert.isTrue(clicked, 'Child element was not clicked');
+                assert.isFalse(keyPressed, 'A key has been pressed');
+                assert.equal(target, childNode);
+                assert.equal(irTarget, view);
+            });
+            it('should invoke event methods only once', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    clicked = 0,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    callback;
+
+
+                callback = function (event) {
+                    target = event.irTarget;
+                    handler = this;
+                    clicked = true;
+                };
+                view.addEventListener('click', callback);
+                view.addEventListener('click', callback);
+                view.addEventListener('click', callback);
+                view.addEventListener('click', callback);
+
+                view.dispatchEvent(buildEvent('click'));
+                assert.equal(clicked, 1);
+                assert.isFalse(keyPressed);
+                assert.equal(target, view);
+            });
+        });
+    //}
 });
