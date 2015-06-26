@@ -95,7 +95,7 @@ describe('View.Template', function () {
             });
         });
         it('should trim whitespaces', function () {
-            var view = new IrLib.View.Template('    <div><h1>Headline</h1></div> '),
+            var view = new IrLib.View.Template("    \t\n<div><h1>Headline</h1></div> "),
                 ELEMENT_NODE = 1;
 
             var result = view.render();
