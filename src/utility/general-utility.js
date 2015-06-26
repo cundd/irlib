@@ -47,7 +47,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         if (typeof value === 'undefined') {
             return [];
         }
-        if (value instanceof Array) {
+        if (Array.isArray(value)) {
             return value.slice();
         }
         if (typeof value === 'object') {
