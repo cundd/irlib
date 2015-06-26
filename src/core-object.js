@@ -19,6 +19,31 @@ IrLib.CoreObject = Class.extend({
             this.__guid = 'irLib-' + (++IrLib.CoreObject.__lastGuid);
         }
         return this.__guid;
+    },
+
+    /**
+     * Defines a new property with the given key and descriptor
+     *
+     * @param {String} key
+     * @param {Object} descriptor
+     * @returns {IrLib.CoreObject}
+     * @see Object.defineProperty()
+     */
+    defineProperty: function(key, descriptor) {
+        Object.defineProperty(this, key, descriptor);
+        return this;
+    },
+
+    /**
+     * Defines new properties form the given properties
+     *
+     * @param {Object} properties
+     * @returns {IrLib.CoreObject}
+     * @see Object.defineProperties()
+     */
+    defineProperties: function(properties) {
+        Object.defineProperties(this, properties);
+        return this;
     }
 });
 IrLib.CoreObject.__lastGuid = 0;

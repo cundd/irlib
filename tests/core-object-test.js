@@ -74,4 +74,115 @@ describe('CoreObject', function () {
             assert.isTrue(!!noFail);
         });
     });
+
+    describe('defineProperty()', function () {
+        it('should add a new property', function () {
+            var instance = new NewClass();
+
+            instance.defineProperty('aKey', {
+                value: 10
+            });
+            assert.strictEqual(instance.aKey, 10);
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.isTrue('aKey' in instance);
+        });
+        it('should add a new property with getter', function () {
+            var instance = new NewClass(), getterCalled = 0;
+
+            instance.defineProperty('aKey', {
+                get: function () {
+                    return ++getterCalled;
+                }
+            });
+            assert.strictEqual(instance.aKey, 1);
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.isTrue('aKey' in instance);
+            assert.strictEqual(getterCalled, 1);
+
+            assert.strictEqual(instance.aKey, 2);
+        });
+        it('should add a new property with setter', function () {
+            var instance = new NewClass(), setterCalled = 0;
+
+            instance.defineProperty('aKey', {
+                set: function (value) {
+                    ++setterCalled;
+                }
+            });
+            instance.aKey = 'whatever';
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.isTrue('aKey' in instance);
+            assert.strictEqual(setterCalled, 1);
+        });
+    });
+
+    describe('defineProperties()', function () {
+        it('should add new properties', function () {
+            var instance = new NewClass();
+
+            instance.defineProperties({
+                'aKey': {
+                    value: 10
+                }
+            });
+            assert.strictEqual(instance.aKey, 10);
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.isTrue('aKey' in instance);
+        });
+        it('should add new properties with getter', function () {
+            var instance = new NewClass(), getterCalled = 0, anotherKeyGetterCalled = 0;
+
+            instance.defineProperties({
+                'aKey': {
+                    get: function () {
+                        return ++getterCalled;
+                    }
+                },
+                'anotherKey': {
+                    get: function () {
+                        return ++anotherKeyGetterCalled;
+                    }
+                }
+            });
+            assert.strictEqual(instance.aKey, 1);
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.isTrue('aKey' in instance);
+            assert.strictEqual(getterCalled, 1);
+
+            assert.strictEqual(instance.aKey, 2);
+
+
+            assert.strictEqual(instance.anotherKey, 1);
+            assert.isTrue(instance.hasOwnProperty('anotherKey'));
+            assert.isTrue('anotherKey' in instance);
+            assert.strictEqual(anotherKeyGetterCalled, 1);
+
+            assert.strictEqual(instance.anotherKey, 2);
+        });
+        it('should add new properties with setter', function () {
+            var instance = new NewClass(), setterCalled = 0, anotherKeySetterCalled = 0;
+
+            instance.defineProperties({
+                'aKey': {
+                    set: function (value) {
+                        ++setterCalled;
+                    }
+                },
+                'anotherKey': {
+                    set: function (value) {
+                        ++anotherKeySetterCalled;
+                    }
+                }
+            });
+            instance.aKey = 'whatever';
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.isTrue('aKey' in instance);
+            assert.strictEqual(setterCalled, 1);
+
+            instance.anotherKey = 'whatever';
+            assert.isTrue(instance.hasOwnProperty('anotherKey'));
+            assert.isTrue('anotherKey' in instance);
+            assert.strictEqual(anotherKeySetterCalled, 1);
+        });
+    });
 });
