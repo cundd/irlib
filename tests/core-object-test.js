@@ -43,4 +43,35 @@ describe('CoreObject', function () {
             assert.strictEqual((new NewSubclass).getAnimal(), 'Wolf');
         });
     });
+
+    describe('guid()', function () {
+        it('should not change', function () {
+            var instance = new NewClass(),
+                lastGuid;
+
+            lastGuid = instance.guid();
+            assert.strictEqual(instance.guid(), lastGuid);
+
+            instance.aKey = 'A new value';
+
+            assert.strictEqual(instance.guid(), lastGuid);
+        });
+        it('should return a unique value for each instance', function () {
+            var guidCollection = [],
+                i = 10000,
+                noFail = 1,
+                guid;
+
+            while (--i > 0) {
+                guid = (new NewClass).guid();
+                noFail *= !(guid in guidCollection);
+                guidCollection.push(guid);
+
+                guid = (new NewSubclass).guid();
+                noFail *= !(guid in guidCollection);
+                guidCollection.push(guid);
+            }
+            assert.isTrue(!!noFail);
+        });
+    });
 });
