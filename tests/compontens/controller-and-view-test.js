@@ -8,9 +8,12 @@ var assert = chai.assert;
 describe('Controller+View', function () {
     bootstrapDocument();
 
-    var buildEvent = function (eventName) {
+    var buildEvent = function (eventName, controller) {
             var event = document.createEvent('Event');
             event.initEvent(eventName, true, true);
+            if (controller) {
+                event.irController = controller;
+            }
             return event;
         },
         getFixturesDivToEnableBubbling = function () {
@@ -89,7 +92,7 @@ describe('Controller+View', function () {
                 }));
                 controller.initializeEventListeners();
 
-                view.dispatchEvent(buildEvent('click'));
+                view.dispatchEvent(buildEvent('click', controller));
                 assert.isTrue(clicked);
                 assert.isFalse(keyPressed);
                 assert.equal(handler, controller);
@@ -125,7 +128,7 @@ describe('Controller+View', function () {
                 }));
                 controller.initializeEventListeners();
 
-                childNode.dispatchEvent(buildEvent('click'));
+                childNode.dispatchEvent(buildEvent('click', controller));
 
                 assert.strictEqual(view.render().firstChild, childNode);
                 assert.isTrue(clicked, 'Child element was not clicked');
@@ -159,7 +162,7 @@ describe('Controller+View', function () {
                 controller.initializeEventListeners();
                 controller.initializeEventListeners();
 
-                view.dispatchEvent(buildEvent('click'));
+                view.dispatchEvent(buildEvent('click', controller));
                 assert.equal(clicked, 1);
                 assert.isFalse(keyPressed);
                 assert.equal(handler, controller);
@@ -193,7 +196,7 @@ describe('Controller+View', function () {
     //        controller.initializeEventListeners();
     //        controller.removeEventListeners();
     //
-    //        view.dispatchEvent(buildEvent('click'));
+    //        view.dispatchEvent(buildEvent('click', controller));
     //        assert.isFalse(clicked);
     //        assert.isFalse(keyPressed);
     //        assert.isNull(handler);
@@ -224,7 +227,7 @@ describe('Controller+View', function () {
     //        controller.initializeEventListeners();
     //        controller.removeEventListeners();
     //
-    //        view.dispatchEvent(buildEvent('click'));
+    //        view.dispatchEvent(buildEvent('click', controller));
     //        assert.isFalse(clicked);
     //        assert.isFalse(keyPressed);
     //        assert.isNull(handler);

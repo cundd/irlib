@@ -4,6 +4,10 @@
 
 var GeneralUtility = IrLib.Utility.GeneralUtility;
 var _Error = IrLib.Error;
+
+/**
+ * @implements EventListener
+ */
 IrLib.Controller = IrLib.CoreObject.extend({
     /**
      * @type {HTMLElement}
@@ -29,11 +33,20 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * @param {Event} event
      */
     handleEvent: function(event) {
-        var _events = this.events;
-        if (_events[event.type]) {
-            _events[event.type].call(this, event);
+        var controller = this,
+            type = event.type,
+            _events = controller.events;
+
+        // Workaround for jsdom based unit tests
+        if (!_events && typeof event.irController === 'object') {
+            controller = event.irController;
+            _events = controller.events;
+        }
+
+        if (_events && _events[type]) {
+            _events[type].call(controller, event);
         } else {
-            console.log(event);
+            IrLib.Logger.debug('Unhandled event', event);
         }
     },
 
