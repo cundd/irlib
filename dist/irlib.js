@@ -284,7 +284,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         if (typeof value === 'undefined') {
             return [];
         }
-        if (value instanceof Array) {
+        if (Array.isArray(value)) {
             return value.slice();
         }
         if (typeof value === 'object') {
@@ -308,6 +308,9 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
 var ef = function() {};
 var Logger = IrLib.Logger = console || {};
 
+if (!Logger.log) {
+    Logger.log = ef;
+}
 if (!Logger.debug) {
     Logger.debug = ef;
 }
@@ -330,6 +333,10 @@ if (!Logger.warn) {
 
 var GeneralUtility = IrLib.Utility.GeneralUtility;
 var _Error = IrLib.Error;
+
+/**
+ * @implements EventListener
+ */
 IrLib.Controller = IrLib.CoreObject.extend({
     /**
      * @type {HTMLElement}
@@ -355,11 +362,20 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * @param {Event} event
      */
     handleEvent: function(event) {
-        var _events = this.events;
-        if (_events[event.type]) {
-            _events[event.type].call(this, event);
+        var controller = this,
+            type = event.type,
+            _events = controller.events;
+
+        // Workaround for jsdom based unit tests
+        if (!_events && typeof event.irController === 'object') {
+            controller = event.irController;
+            _events = controller.events;
+        }
+
+        if (_events && _events[type]) {
+            _events[type].call(controller, event);
         } else {
-            console.log(event);
+            IrLib.Logger.debug('Unhandled event', event);
         }
     },
 
@@ -1052,6 +1068,8 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
 
 /**
  * A template based view
+ *
+ * @implements EventListener
  */
 IrLib.View.Template = IrLib.View.Interface.extend({
     /**
@@ -1329,15 +1347,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @param {Event} event
      */
     handleEvent: function (event) {
-        /** @type IrLib.Dictionary imps */
         var imps = this.eventListeners[event.type],
-            impsArray, patchedEvent, currentImp, i;
+            patchedEvent, currentImp, i;
 
         if (imps) {
-            impsArray = imps.values();
             patchedEvent = this._patchEvent(event);
-            for (i = 0; i < impsArray.length; i++) {
-                currentImp = impsArray[i];
+            for (i = 0; i < imps.length; i++) {
+                currentImp = imps[i];
                 if (typeof currentImp === 'function') {
                     currentImp(patchedEvent);
                 } else if (currentImp.handleEvent) {
@@ -1389,12 +1405,14 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     addEventListener: function (type, listener, useCapture) {
         var _eventListeners = this.eventListeners;
-
         if (!_eventListeners[type]) {
-            _eventListeners[type] = new IrLib.Dictionary();
+            _eventListeners[type] = [listener];
+        } else {}
+
+        if (_eventListeners[type].indexOf(listener) === -1) {
+            _eventListeners[type].push(listener);
         }
 
-        _eventListeners[type][this._getListenerId(listener)] = listener;
         this.render().addEventListener(type, this);
     },
 

@@ -4,6 +4,9 @@
 var ef = function() {};
 var Logger = IrLib.Logger = console || {};
 
+if (!Logger.log) {
+    Logger.log = ef;
+}
 if (!Logger.debug) {
     Logger.debug = ef;
 }
