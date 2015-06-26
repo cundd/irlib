@@ -114,6 +114,32 @@ describe('CoreObject', function () {
             assert.isTrue('aKey' in instance);
             assert.strictEqual(setterCalled, 1);
         });
+        it('should add a new property with overwrite', function () {
+            var instance = new (NewClass.extend({
+                aKey: 1
+            }));
+
+            instance.defineProperty('aKey', {
+                value: 2
+            });
+
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.strictEqual(instance.aKey, 2);
+        });
+        it('should add a new property without overwrite', function () {
+            var instance = new (NewClass.extend({
+                aKey: 1
+            }));
+
+            instance.defineProperty('aKey', {
+                overwrite: false,
+                value: 2
+            });
+
+            assert.isTrue('aKey' in instance);
+            assert.isFalse(instance.hasOwnProperty('aKey'));
+            assert.strictEqual(instance.aKey, 1);
+        });
     });
 
     describe('defineProperties()', function () {
@@ -125,6 +151,7 @@ describe('CoreObject', function () {
                     value: 10
                 }
             });
+
             assert.strictEqual(instance.aKey, 10);
             assert.isTrue(instance.hasOwnProperty('aKey'));
             assert.isTrue('aKey' in instance);
@@ -183,6 +210,37 @@ describe('CoreObject', function () {
             assert.isTrue(instance.hasOwnProperty('anotherKey'));
             assert.isTrue('anotherKey' in instance);
             assert.strictEqual(anotherKeySetterCalled, 1);
+        });
+
+        it('should add new properties with overwrite', function () {
+            var instance = new (NewClass.extend({
+                aKey: 1
+            }));
+
+            instance.defineProperties({
+                'aKey': {
+                    value: 2
+                }
+            });
+
+            assert.isTrue(instance.hasOwnProperty('aKey'));
+            assert.strictEqual(instance.aKey, 2);
+        });
+        it('should add new properties without overwrite', function () {
+            var instance = new (NewClass.extend({
+                aKey: 1
+            }));
+
+            instance.defineProperties({
+                'aKey': {
+                    overwrite: false,
+                    value: 2
+                }
+            });
+
+            assert.isTrue('aKey' in instance);
+            assert.isFalse(instance.hasOwnProperty('aKey'));
+            assert.strictEqual(instance.aKey, 1);
         });
     });
 });

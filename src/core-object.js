@@ -30,6 +30,9 @@ IrLib.CoreObject = Class.extend({
      * @see Object.defineProperty()
      */
     defineProperty: function(key, descriptor) {
+        if (descriptor.overwrite === false && this[key]) {
+            return this;
+        }
         Object.defineProperty(this, key, descriptor);
         return this;
     },
@@ -42,7 +45,10 @@ IrLib.CoreObject = Class.extend({
      * @see Object.defineProperties()
      */
     defineProperties: function(properties) {
-        Object.defineProperties(this, properties);
+        var propertiesDictionary = new IrLib.Dictionary(properties);
+        propertiesDictionary.forEach(function(descriptor, key) {
+            this.defineProperty(key, descriptor);
+        }, this);
         return this;
     }
 });
