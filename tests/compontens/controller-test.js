@@ -12,7 +12,7 @@ describe('Controller', function () {
             var event = document.createEvent('Event');
             event.initEvent(eventName, true, true);
             if (controller) {
-                //event.irController = controller;
+                event.irController = controller;
             }
             return event;
         },
@@ -103,6 +103,7 @@ describe('Controller', function () {
                 handler = null,
                 target = null,
                 controller;
+            getFixturesDivToEnableBubbling().appendChild(domNode);
 
             controller = new (IrLib.Controller.extend({
                 view: domNode,
@@ -120,7 +121,7 @@ describe('Controller', function () {
             controller.initializeEventListeners();
 
             domNode.dispatchEvent(buildEvent('click', controller));
-            assert.isTrue(clicked);
+            assert.isTrue(clicked, 'Element should have been clicked');
             assert.isFalse(keyPressed);
             assert.equal(handler, controller);
             assert.equal(target, domNode);
@@ -144,7 +145,6 @@ describe('Controller', function () {
                     'keydown': function () {
                         keyPressed = true;
                     }
-
                 }
             }));
             controller.initializeEventListeners();
@@ -229,6 +229,8 @@ describe('Controller', function () {
                 target = null,
                 controller;
 
+            getFixturesDivToEnableBubbling().appendChild(domNode);
+
             controller = new (IrLib.Controller.extend({
                 view: domNode,
                 events: {
@@ -247,6 +249,7 @@ describe('Controller', function () {
             controller.initializeEventListeners();
 
             domNode.dispatchEvent(buildEvent('click', controller));
+            assert.isTrue(clicked > 0, 'Element should have been clicked');
             assert.equal(clicked, 1);
             assert.isFalse(keyPressed);
             assert.equal(handler, controller);
@@ -274,7 +277,6 @@ describe('Controller', function () {
                     'keydown': function () {
                         keyPressed = true;
                     }
-
                 }
             }));
             controller.initializeEventListeners();
