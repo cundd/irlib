@@ -4,6 +4,8 @@
 
 /**
  * A template based view
+ *
+ * @implements EventListener
  */
 IrLib.View.Template = IrLib.View.Interface.extend({
     /**
@@ -281,15 +283,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @param {Event} event
      */
     handleEvent: function (event) {
-        /** @type IrLib.Dictionary imps */
         var imps = this.eventListeners[event.type],
-            impsArray, patchedEvent, currentImp, i;
+            patchedEvent, currentImp, i;
 
         if (imps) {
-            impsArray = imps.values();
             patchedEvent = this._patchEvent(event);
-            for (i = 0; i < impsArray.length; i++) {
-                currentImp = impsArray[i];
+            for (i = 0; i < imps.length; i++) {
+                currentImp = imps[i];
                 if (typeof currentImp === 'function') {
                     currentImp(patchedEvent);
                 } else if (currentImp.handleEvent) {
@@ -314,25 +314,6 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
-     * Returns the ID of the listener
-     *
-     * @param {Function|Object} value
-     * @returns {string}
-     * @private
-     */
-    _getListenerId: function (value) {
-        if (typeof value === 'function') {
-            return value + '';
-        }
-
-        /** @type IrLib.CoreObject value */
-        if (typeof value === 'object' && typeof value.guid === 'function') {
-            return value.guid();
-        }
-        return value + '';
-    },
-
-    /**
      * Adds the given event listener to the View
      *
      * @param {String} type
@@ -341,12 +322,14 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     addEventListener: function (type, listener, useCapture) {
         var _eventListeners = this.eventListeners;
-
         if (!_eventListeners[type]) {
-            _eventListeners[type] = new IrLib.Dictionary();
+            _eventListeners[type] = [listener];
+        } else {}
+
+        if (_eventListeners[type].indexOf(listener) === -1) {
+            _eventListeners[type].push(listener);
         }
 
-        _eventListeners[type][this._getListenerId(listener)] = listener;
         this.render().addEventListener(type, this);
     },
 

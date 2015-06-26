@@ -1378,25 +1378,6 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
-     * Returns the ID of the listener
-     *
-     * @param {Function|Object} value
-     * @returns {string}
-     * @private
-     */
-    _getListenerId: function (value) {
-        if (typeof value === 'function') {
-            return value + '';
-        }
-
-        /** @type IrLib.CoreObject value */
-        if (typeof value === 'object' && typeof value.guid === 'function') {
-            return value.guid();
-        }
-        return value + '';
-    },
-
-    /**
      * Adds the given event listener to the View
      *
      * @param {String} type
