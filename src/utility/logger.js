@@ -1,8 +1,10 @@
 /**
  * Created by COD on 14.04.15.
  */
-var ef = function() {};
-var Logger = IrLib.Logger = console || {};
+var ef = function () {
+};
+
+var Logger = IrLib.Logger = (typeof console === 'object' ? console : {});
 
 if (!Logger.log) {
     Logger.log = ef;
@@ -15,4 +17,7 @@ if (!Logger.info) {
 }
 if (!Logger.warn) {
     Logger.warn = ef;
+}
+if (!Logger.error) {
+    Logger.error = ef;
 }
