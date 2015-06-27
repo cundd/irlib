@@ -6,7 +6,7 @@
 var assert = chai.assert;
 
 describe('Dictionary', function () {
-    describe('new()', function () {
+    describe('new', function () {
         it('should add elements from given initialization argument', function () {
             var dictionary = new IrLib.Dictionary({
                 'aKey': 'aValue',

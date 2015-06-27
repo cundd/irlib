@@ -25,7 +25,7 @@ describe('CoreObject', function () {
         }
     });
 
-    describe('new()', function () {
+    describe('new', function () {
         it('should return an instance of the class', function () {
             assert.isTrue((new NewClass) instanceof NewClass);
         });

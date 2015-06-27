@@ -7,12 +7,12 @@
 (function(exports){
     var IrLib = exports;
 
-/*    require('core-object');// */
+(function() {/*    require('core-object');// */
 
 /**
  * Created by COD on 03.06.15.
  */
-/*require('class');// */
+(function() {/*require('class');// */
 
 /* Simple JavaScript Inheritance
  * By John Resig http://ejohn.org/
@@ -131,7 +131,7 @@
     };
 })(this);
 
-
+}());
 
 
 
@@ -184,10 +184,10 @@ IrLib.CoreObject = Class.extend({
 IrLib.CoreObject.__lastGuid = 0;
 
 
+}());
 
 
-
-/*    require('error\/*');// */
+(function() {/*    require('error\/*');// */
 
 /**
  * Created by COD on 14.04.15.
@@ -227,10 +227,10 @@ IrLib.MissingImplementationError.prototype = {
     }
 };
 
+}());
 
 
-
-/*    require('utility\/*');// */
+(function() {/*    require('utility\/*');// */
 
 /**
  * Created by COD on 03.06.15.
@@ -302,8 +302,10 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
 /**
  * Created by COD on 14.04.15.
  */
-var ef = function() {};
-var Logger = IrLib.Logger = console || {};
+var ef = function () {
+};
+
+var Logger = IrLib.Logger = (typeof console === 'object' ? console : {});
 
 if (!Logger.log) {
     Logger.log = ef;
@@ -317,12 +319,15 @@ if (!Logger.info) {
 if (!Logger.warn) {
     Logger.warn = ef;
 }
+if (!Logger.error) {
+    Logger.error = ef;
+}
 
 
+}());
 
 
-
-/*    require('components\/*');// */
+(function() {/*    require('components\/*');// */
 
 /**
  * Created by COD on 03.06.15.
@@ -962,15 +967,15 @@ IrLib.Url.prototype = {
 };
 
 
+}());
 
 
+(function() {/*    require('view\/interface');// */
 
-/*    require('view\/interface');// */
+}());
 
 
-
-
-/*    require('view\/*');// */
+(function() {/*    require('view\/*');// */
 
 /**
  * Created by COD on 25.06.15.
@@ -1408,7 +1413,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     }
 });
 
-
+}());
 
 
 
