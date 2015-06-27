@@ -15,13 +15,33 @@ describe('View.Template', function () {
         },
         getFixturesDivToEnableBubbling = function () {
             return document.getElementById('mocha-fixtures');
+        },
+        getTemplateDomString = function() {
+            return '<div class="some-element"><header>{{headline}}</header><section>My content</section></div>';
+        },
+        createTemplateDom = function (id) {
+            var element = document.createElement('div');
+
+            element.type = 'text/irlib-template';
+            element.innerHTML = getTemplateDomString();
+            element.id = id.charAt(0) === '#' ? id.substr(1) : id;
+
+            getFixturesDivToEnableBubbling().appendChild(element);
+            return element;
         };
 
     describe('new', function () {
-        it('should take the first element as template', function () {
+        it('should take the first element as template (string)', function () {
             var template = '<div><h1>Heading</h1></div>',
                 view = new IrLib.View.Template(template);
             assert.strictEqual(view._template, template);
+        });
+        it('should take the first element as template (selector)', function () {
+            var template = '#my-template',
+                view;
+            createTemplateDom(template);
+            view = new IrLib.View.Template(template);
+            assert.strictEqual(view._template, getTemplateDomString());
         });
         it('should take the second element as variables', function () {
             var view = new IrLib.View.Template('', {
@@ -29,12 +49,21 @@ describe('View.Template', function () {
             });
             assert.strictEqual(view._variables['aKey'], 'aValue');
         });
-        it('should inherit the template', function () {
+        it('should inherit the template (string)', function () {
             var template = '<div><h1>Heading</h1></div>',
                 view = new (IrLib.View.Template.extend({
                     template: template
                 }));
             assert.strictEqual(view._template, template);
+        });
+        it('should inherit the template (selector)', function () {
+            var template = '#my-template',
+                view;
+            createTemplateDom(template);
+            view = new (IrLib.View.Template.extend({
+                template: template
+            }));
+            assert.strictEqual(view._template, getTemplateDomString());
         });
         it('should throw exception if the argument is not of type string', function () {
             assert.throws(function () {
@@ -43,12 +72,34 @@ describe('View.Template', function () {
         });
     });
     describe('setTemplate()', function () {
-        it('should overwrite the template and set needsRedraw', function () {
+        it('should overwrite the template and set needsRedraw (string)', function () {
             var view = new IrLib.View.Template(),
                 template = '<div><h1>Heading</h1></div>';
 
             view.setTemplate(template);
             assert.strictEqual(view.template, template);
+            assert.strictEqual(view.needsRedraw, true);
+        });
+        it('should overwrite the template and set needsRedraw (selector)', function () {
+            var template = '#my-template',
+                view = new IrLib.View.Template();
+            createTemplateDom(template);
+            view.setTemplate(template);
+            assert.strictEqual(view.template, getTemplateDomString());
+            assert.strictEqual(view.needsRedraw, true);
+        });
+        it.skip('should load templates lazy', function () {
+            var template = '#my-template-lazy-loaded',
+                view = new IrLib.View.Template();
+
+            view.setTemplate(template);
+
+            assert.strictEqual(view._template, template);
+            assert.strictEqual(view.needsRedraw, true);
+
+            createTemplateDom(template);
+
+            assert.strictEqual(view.template, getTemplateDomString());
             assert.strictEqual(view.needsRedraw, true);
         });
     });
@@ -59,6 +110,15 @@ describe('View.Template', function () {
 
             view.template = template;
             assert.strictEqual(view.template, template);
+            assert.strictEqual(view.needsRedraw, true);
+        });
+        it('should overwrite the template and set needsRedraw (selector)', function () {
+            var template = '#my-template',
+                view = new IrLib.View.Template();
+            createTemplateDom(template);
+
+            view.template = template;
+            assert.strictEqual(view._template, getTemplateDomString());
             assert.strictEqual(view.needsRedraw, true);
         });
     });
@@ -128,7 +188,7 @@ describe('View.Template', function () {
             assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
 
         });
-        it('should inherit the template', function () {
+        it('should inherit the template (string)', function () {
             var template = '<div><h1>{{headline}}</h1></div>',
                 view = new (IrLib.View.Template.extend({
                     template: template
@@ -140,6 +200,22 @@ describe('View.Template', function () {
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        });
+        it('should inherit the template (selector)', function () {
+            var template = '#my-template',
+                variables = {'headline': 'This worked'},
+                ELEMENT_NODE = 1,
+                view;
+
+            createTemplateDom(template);
+            view = new (IrLib.View.Template.extend({
+                template: template
+            }));
+
+            view.setVariables(variables);
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<header>This worked</header><section>My content</section>');
         });
     });
     describe('appendTo()', function () {
@@ -209,7 +285,6 @@ describe('View.Template', function () {
             assert.isDefined(element.firstChild);
             assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
 
-
             view.remove();
 
             assert.isNull(element.firstChild);
@@ -251,7 +326,6 @@ describe('View.Template', function () {
                 view.render().appendChild(childNode);
                 getFixturesDivToEnableBubbling().appendChild(view.render());
 
-
                 view.addEventListener('click', function (event) {
                     target = event.target;
                     irTarget = event.irTarget;
@@ -274,7 +348,6 @@ describe('View.Template', function () {
                     handler = null,
                     target = null,
                     callback;
-
 
                 callback = function (event) {
                     target = event.irTarget;

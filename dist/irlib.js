@@ -1286,7 +1286,12 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {IrLib.View.Template}
      */
     setTemplate: function (template) {
-        this._template = template.trim();
+        var templateTemporary = template.trim();
+        if (this._isSelector(templateTemporary)) {
+            this._template = this._getTemplateForSelector(templateTemporary);
+        } else {
+            this._template = templateTemporary;
+        }
         this._needsRedraw = true;
         return this;
     },
@@ -1298,6 +1303,36 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     getTemplate: function () {
         return this._template;
+    },
+
+    /**
+     * Returns if the given value is a selector
+     *
+     * @param {*} value
+     * @returns {boolean}
+     * @private
+     */
+    _isSelector: function(value) {
+        if (typeof value !== 'string') {
+            return false;
+        }
+        var firstChar = value.charAt(0);
+        return firstChar === '#' || firstChar === '.' || /^[a-z]/i.test(firstChar);
+    },
+
+    /**
+     * Returns the template for the given selector
+     *
+     * @param {String} selector
+     * @returns {String}
+     * @private
+     */
+    _getTemplateForSelector: function(selector) {
+        var templateElement = document.querySelector(selector);
+        if (!templateElement) {
+            return null;
+        }
+        return templateElement.innerHTML;
     },
 
     /**
