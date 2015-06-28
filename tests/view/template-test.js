@@ -152,6 +152,65 @@ describe('View.Template', function () {
             assert.instanceOf(view._variables, IrLib.Dictionary);
         });
     });
+    describe('variables=', function () {
+        it('should overwrite previous variables', function () {
+            var view = new IrLib.View.Template(),
+                variables = {'newKey': 'newValue'};
+            view.assignVariable('key1', 'aValue');
+            view.assignVariable('key2', variables);
+
+            view.variables = variables;
+
+            assert.typeOf(view._variables['newKey'], 'string');
+            assert.strictEqual(view._variables['newKey'], 'newValue');
+            assert.isUndefined(view._variables['key1']);
+            assert.isUndefined(view._variables['key2']);
+        });
+        it('should convert object to Dictionary', function () {
+            var view = new IrLib.View.Template();
+            view.variables = {'newKey': 'newValue'};
+            assert.instanceOf(view._variables, IrLib.Dictionary);
+        });
+    });
+    describe('getVariables()', function () {
+        it('should return variables', function () {
+            var view = new IrLib.View.Template(),
+                variables = {'newKey': 'newValue'};
+            view.assignVariable('key1', 'aValue');
+            view.assignVariable('key2', variables);
+
+            var retrievedVariables = view.getVariables();
+            assert.instanceOf(retrievedVariables, IrLib.Dictionary);
+            assert.typeOf(retrievedVariables['key1'], 'string');
+            assert.strictEqual(retrievedVariables['key1'], 'aValue');
+            assert.typeOf(retrievedVariables['key2'], 'object');
+            assert.strictEqual(retrievedVariables['key2'], variables);
+        });
+        it('should convert object to Dictionary', function () {
+            var view = new IrLib.View.Template();
+            view.variables = {'newKey': 'newValue'};
+            assert.instanceOf(view.getVariables(), IrLib.Dictionary);
+        });
+    });
+    describe('=variables', function () {
+        it('should return variables', function () {
+            var view = new IrLib.View.Template(),
+                variables = {'newKey': 'newValue'};
+            view.assignVariable('key1', 'aValue');
+            view.assignVariable('key2', variables);
+
+            assert.instanceOf(view.variables, IrLib.Dictionary);
+            assert.typeOf(view.variables['key1'], 'string');
+            assert.strictEqual(view.variables['key1'], 'aValue');
+            assert.typeOf(view.variables['key2'], 'object');
+            assert.strictEqual(view.variables['key2'], variables);
+        });
+        it('should convert object to Dictionary', function () {
+            var view = new IrLib.View.Template();
+            view.variables = {'newKey': 'newValue'};
+            assert.instanceOf(view.variables, IrLib.Dictionary);
+        });
+    });
     describe('render()', function () {
         it('should build a DOM element', function () {
             var view = new IrLib.View.Template('<div><h1>Headline</h1></div>'),

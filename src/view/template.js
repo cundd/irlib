@@ -72,6 +72,11 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             'needsRedraw': {
                 enumerable: true,
                 get: this.getNeedsRedraw
+            },
+            'variables': {
+                enumerable: true,
+                get: this.getVariables,
+                set: this.setVariables
             }
         });
     },
@@ -214,6 +219,15 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
+     * Returns the currently assigned variables
+     *
+     * @returns {IrLib.Dictionary}
+     */
+    getVariables: function() {
+        return this._variables;
+    },
+
+    /**
      * Sets the template
      *
      * @param {String} template
@@ -262,11 +276,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @private
      */
     _getTemplateForSelector: function(selector) {
-        var templateElement = document.querySelector(selector);
+        var templateElement = document.querySelector(selector),
+            templateHtml;
         if (!templateElement) {
             return null;
         }
-        return templateElement.innerHTML;
+        templateHtml = templateElement.innerHTML;
+        return templateHtml ? templateHtml.trim() : null;
     },
 
     /**
