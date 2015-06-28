@@ -1289,7 +1289,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      *
      * @returns {IrLib.Dictionary}
      */
-    getVariables: function() {
+    getVariables: function () {
         return this._variables;
     },
 
@@ -1326,7 +1326,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {boolean}
      * @private
      */
-    _isSelector: function(value) {
+    _isSelector: function (value) {
         if (typeof value !== 'string') {
             return false;
         }
@@ -1341,7 +1341,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {String}
      * @private
      */
-    _getTemplateForSelector: function(selector) {
+    _getTemplateForSelector: function (selector) {
         var templateElement = document.querySelector(selector),
             templateHtml;
         if (!templateElement) {
@@ -1378,6 +1378,27 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             element.appendChild(this._dom);
         }
         this._lastInsertedNode = this._dom;
+        return this;
+    },
+
+    /**
+     * Reloads the Views output in the DOM
+     *
+     * @param {Boolean} [force]
+     * @returns {IrLib.View.Template}
+     */
+    reload: function (force) {
+        var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null),
+            newDomElement;
+        if (!lastParent) {
+            throw new ReferenceError('Can not reload because the view does not seem to be in the DOM');
+        }
+        if (force || this._needsRedraw) {
+            this._needsRedraw = true;
+            newDomElement = this.render();
+            this.appendTo(lastParent);
+            this._addEventListeners(newDomElement, Object.keys(this.eventListeners));
+        }
         return this;
     },
 
@@ -1441,13 +1462,29 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         var _eventListeners = this.eventListeners;
         if (!_eventListeners[type]) {
             _eventListeners[type] = [listener];
-        } else {}
+        } else {
+        }
 
         if (_eventListeners[type].indexOf(listener) === -1) {
             _eventListeners[type].push(listener);
         }
 
-        this.render().addEventListener(type, this);
+        this._addEventListeners(this.render(), [type]);
+    },
+
+    /**
+     * Add event listeners for each given event types to the element
+     *
+     * @param {HTMLElement} element
+     * @param {String[]} eventTypes
+     * @private
+     */
+    _addEventListeners: function (element, eventTypes) {
+        var i, type;
+        for (i = 0; i < eventTypes.length; i++) {
+            type = eventTypes[i];
+            element.addEventListener(type, this);
+        }
     },
 
     /**

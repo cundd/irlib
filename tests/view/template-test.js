@@ -352,8 +352,45 @@ describe('View.Template', function () {
             (new IrLib.View.Template()).remove();
         });
     });
+    describe('reload()', function () {
+        it('should update the DOM element', function () {
+            var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
+                element = document.createElement('div'),
+                result;
 
-    if (TestRunner.name !== 'mocha-cli') {
+            view.variables = {'headline': 'This worked'};
+            view.appendTo(element);
+            result = element.firstChild;
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+
+            view.variables = {'headline': 'Refreshed'};
+            view.reload();
+
+            result = element.firstChild;
+            assert.isDefined(result);
+            assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
+        });
+        it('should throw exception if not added to the DOM', function () {
+            assert.throw(function() {
+                var view = new (IrLib.View.Template.extend({
+                        template: '<div><h1>{{headline}}</h1></div>'
+                    })),
+                    result;
+
+                view.variables = {'headline': 'This worked'};
+                result = view.render();
+                assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+
+                view.variables = {'headline': 'Refreshed'};
+                result = view.render();
+                assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
+                result = view.reload();
+                assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
+            });
+        });
+    });
+
+    //if (TestRunner.name !== 'mocha-cli') {
         describe('addEventListener()', function () {
             it('should bind event listeners', function () {
                 var view = new IrLib.View.Template('<div></div>'),
@@ -380,10 +417,12 @@ describe('View.Template', function () {
                     keyPressed = false,
                     handler = null,
                     target = null,
-                    irTarget = null;
+                    irTarget = null,
+                    viewDom;
 
-                view.render().appendChild(childNode);
-                getFixturesDivToEnableBubbling().appendChild(view.render());
+                viewDom = view.render();
+                viewDom.appendChild(childNode);
+                getFixturesDivToEnableBubbling().appendChild(viewDom);
 
                 view.addEventListener('click', function (event) {
                     target = event.target;
@@ -423,6 +462,33 @@ describe('View.Template', function () {
                 assert.isFalse(keyPressed);
                 assert.equal(target, view);
             });
+            it('should invoke event methods after reload', function () {
+                var view = new IrLib.View.Template('<div>{{content}}</div>', {content: 'hello'}),
+                    clicked = 0,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    callback;
+
+                callback = function (event) {
+                    target = event.irTarget;
+                    handler = this;
+                    clicked = true;
+                };
+
+                //view.appendTo(getFixturesDivToEnableBubbling());
+                getFixturesDivToEnableBubbling().appendChild(view.render());
+
+                view.addEventListener('click', callback);
+
+                view.variables = {content: 'new content'};
+                view.reload();
+
+                view._dom.dispatchEvent(buildEvent('click'));
+                assert.equal(clicked, 1);
+                assert.isFalse(keyPressed);
+                assert.equal(target, view);
+            });
         });
-    }
+    //}
 });

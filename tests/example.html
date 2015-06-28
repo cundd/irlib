@@ -3,12 +3,77 @@
 <head lang="en">
     <meta charset="utf-8">
     <title>IrLib example</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial;
+            margin: 0;
+            padding: 0;
+        }
+
+        *, *:after, *:before {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        .toolbar {
+            background: #333;
+            color: white;
+        }
+
+        .toolbar a {
+            display: inline-block;
+            background: #555;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+        }
+
+        .toolbar a:hover {
+            background: #353535;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
 <script src="../dist/irlib.js?raw=true"></script>
 
-<script type="application/javascript">
+<div id="root"></div>
 
+<script type="text/irlib-template" id="my-template">
+    <div>
+        <div class="toolbar">
+            <a href="#" id="home">Home</a>
+            <a href="#" id="save">Save</a>
+            <a href="#" id="delete">Delete</a>
+        </div>
+        <div class="saved">Saved {{saved}} times</div>
+    </div>
+</script>
+
+<script type="application/javascript">
+    var controller = new (IrLib.Controller.extend({
+        view: new IrLib.View.Template('#my-template', {saved: 0}),
+        events: {
+            click: function (e) {
+                IrLib.Logger.log('Clicked element', e.target);
+                IrLib.Logger.log('attached to view', e.irTarget);
+
+                if (e.target.id === 'save') {
+                    this.view.assignVariable('saved', this.view.variables.saved + 1);
+                    this.view.reload();
+                }
+
+                if (e.target.id === 'delete') {
+                    this.view.assignVariable('saved', 0);
+                    this.view.reload();
+                }
+            }
+        }
+    }));
+
+    controller.view.appendTo(document.getElementById('root'));
+    controller.initializeEventListeners();
 </script>
 
 </body>
