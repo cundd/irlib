@@ -345,6 +345,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         var lastInsertedNode = this._lastInsertedNode;
         if (lastInsertedNode && lastInsertedNode.parentNode) {
             lastInsertedNode.parentNode.removeChild(lastInsertedNode);
+            this._lastInsertedNode = null;
         }
         return this;
     },
@@ -396,7 +397,6 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         var _eventListeners = this.eventListeners;
         if (!_eventListeners[type]) {
             _eventListeners[type] = [listener];
-        } else {
         }
 
         if (_eventListeners[type].indexOf(listener) === -1) {

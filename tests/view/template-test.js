@@ -348,6 +348,22 @@ describe('View.Template', function () {
 
             assert.isNull(element.firstChild);
         });
+        it('should remove the View from DOM and allow to append it afterwards', function () {
+            var view = new IrLib.View.Template('<div><h1>Headline</h1></div>'),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            assert.isDefined(element.firstChild);
+            assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
+
+            view.remove();
+
+            assert.isNull(element.firstChild);
+
+            view.appendTo(element);
+            assert.isNotNull(element.firstChild);
+            assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
+        });
         it('should do nothing if not inserted', function () {
             (new IrLib.View.Template()).remove();
         });
