@@ -285,6 +285,186 @@ describe('Controller', function () {
             assert.equal(target, domNode);
         });
     });
+
+    if (TestRunner.name !== 'mocha-cli') {
+
+        describe('catchAllViewEvents()', function () {
+            it('should bind event listeners (div)', function () {
+                var domNode = document.createElement('div'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+                getFixturesDivToEnableBubbling().appendChild(domNode);
+
+                controller = new (IrLib.Controller.extend({
+                    view: domNode,
+                    handleEvent: function (event) {
+                        if (event.type == 'click') {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        }
+                    },
+                    events: {
+                        'click': function (event) {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                domNode.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked, 'Element should have been clicked');
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, domNode);
+            });
+            it('should bind event listeners (selector)', function () {
+                var domNode = document.querySelector('#my-id'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                controller = new (IrLib.Controller.extend({
+                    view: domNode,
+                    handleEvent: function (event) {
+                        if (event.type == 'click') {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        }
+                    },
+                    events: {
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                domNode.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, domNode);
+            });
+            it('should handle bubbled events (div)', function () {
+                var domNode = document.createElement('div'),
+                    childNode = document.createElement('span'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                domNode.appendChild(childNode);
+                getFixturesDivToEnableBubbling().appendChild(domNode);
+
+                controller = new (IrLib.Controller.extend({
+                    view: domNode,
+                    handleEvent: function (event) {
+                        if (event.type == 'click') {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        }
+                    },
+                    events: {
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                childNode.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, childNode);
+            });
+            it('should handle bubbled events (selector)', function () {
+                var domNode = document.querySelector('#my-id'),
+                    childNode = document.createElement('span'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                domNode.appendChild(childNode);
+
+                controller = new (IrLib.Controller.extend({
+                    view: domNode,
+                    handleEvent: function (event) {
+                        if (event.type == 'click') {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        }
+                    },
+                    events: {
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                childNode.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked);
+                assert.isFalse(keyPressed);
+                assert.equal(target, childNode);
+                assert.equal(handler, controller);
+            });
+            it('should invoke event methods only once', function () {
+                var domNode = document.createElement('div'),
+                    clicked = 0,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                getFixturesDivToEnableBubbling().appendChild(domNode);
+
+                controller = new (IrLib.Controller.extend({
+                    view: domNode,
+                    handleEvent: function (event) {
+                        if (event.type == 'click') {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        }
+                    },
+                    events: {
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+                controller.catchAllViewEvents();
+                controller.catchAllViewEvents();
+
+                domNode.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked > 0, 'Element should have been clicked');
+                assert.equal(clicked, 1);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, domNode);
+            });
+        });
+    }
     describe('removeEventListeners()', function () {
         var doSkip = (TestRunner.name !== 'mocha-cli') ? it : it.skip;
 
@@ -297,6 +477,7 @@ describe('Controller', function () {
                 controller;
 
             controller = new (IrLib.Controller.extend({
+                view: domNode,
                 events: {
                     'click': function (event) {
                         target = event.target;
@@ -341,6 +522,60 @@ describe('Controller', function () {
             }));
 
             controller.initializeEventListeners();
+            controller.removeEventListeners();
+
+            domNode.dispatchEvent(buildEvent('click', controller));
+            assert.isFalse(clicked, 'Element click should not trigger event callback');
+            assert.isFalse(keyPressed, 'Key should not have been pressed');
+            assert.isNull(handler);
+            assert.isNull(target);
+        });
+        doSkip('should unbind event listeners after catchAllViewEvents() (selector)', function () {
+            var domNode = document.querySelector('#my-id'),
+                clicked = false,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                controller;
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                handleEvent: function (event) {
+                    target = event.target;
+                    handler = this;
+                    clicked = true;
+                    keyPressed = true;
+                }
+            }));
+            controller.catchAllViewEvents();
+
+            controller.removeEventListeners();
+
+            domNode.dispatchEvent(buildEvent('click', controller));
+            assert.isFalse(clicked, 'Element click should not trigger event callback');
+            assert.isFalse(keyPressed, 'Key should not have been pressed');
+            assert.isNull(handler);
+            assert.isNull(target);
+        });
+        it('should unbind event listeners catchAllViewEvents() (div)', function () {
+            var domNode = document.createElement('div'),
+                clicked = false,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                controller;
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                handleEvent: function (event) {
+                    target = event.target;
+                    handler = this;
+                    clicked = true;
+                    keyPressed = true;
+                }
+            }));
+
+            controller.catchAllViewEvents();
             controller.removeEventListeners();
 
             domNode.dispatchEvent(buildEvent('click', controller));

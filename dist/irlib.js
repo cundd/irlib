@@ -346,11 +346,18 @@ IrLib.Controller = IrLib.CoreObject.extend({
     _view: null,
 
     /**
+     * List of all registered events
+     *
+     * @type {String[]}
+     */
+    _registeredEvents: [],
+
+    /**
      * Initialize the controller
      *
      * @param {HTMLElement|String} [view] A dom node or selector
      */
-    init: function(view) {
+    init: function (view) {
         if (arguments.length > 0) { // Check if the view argument is given
             this.setView(view);
         } else if (this.view) { // Check if a view is inherited
@@ -368,7 +375,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
      *
      * @param {Event} event
      */
-    handleEvent: function(event) {
+    handleEvent: function (event) {
         var controller = this,
             type = event.type,
             _events = controller.events;
@@ -391,7 +398,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
      *
      * @param {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String} view A View object, dom node or selector
      */
-    setView: function(view) {
+    setView: function (view) {
         this._assertView(view);
         if (typeof view === 'string') { // If the view is a selector
             this._view = GeneralUtility.domNode(view);
@@ -405,35 +412,76 @@ IrLib.Controller = IrLib.CoreObject.extend({
      *
      * @returns {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String}
      */
-    getView: function() {
+    getView: function () {
         return this._view;
     },
 
     /**
-     * Initialize the event listeners
+     * Register the Controller as event listener for each event
+     *
+     * @returns {IrLib.Controller}
      */
-    initializeEventListeners: function() {
-        var _view = this.view,
-        _eventNames, i;
+    catchAllViewEvents: function () {
+        var registeredEvents = this._registeredEvents,
+            _view = this.view,
+            domElement, property, eventType;
+        if (_view) {
+            if (_view instanceof IrLib.View.Interface) {
+                domElement = document.createElement('div');
+            } else {
+                domElement = _view;
+            }
+
+            for (property in domElement) {
+                if (property.substr(0, 2) === 'on') {
+                    eventType = property.substr(2);
+                    registeredEvents.push(eventType);
+                    _view.addEventListener(eventType, this, false);
+                }
+            }
+        } else {
+            IrLib.Logger.warn('Can not catch all events because the view not set');
+        }
+        return this;
+    },
+
+    /**
+     * Register the Controller as event listener for each of the callbacks defined in
+     * the events property
+     *
+     * @returns {IrLib.Controller}
+     */
+    initializeEventListeners: function () {
+        var registeredEvents = this._registeredEvents,
+            _view = this.view,
+            _eventNames, eventType, i;
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                _view.addEventListener(_eventNames[i], this, false);
+                eventType = _eventNames[i];
+                registeredEvents.push(eventType);
+                _view.addEventListener(eventType, this, false);
             }
+        } else {
+            IrLib.Logger.warn('Can not add event listener because the view not set');
         }
+        return this;
     },
 
     /**
      * Removes the event listeners
      */
-    removeEventListeners: function() {
-        var _view = this.view,
-        _eventNames, i;
+    removeEventListeners: function () {
+        var registeredEvents = this._registeredEvents,
+            _view = this.view,
+            i;
         if (_view) {
-            _eventNames = this.eventNames();
-            for (i = 0; i < _eventNames.length; i++) {
-                _view.removeEventListener(_eventNames[i], this, false);
+            for (i = 0; i < registeredEvents.length; i++) {
+                _view.removeEventListener(registeredEvents[i], this, false);
             }
+            this._registeredEvents = [];
+        } else {
+            IrLib.Logger.warn('Can not remove event listeners because the view not set');
         }
     },
 
@@ -457,7 +505,8 @@ IrLib.Controller = IrLib.CoreObject.extend({
             throw new _Error('No view given', 1433355412);
         }
 
-        var ViewInterface = IrLib.View && IrLib.View.Interface ? IrLib.View.Interface : function() {};
+        var ViewInterface = IrLib.View && IrLib.View.Interface ? IrLib.View.Interface : function () {
+        };
         if (!GeneralUtility.domNode(view) && !(view instanceof ViewInterface)) {
             throw new _Error('No view given', 1433355412, view);
         }
@@ -466,9 +515,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
     /**
      * Registered event handler methods
      */
-    events: {
-
-    }
+    events: {}
 });
 
 /**
