@@ -93,7 +93,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
     catchAllViewEvents: function () {
         var registeredEvents = this._registeredEvents,
             _view = this.view,
-            domElement, property, eventType;
+            domElement, property;
         if (_view) {
             if (_view instanceof IrLib.View.Interface) {
                 domElement = document.createElement('div');
@@ -103,11 +103,10 @@ IrLib.Controller = IrLib.CoreObject.extend({
 
             for (property in domElement) {
                 if (property.substr(0, 2) === 'on') {
-                    eventType = property.substr(2);
-                    registeredEvents.push(eventType);
-                    _view.addEventListener(eventType, this, false);
+                    registeredEvents.push(property.substr(2));
                 }
             }
+            this._addListenersForRegisteredEventTypes();
         } else {
             IrLib.Logger.warn('Can not catch all events because the view not set');
         }
@@ -123,14 +122,13 @@ IrLib.Controller = IrLib.CoreObject.extend({
     initializeEventListeners: function () {
         var registeredEvents = this._registeredEvents,
             _view = this.view,
-            _eventNames, eventType, i;
+            _eventNames, i;
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                eventType = _eventNames[i];
-                registeredEvents.push(eventType);
-                _view.addEventListener(eventType, this, false);
+                registeredEvents.push(_eventNames[i]);
             }
+            this._addListenersForRegisteredEventTypes();
         } else {
             IrLib.Logger.warn('Can not add event listener because the view not set');
         }
@@ -161,6 +159,23 @@ IrLib.Controller = IrLib.CoreObject.extend({
      */
     eventNames: function () {
         return Object.keys(this.events);
+    },
+
+    /**
+     * Actually add the event listeners listed in _registeredEvents to the View
+     *
+     * @private
+     */
+    _addListenersForRegisteredEventTypes: function() {
+        var registeredEvents = this._registeredEvents,
+            registeredEventsLength = registeredEvents.length,
+            _view = this.view,
+            i;
+        if (_view) {
+            for (i = 0; i < registeredEventsLength; i++) {
+                _view.addEventListener(registeredEvents[i], this, false);
+            }
+        }
     },
 
     /**
