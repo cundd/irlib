@@ -1283,6 +1283,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     render: function () {
         if (this._needsRedraw) {
+            delete this._dom;
             var _template = this.template;
             if (!_template) {
                 throw new ReferenceError('Template not specified');
@@ -1490,6 +1491,16 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
+     * Returns if the View is in the visible DOM
+     *
+     * @returns {Boolean}
+     */
+    isVisible: function() {
+        var element = this._dom;
+        return !!(element && element.parentNode && document.contains(element));
+    },
+
+    /**
      * Appends the View to the given DOM element, while replacing the previously rendered element
      *
      * @param {Node|HTMLElement} element
@@ -1507,6 +1518,8 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             element.appendChild(this._dom);
         }
         this._lastInsertedNode = this._dom;
+
+        this._addEventListeners(this._dom, Object.keys(this.eventListeners));
         return this;
     },
 
@@ -1526,7 +1539,6 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             this._needsRedraw = true;
             newDomElement = this.render();
             this.appendTo(lastParent);
-            this._addEventListeners(newDomElement, Object.keys(this.eventListeners));
         }
         return this;
     },

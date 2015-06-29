@@ -368,6 +368,26 @@ describe('View.Template', function () {
             (new IrLib.View.Template()).remove();
         });
     });
+    describe('isVisible()', function () {
+        it('should return false at initialization', function () {
+            assert.isFalse((new IrLib.View.Template('<div><h1>Headline</h1></div>')).isVisible());
+        });
+        it('should return false if not added to the document', function () {
+            var view = new IrLib.View.Template('<div><h1>Headline</h1></div>'),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            assert.isFalse(view.isVisible());
+        });
+        it('should return true if added to the visible DOM', function () {
+            var view = new IrLib.View.Template('<div><h1>Headline</h1></div>'),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            getFixturesDivToEnableBubbling().appendChild(element);
+            assert.isTrue(view.isVisible());
+        });
+    });
     describe('reload()', function () {
         it('should update the DOM element', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
