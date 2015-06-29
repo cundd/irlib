@@ -390,7 +390,7 @@ describe('View.Template', function () {
         });
     });
 
-    //if (TestRunner.name !== 'mocha-cli') {
+    if (TestRunner.name !== 'mocha-cli') {
         describe('addEventListener()', function () {
             it('should bind event listeners', function () {
                 var view = new IrLib.View.Template('<div></div>'),
@@ -490,5 +490,5 @@ describe('View.Template', function () {
                 assert.equal(target, view);
             });
         });
-    //}
+    }
 });
