@@ -269,6 +269,207 @@ describe('Controller+View', function () {
                 assert.equal(target, view);
             });
         });
+        describe('catchAllViewEvents()', function () {
+            it('should bind event listeners (IrLib.View.Template)', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                controller = new (IrLib.Controller.extend({
+                    view: view,
+                    events: {
+                        'click': function (event) {
+                            target = event.irTarget;
+                            handler = this;
+                            clicked = true;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                view.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, view);
+            });
+            it('should handle bubbled events (IrLib.View.Template)', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    childNode = document.createElement('span'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    irTarget = null,
+                    controller;
+
+                view.render().appendChild(childNode);
+                getFixturesDivToEnableBubbling().appendChild(view.render());
+
+
+                controller = new (IrLib.Controller.extend({
+                    view: view,
+                    events: {
+                        'click': function (event) {
+                            target = event.target;
+                            irTarget = event.irTarget;
+                            handler = this;
+                            clicked = true;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                childNode.dispatchEvent(buildEvent('click', controller));
+
+                assert.strictEqual(view.render().firstChild, childNode);
+                assert.isTrue(clicked, 'Child element was not clicked');
+                assert.isFalse(keyPressed, 'A key has been pressed');
+                assert.equal(handler, controller);
+                assert.equal(target, childNode);
+                assert.equal(irTarget, view);
+            });
+            it('should invoke event methods only once', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    clicked = 0,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                controller = new (IrLib.Controller.extend({
+                    view: view,
+                    events: {
+                        'click': function (event) {
+                            target = event.irTarget;
+                            handler = this;
+                            clicked++;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+                controller.catchAllViewEvents();
+                controller.catchAllViewEvents();
+
+                view.dispatchEvent(buildEvent('click', controller));
+                assert.equal(clicked, 1);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, view);
+            });
+            it('should bind event listeners after setView() (IrLib.View.Template)', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                controller = new (IrLib.Controller.extend({
+                    events: {
+                        'click': function (event) {
+                            target = event.irTarget;
+                            handler = this;
+                            clicked = true;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+
+                controller.setView(view);
+                controller.catchAllViewEvents();
+
+                view.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, view);
+            });
+            it('should handle bubbled events after setView() (IrLib.View.Template)', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    childNode = document.createElement('span'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    irTarget = null,
+                    controller;
+
+                view.render().appendChild(childNode);
+                getFixturesDivToEnableBubbling().appendChild(view.render());
+
+
+                controller = new (IrLib.Controller.extend({
+                    events: {
+                        'click': function (event) {
+                            target = event.target;
+                            irTarget = event.irTarget;
+                            handler = this;
+                            clicked = true;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.setView(view);
+                controller.catchAllViewEvents();
+
+                childNode.dispatchEvent(buildEvent('click', controller));
+
+                assert.strictEqual(view.render().firstChild, childNode);
+                assert.isTrue(clicked, 'Child element was not clicked');
+                assert.isFalse(keyPressed, 'A key has been pressed');
+                assert.equal(handler, controller);
+                assert.equal(target, childNode);
+                assert.equal(irTarget, view);
+            });
+            it('should invoke event methods only once after setView()', function () {
+                var view = new IrLib.View.Template('<div></div>'),
+                    clicked = 0,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    controller;
+
+                controller = new (IrLib.Controller.extend({
+                    events: {
+                        'click': function (event) {
+                            target = event.irTarget;
+                            handler = this;
+                            clicked++;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.setView(view);
+                controller.catchAllViewEvents();
+                controller.catchAllViewEvents();
+                controller.catchAllViewEvents();
+
+                view.dispatchEvent(buildEvent('click', controller));
+                assert.equal(clicked, 1);
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, view);
+            });
+        });
     }
 
     //describe('removeEventListeners()', function () {
