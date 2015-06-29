@@ -341,9 +341,9 @@ var _Error = IrLib.Error;
  */
 IrLib.Controller = IrLib.CoreObject.extend({
     /**
-     * @type {HTMLElement}
+     * @type {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String}
      */
-    view: null,
+    _view: null,
 
     /**
      * Initialize the controller
@@ -351,11 +351,16 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * @param {HTMLElement|String} [view] A dom node or selector
      */
     init: function(view) {
-        if (arguments.length > 0) {
+        if (arguments.length > 0) { // Check if the view argument is given
             this.setView(view);
-        } else if (this.view) {
+        } else if (this.view) { // Check if a view is inherited
             this.setView(this.view);
         }
+        this.defineProperty('view', {
+            enumerable: true,
+            get: this.getView,
+            set: this.setView
+        });
     },
 
     /**
@@ -388,7 +393,20 @@ IrLib.Controller = IrLib.CoreObject.extend({
      */
     setView: function(view) {
         this._assertView(view);
-        this.view = view;
+        if (typeof view === 'string') { // If the view is a selector
+            this._view = GeneralUtility.domNode(view);
+        } else {
+            this._view = view;
+        }
+    },
+
+    /**
+     * Returns the view
+     *
+     * @returns {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String}
+     */
+    getView: function() {
+        return this._view;
     },
 
     /**

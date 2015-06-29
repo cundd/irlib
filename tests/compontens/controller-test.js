@@ -20,16 +20,17 @@ describe('Controller', function () {
             return document.getElementById('mocha-fixtures');
         };
 
-    describe('view()', function () {
+    describe('=view', function () {
         it('should return the initialization parameter (div)', function () {
             var view = document.createElement('div');
             var controller = new IrLib.Controller(view);
             assert.strictEqual(controller.view, view);
         });
-        it('should return the initialization parameter (selector)', function () {
-            var view = '#my-id';
-            var controller = new IrLib.Controller(view);
-            assert.strictEqual(controller.view, view);
+        it('should return the initialization parameter as DOM element (selector)', function () {
+            var selector = '#my-id';
+            var controller = new IrLib.Controller(selector);
+            assert.strictEqual(controller.view, document.querySelector(selector));
+            assert.strictEqual(controller.view.id, selector.substr(1));
         });
 
         it('should return the initialization parameter (div)', function () {
@@ -40,11 +41,11 @@ describe('Controller', function () {
             assert.strictEqual(controller.view, view);
         });
         it('should return the initialization parameter (selector)', function () {
-            var view = '#my-id';
+            var selector = '#my-id';
             var controller = new (IrLib.Controller.extend({
-                view: view
+                view: selector
             }));
-            assert.strictEqual(controller.view, view);
+            assert.strictEqual(controller.view, document.querySelector(selector));
         });
         it('should throw for invalid initialization parameter', function () {
             assert.throws(function () {
@@ -62,11 +63,12 @@ describe('Controller', function () {
             controller.setView(view);
             assert.strictEqual(controller.view, view);
         });
-        it('should set the view (selector)', function () {
-            var view = '#my-id';
+        it('should set the view and resolve selectors', function () {
+            var selector = '#my-id';
             var controller = new IrLib.Controller();
-            controller.setView(view);
-            assert.strictEqual(controller.view, view);
+            controller.setView(selector);
+            assert.strictEqual(controller.view, document.querySelector(selector));
+            assert.strictEqual(controller.view.id, selector.substr(1));
         });
         it('should throw for invalid parameters (constructor)', function () {
             assert.throws(function () {
@@ -77,6 +79,33 @@ describe('Controller', function () {
             var controller = new IrLib.Controller();
             assert.throws(function () {
                 controller.setView('something bad');
+            });
+        });
+    });
+
+    describe('view=', function () {
+        it('should set the view (div)', function () {
+            var view = document.createElement('div');
+            var controller = new IrLib.Controller();
+            controller.view = view;
+            assert.strictEqual(controller.view, view);
+        });
+        it('should set the view and resolve selectors', function () {
+            var selector = '#my-id';
+            var controller = new IrLib.Controller();
+            controller.view = selector;
+            assert.strictEqual(controller.view, document.querySelector(selector));
+            assert.strictEqual(controller.view.id, selector.substr(1));
+        });
+        it('should throw for invalid parameters (constructor)', function () {
+            assert.throws(function () {
+                new IrLib.Controller('something bad');
+            });
+        });
+        it('should throw for invalid parameters', function () {
+            var controller = new IrLib.Controller();
+            assert.throws(function () {
+                controller.view = 'something bad';
             });
         });
     });
