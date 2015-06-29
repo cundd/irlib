@@ -43,6 +43,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * Handle the DOM event
      *
      * @param {Event} event
+     * @returns {*}
      */
     handleEvent: function (event) {
         var controller = this,
@@ -83,12 +84,12 @@ IrLib.Controller = IrLib.CoreObject.extend({
         }
 
         if (typeof imp === 'function') {
-            imp.call(controller, event);
+            return imp.call(controller, event);
         } else if (imp) {
             IrLib.Logger.error('Event handler implementation is of type ' + (typeof event));
-        } else {
-            IrLib.Logger.debug('Unhandled event', event);
+            return false;
         }
+        return true;
     },
 
     /**
