@@ -276,6 +276,28 @@ describe('View.Template', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<header>This worked</header><section>My content</section>');
         });
+        it('should escape variable content', function () {
+            var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
+                variables = {'headline': 'This <strong>worked</strong>'},
+                ELEMENT_NODE = 1;
+
+            view.setVariables(variables);
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This &lt;strong&gt;worked&lt;/strong&gt;</h1>');
+        });
+        it('should not escape variable content', function () {
+            var view = new IrLib.View.Template('<div><h1>{{{headline}}}</h1></div>'),
+                variables = {'headline': 'This <strong>worked</strong>'},
+                ELEMENT_NODE = 1;
+
+            view.setVariables(variables);
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This <strong>worked</strong></h1>');
+        });
     });
     describe('appendTo()', function () {
         it('should build a DOM element and insert it to the parent', function () {

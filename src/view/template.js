@@ -123,13 +123,39 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {String}
      */
     _renderVariables: function (template) {
+        var inline_escapeHtml = this._escapeHtml;
         this._variables.forEach(function (value, key) {
-            var replaceExpression = new RegExp('\\{\\{' + key + '\\}\\}', 'g');
+            var replaceExpression;
+            replaceExpression = new RegExp('\\{\\{\\{' + key + '\\}\\}\\}', 'g');
             template = template.replace(replaceExpression, value);
+
+            replaceExpression = new RegExp('\\{\\{' + key + '\\}\\}', 'g');
+            template = template.replace(replaceExpression, inline_escapeHtml(value));
         });
 
         /* Clean up unresolved variables */
         return template.replace(/\{\{[\w\.\-]+}}/g, '');
+    },
+
+    /**
+     * Escapes the given input
+     *
+     * @param {String} string
+     * @returns {string}
+     * @private
+     */
+    _escapeHtml: function (string) {
+        var entityMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '/': '&#x2F;'
+        };
+        return String(string).replace(/[&<>"'\/]/g, function fromEntityMap(s) {
+            return entityMap[s];
+        });
     },
 
     ///**
@@ -300,7 +326,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      *
      * @returns {Boolean}
      */
-    isVisible: function() {
+    isVisible: function () {
         var element = this._dom;
         return !!(element && element.parentNode && document.contains(element));
     },
