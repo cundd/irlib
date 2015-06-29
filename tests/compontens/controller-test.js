@@ -125,6 +125,8 @@ describe('Controller', function () {
     });
 
     describe('initializeEventListeners()', function () {
+        var doSkip = (TestRunner.name !== 'mocha-cli') ? it : it.skip;
+
         it('should bind event listeners (div)', function () {
             var domNode = document.createElement('div'),
                 clicked = false,
@@ -284,6 +286,148 @@ describe('Controller', function () {
             assert.equal(handler, controller);
             assert.equal(target, domNode);
         });
+        it('should bind event listeners with data-irlib-target (div)', function () {
+            var domNode = document.createElement('div'),
+                clicked = 0,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                linkWithTarget, linkWithoutTarget, controller;
+
+            linkWithTarget = document.createElement('a');
+            linkWithTarget.setAttribute('data-irlib-target', 'action');
+            domNode.appendChild(linkWithTarget);
+
+            linkWithoutTarget = document.createElement('a');
+            domNode.appendChild(linkWithoutTarget);
+
+            getFixturesDivToEnableBubbling().appendChild(domNode);
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    'click:action': function (event) {
+                        target = event.target;
+                        handler = this;
+                        clicked++;
+                    },
+                    'keydown': function () {
+                        keyPressed = true;
+                    }
+                }
+            }));
+            controller.initializeEventListeners();
+
+            linkWithoutTarget.dispatchEvent(buildEvent('click', controller));
+            assert.strictEqual(clicked, 0, 'Element should not have been clicked');
+            assert.isFalse(keyPressed);
+            assert.isNull(handler);
+            assert.isNull(target);
+
+            linkWithTarget.dispatchEvent(buildEvent('click', controller));
+            assert.strictEqual(clicked, 1, 'Element should have been clicked');
+            assert.isFalse(keyPressed);
+            assert.equal(handler, controller);
+            assert.equal(target, linkWithTarget);
+        });
+        doSkip('should bind event listeners with data-irlib-target (selector)', function () {
+            var domNode = document.querySelector('#my-id-with-irlib-target'),
+                clicked = 0,
+                keyPressed = false,
+                handler = null,
+                target = null,
+                controller;
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    'click:my-target': function (event) {
+                        target = event.target;
+                        handler = this;
+                        clicked++;
+                    },
+                    'keydown': function () {
+                        keyPressed = true;
+                    }
+                }
+            }));
+            controller.initializeEventListeners();
+
+            domNode.dispatchEvent(buildEvent('click', controller));
+            assert.strictEqual(clicked, 1);
+            assert.isFalse(keyPressed);
+            assert.equal(handler, controller);
+            assert.equal(target, domNode);
+        });
+        it('should not bubble with data-irlib-target (div)', function () {
+            var domNode = document.createElement('div'),
+                clicked = false,
+                keyPressed = false,
+                handler = null,
+                target = null,
+            span, linkWithTarget, controller;
+
+            span = document.createElement('span');
+            span.innerText = 'I am a link';
+
+            linkWithTarget = document.createElement('a');
+            linkWithTarget.setAttribute('data-irlib-target', 'action');
+            linkWithTarget.appendChild(span);
+            domNode.appendChild(linkWithTarget);
+
+            getFixturesDivToEnableBubbling().appendChild(domNode);
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    'click:action': function (event) {
+                        target = event.target;
+                        handler = this;
+                        clicked = true;
+                    },
+                    'keydown': function () {
+                        keyPressed = true;
+                    }
+                }
+            }));
+            controller.initializeEventListeners();
+
+            span.dispatchEvent(buildEvent('click', controller));
+            assert.isFalse(clicked);
+            assert.isFalse(keyPressed);
+            assert.isNull(handler);
+            assert.isNull(target);
+        });
+        it('should bind event listeners and prefer with data-irlib-target over unspecified (div)', function () {
+            var domNode = document.createElement('div'),
+                clickWithActionOccurred = false,
+                clickWithoutActionOccurred = false,
+                target = null,
+                linkWithTarget, controller;
+
+            linkWithTarget = document.createElement('a');
+            linkWithTarget.setAttribute('data-irlib-target', 'action');
+            domNode.appendChild(linkWithTarget);
+
+            getFixturesDivToEnableBubbling().appendChild(domNode);
+
+            controller = new (IrLib.Controller.extend({
+                view: domNode,
+                events: {
+                    click: function() {
+                        clickWithoutActionOccurred = true;
+                    },
+                    'click:action': function () {
+                        clickWithActionOccurred = true;
+                    }
+                }
+            }));
+            controller.initializeEventListeners();
+
+            linkWithTarget.dispatchEvent(buildEvent('click', controller));
+            assert.isTrue(clickWithActionOccurred, 'Element with irlib-target should have been clicked');
+            assert.isFalse(clickWithoutActionOccurred, 'Element without the irlib-target attribute should not have been clicked');
+        });
     });
 
     if (TestRunner.name !== 'mocha-cli') {
@@ -356,6 +500,50 @@ describe('Controller', function () {
                 assert.isFalse(keyPressed);
                 assert.equal(handler, controller);
                 assert.equal(target, domNode);
+            });
+            it('should bind event listeners with data-irlib-target (div)', function () {
+                var domNode = document.createElement('div'),
+                    clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    linkWithTarget, linkWithoutTarget, controller;
+
+                linkWithTarget = document.createElement('a');
+                linkWithTarget.setAttribute('data-irlib-target', 'action');
+                domNode.appendChild(linkWithTarget);
+
+                linkWithoutTarget = document.createElement('a');
+                domNode.appendChild(linkWithoutTarget);
+
+                getFixturesDivToEnableBubbling().appendChild(domNode);
+
+                controller = new (IrLib.Controller.extend({
+                    view: domNode,
+                    events: {
+                        'click:action': function (event) {
+                            target = event.target;
+                            handler = this;
+                            clicked = true;
+                        },
+                        'keydown': function () {
+                            keyPressed = true;
+                        }
+                    }
+                }));
+                controller.catchAllViewEvents();
+
+                linkWithoutTarget.dispatchEvent(buildEvent('click', controller));
+                assert.isFalse(clicked, 'Element should not have been clicked');
+                assert.isFalse(keyPressed);
+                assert.isNull(handler);
+                assert.isNull(target);
+
+                linkWithTarget.dispatchEvent(buildEvent('click', controller));
+                assert.isTrue(clicked, 'Element should have been clicked');
+                assert.isFalse(keyPressed);
+                assert.equal(handler, controller);
+                assert.equal(target, linkWithTarget);
             });
             it('should handle bubbled events (div)', function () {
                 var domNode = document.createElement('div'),

@@ -3,7 +3,7 @@
  */
 (function (root) {
     root.createDomFixture = function () {
-        var outer, emptyChild, linkChild, link;
+        var outer, emptyChild, linkChild, childWithIrLibTarget, link;
 
         outer = document.createElement('div');
         outer.className = 'outer';
@@ -20,7 +20,13 @@
         link.textContent = 'A link';
 
         linkChild.appendChild(link);
-        outer.appendChild(emptyChild).appendChild(linkChild);
+
+        childWithIrLibTarget = document.createElement('div');
+        childWithIrLibTarget.id = "my-id-with-irlib-target";
+        childWithIrLibTarget.setAttribute('data-irlib-target', 'my-target');
+
+
+        outer.appendChild(emptyChild).appendChild(linkChild).appendChild(childWithIrLibTarget);
         return outer;
     };
 

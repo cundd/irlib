@@ -378,7 +378,9 @@ IrLib.Controller = IrLib.CoreObject.extend({
     handleEvent: function (event) {
         var controller = this,
             type = event.type,
-            _events = controller.events;
+            target = event.target,
+            _events = controller.events,
+            targetsTargetAttribute, imp;
 
         // Workaround for jsdom based unit tests
         if (!_events && typeof event.irController === 'object') {
@@ -386,8 +388,35 @@ IrLib.Controller = IrLib.CoreObject.extend({
             _events = controller.events;
         }
 
-        if (_events && _events[type]) {
-            _events[type].call(controller, event);
+        // Check if the data-irlib-target attribute is set
+        if (typeof target.getAttribute === 'function') {
+            targetsTargetAttribute = target.getAttribute('data-irlib-target');
+        }
+
+        // If the data-irlib-target attribute is set look for a matching implementation
+        if (targetsTargetAttribute) {
+            var matchingImpName = Object.keys(_events).filter(function (eventIdentifier) {
+                var eventIdentifierParts = eventIdentifier.split(':');
+
+                return eventIdentifierParts.length > 1 &&
+                    eventIdentifierParts[1] === targetsTargetAttribute && // Matching target attribute
+                    eventIdentifierParts[0] === type // Matching event type
+                    ;
+            });
+
+            if (matchingImpName.length > 0) {
+                imp = _events[matchingImpName[0]];
+            }
+        }
+
+        if (!imp && _events && _events[type]) {
+            imp = _events[type];
+        }
+
+        if (typeof imp === 'function') {
+            imp.call(controller, event);
+        } else if (imp) {
+            IrLib.Logger.error('Event handler implementation is of type ' + (typeof event));
         } else {
             IrLib.Logger.debug('Unhandled event', event);
         }
@@ -423,6 +452,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
      */
     catchAllViewEvents: function () {
         var registeredEvents = this._registeredEvents,
+            inline_splitEventIdentifier = this._splitEventIdentifier,
             _view = this.view,
             domElement, property;
         if (_view) {
@@ -434,7 +464,9 @@ IrLib.Controller = IrLib.CoreObject.extend({
 
             for (property in domElement) {
                 if (property.substr(0, 2) === 'on') {
-                    registeredEvents.push(property.substr(2));
+                    registeredEvents.push(
+                        inline_splitEventIdentifier(property.substr(2))[0]
+                    );
                 }
             }
             this._addListenersForRegisteredEventTypes();
@@ -452,12 +484,13 @@ IrLib.Controller = IrLib.CoreObject.extend({
      */
     initializeEventListeners: function () {
         var registeredEvents = this._registeredEvents,
+            inline_splitEventIdentifier = this._splitEventIdentifier,
             _view = this.view,
             _eventNames, i;
         if (_view) {
             _eventNames = this.eventNames();
             for (i = 0; i < _eventNames.length; i++) {
-                registeredEvents.push(_eventNames[i]);
+                registeredEvents.push(inline_splitEventIdentifier(_eventNames[i])[0]);
             }
             this._addListenersForRegisteredEventTypes();
         } else {
@@ -497,7 +530,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
      *
      * @private
      */
-    _addListenersForRegisteredEventTypes: function() {
+    _addListenersForRegisteredEventTypes: function () {
         var registeredEvents = this._registeredEvents,
             registeredEventsLength = registeredEvents.length,
             _view = this.view,
@@ -507,6 +540,21 @@ IrLib.Controller = IrLib.CoreObject.extend({
                 _view.addEventListener(registeredEvents[i], this, false);
             }
         }
+    },
+
+    /**
+     * Split the given event identifier into it's type and action-target parts
+     *
+     * Example:
+     *  click:my-action => click, my-action
+     *  click:data-attribute-to-match => click, data-attribute-to-match
+     *
+     * @param {String} eventIdentifier
+     * @returns {String[]}
+     * @private
+     */
+    _splitEventIdentifier: function (eventIdentifier) {
+        return eventIdentifier.split ? eventIdentifier.split(':') : eventIdentifier;
     },
 
     /**
