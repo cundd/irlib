@@ -361,14 +361,12 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {IrLib.View.Template}
      */
     reload: function (force) {
-        var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null),
-            newDomElement;
+        var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null);
         if (!lastParent) {
             throw new ReferenceError('Can not reload because the view does not seem to be in the DOM');
         }
         if (force || this._needsRedraw) {
             this._needsRedraw = true;
-            newDomElement = this.render();
             this.appendTo(lastParent);
         }
         return this;
