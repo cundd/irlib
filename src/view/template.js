@@ -328,7 +328,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     isVisible: function () {
         var element = this._dom;
-        return !!(element && element.parentNode && document.contains(element));
+        return !!(element && element.parentNode && document.body.contains(element));
     },
 
     /**
