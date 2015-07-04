@@ -73,5 +73,36 @@ describe('Utility', function () {
                 assert.strictEqual(result[3], 'd');
             });
         });
+
+        describe('valueForKeyPathOfObject()', function () {
+            it('should return the value', function () {
+                var testObject = {
+                    'firstKey': 'my value',
+                    'secondKey': {
+                        'subValue': 'test value'
+                    }
+                };
+                var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
+                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'firstKey') , 'my value');
+                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'secondKey.subValue') , 'test value');
+            });
+            it('should resolve array index', function () {
+                var testObject = {
+                    'firstKey': [
+                        'firstValue',
+                        'secondValue',
+                        'thirdValue'
+                    ],
+                    'secondKey': [
+                        { 'value': 'wrong value'},
+                        { 'value': 'wrong value'},
+                        { 'value': 'correct value'}
+                    ]
+                };
+                var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
+                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'firstKey.1') , 'secondValue');
+                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'secondKey.2.value') , 'correct value');
+            });
+        });
     })
 });
