@@ -75,6 +75,8 @@ describe('Utility', function () {
         });
 
         describe('valueForKeyPathOfObject()', function () {
+            var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
+
             it('should return the value', function () {
                 var testObject = {
                     'firstKey': 'my value',
@@ -82,9 +84,8 @@ describe('Utility', function () {
                         'subValue': 'test value'
                     }
                 };
-                var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
-                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'firstKey') , 'my value');
-                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'secondKey.subValue') , 'test value');
+                assert.strictEqual(_valueForKeyPathOfObject('firstKey', testObject) , 'my value');
+                assert.strictEqual(_valueForKeyPathOfObject('secondKey.subValue', testObject) , 'test value');
             });
             it('should resolve array index', function () {
                 var testObject = {
@@ -99,15 +100,54 @@ describe('Utility', function () {
                         { 'value': 'correct value'}
                     ]
                 };
-                var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
-                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'firstKey.1') , 'secondValue');
-                assert.strictEqual(_valueForKeyPathOfObject(testObject, 'secondKey.2.value') , 'correct value');
+                assert.strictEqual(_valueForKeyPathOfObject('firstKey.1', testObject) , 'secondValue');
+                assert.strictEqual(_valueForKeyPathOfObject('secondKey.2.value', testObject) , 'correct value');
             });
             it('should throw exception for invalid key path', function () {
-                var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
                 assert.throws(function() {_valueForKeyPathOfObject({}, {})});
-                assert.throws(function() {_valueForKeyPathOfObject({}, 1)});
-                assert.throws(function() {_valueForKeyPathOfObject({}, null)});
+                assert.throws(function() {_valueForKeyPathOfObject(1, {})});
+                assert.throws(function() {_valueForKeyPathOfObject(null, {})});
+            });
+        });
+
+        describe.only('setValueForKeyPathOfObject()', function () {
+            var _setValueForKeyPathOfObject = IrLib.Utility.GeneralUtility.setValueForKeyPathOfObject;
+
+            it('should set the value', function () {
+                var testObject = {
+                    'firstKey': 'my value',
+                    'secondKey': {
+                        'subValue': 'test value'
+                    }
+                };
+                _setValueForKeyPathOfObject('new value', 'firstKey', testObject);
+                _setValueForKeyPathOfObject('new value 2', 'secondKey.subValue', testObject);
+                assert.strictEqual(testObject.firstKey, 'new value');
+                assert.strictEqual(testObject.secondKey.subValue, 'new value 2');
+            });
+            it('should set array index', function () {
+                var testObject = {
+                    'firstKey': [
+                        'firstValue',
+                        'secondValue',
+                        'thirdValue'
+                    ],
+                    'secondKey': [
+                        { 'value': 'wrong value'},
+                        { 'value': 'wrong value'},
+                        { 'value': 'correct value'}
+                    ]
+                };
+
+                _setValueForKeyPathOfObject('new value', 'firstKey.1', testObject);
+                _setValueForKeyPathOfObject('new value 2', 'secondKey.2.value', testObject);
+                assert.strictEqual(testObject.firstKey[1], 'new value');
+                assert.strictEqual(testObject.secondKey[2].value, 'new value 2');
+            });
+            it('should throw exception for invalid key path', function () {
+                assert.throws(function() {_setValueForKeyPathOfObject(null, {}, {})});
+                assert.throws(function() {_setValueForKeyPathOfObject(null, 1, {})});
+                assert.throws(function() {_setValueForKeyPathOfObject(null, null, {})});
             });
         });
     })

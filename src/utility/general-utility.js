@@ -65,21 +65,18 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
     /**
      * Returns the value for the key path of the given object
      *
-     * @param {Object} object
      * @param {String} keyPath
+     * @param {Object} object
      * @returns {*}
      */
-    valueForKeyPathOfObject: function (object, keyPath) {
+    valueForKeyPathOfObject: function (keyPath, object) {
         if (typeof keyPath !== 'string') {
-            throw new TypeError('Key path must be of type string', 1436018907);
+            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
         }
-        var keyPathParts = keyPath.split('.'), currentKeyPathPart, currentValue, i,
-            isIndex;
-        currentValue = object;
+        var keyPathParts = keyPath.split('.'),
+            currentValue = object,
+            currentKeyPathPart, i;
 
-        isIndex = function (value) {
-            return !isNaN(parseInt(value)) && isFinite(value);
-        };
         for (i = 0; i < keyPathParts.length; i++) {
             currentKeyPathPart = keyPathParts[i];
             if (typeof currentValue !== 'object') {
@@ -88,13 +85,66 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
                     1436019551
                 );
             }
-            if (typeof currentValue[currentKeyPathPart] === 'undefined' && isIndex(currentValue)) {
+            if (typeof currentValue[currentKeyPathPart] === 'undefined' && _GeneralUtility._toArrayIndex(currentKeyPathPart)) {
                 currentValue = currentValue[parseInt(currentKeyPathPart)];
             } else {
                 currentValue = currentValue[currentKeyPathPart];
             }
         }
         return currentValue;
+    },
+
+    /**
+     * Sets the value for the key path of the given object
+     *
+     * @param {*} value
+     * @param {String} keyPath
+     * @param {Object} object
+     * @returns {*}
+     */
+    setValueForKeyPathOfObject: function (value, keyPath, object) {
+        if (typeof keyPath !== 'string') {
+            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
+        }
+        var lastIndexOfDot = keyPath.lastIndexOf('.'), keyPathToParent, childKey, parentObject;
+
+        // Only the first level child should be modified
+        if (lastIndexOfDot === -1) {
+            parentObject = object;
+            childKey = keyPath;
+        } else {
+            keyPathToParent = keyPath.substr(0, lastIndexOfDot);
+            childKey = keyPath.substr(lastIndexOfDot + 1);
+
+            parentObject = _GeneralUtility.valueForKeyPathOfObject(keyPathToParent, object);
+        }
+        if (typeof parentObject !== 'object') {
+            throw new TypeError(
+                'Can not set key ' + keyPath + ' of value of type ' + (typeof parentObject),
+                1436019552
+            );
+        }
+        if (Array.isArray(parentObject) && _GeneralUtility._toArrayIndex(childKey)) {
+            parentObject[_GeneralUtility._toArrayIndex(childKey)] = value;
+        } else {
+            parentObject[childKey] = value;
+        }
+
+        console.log(object);
+    },
+
+    /**
+     * Returns if the integer representation of the given value or -1 if it could not be transformed
+     *
+     * @param {*} value
+     * @returns {number}
+     * @private
+     */
+    _toArrayIndex: function (value) {
+        if(!isNaN(parseInt(value)) && isFinite(value)) {
+            return parseInt(value);
+        }
+        return -1;
     },
 
     /**
