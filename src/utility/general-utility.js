@@ -85,11 +85,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
                     1436019551
                 );
             }
-            if (typeof currentValue[currentKeyPathPart] === 'undefined' && _GeneralUtility._toArrayIndex(currentKeyPathPart)) {
-                currentValue = currentValue[parseInt(currentKeyPathPart)];
-            } else {
-                currentValue = currentValue[currentKeyPathPart];
-            }
+            currentValue = currentValue[currentKeyPathPart];
         }
         return currentValue;
     },
@@ -124,25 +120,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
                 1436019552
             );
         }
-        if (Array.isArray(parentObject) && _GeneralUtility._toArrayIndex(childKey)) {
-            parentObject[_GeneralUtility._toArrayIndex(childKey)] = value;
-        } else {
-            parentObject[childKey] = value;
-        }
-    },
-
-    /**
-     * Returns if the integer representation of the given value or -1 if it could not be transformed
-     *
-     * @param {*} value
-     * @returns {number}
-     * @private
-     */
-    _toArrayIndex: function (value) {
-        if(!isNaN(parseInt(value)) && isFinite(value)) {
-            return parseInt(value);
-        }
-        return -1;
+        parentObject[childKey] = value;
     },
 
     /**
