@@ -116,7 +116,7 @@ describe('Utility', function () {
             });
         });
 
-        describe.only('setValueForKeyPathOfObject()', function () {
+        describe('setValueForKeyPathOfObject()', function () {
             var _setValueForKeyPathOfObject = IrLib.Utility.GeneralUtility.setValueForKeyPathOfObject;
 
             it('should set the value', function () {

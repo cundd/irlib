@@ -363,8 +363,6 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         } else {
             parentObject[childKey] = value;
         }
-
-        console.log(object);
     },
 
     /**
