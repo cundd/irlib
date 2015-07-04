@@ -331,6 +331,42 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         return currentValue;
     },
 
+
+    /**
+     * Returns the value for the key path of the given object
+     *
+     * @param {Object} object
+     * @param {String} keyPath
+     * @returns {*}
+     */
+    setValueForKeyPathOfObject: function (object, keyPath) {
+        if (typeof keyPath !== 'string') {
+            throw new TypeError('Key path must be of type string', 1436018907);
+        }
+        var keyPathParts = keyPath.split('.'), currentKeyPathPart, currentValue, i,
+            isIndex;
+        currentValue = object;
+
+        isIndex = function (value) {
+            return !isNaN(parseInt(value)) && isFinite(value);
+        };
+        for (i = 0; i < keyPathParts.length; i++) {
+            currentKeyPathPart = keyPathParts[i];
+            if (typeof currentValue !== 'object') {
+                throw new TypeError(
+                    'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
+                    1436019551
+                );
+            }
+            if (typeof currentValue[currentKeyPathPart] === 'undefined' && isIndex(currentValue)) {
+                currentValue = currentValue[parseInt(currentKeyPathPart)];
+            } else {
+                currentValue = currentValue[currentKeyPathPart];
+            }
+        }
+        return currentValue;
+    },
+
     /**
      * Returns if the given value is numeric
      *

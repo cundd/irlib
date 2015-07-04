@@ -103,6 +103,12 @@ describe('Utility', function () {
                 assert.strictEqual(_valueForKeyPathOfObject(testObject, 'firstKey.1') , 'secondValue');
                 assert.strictEqual(_valueForKeyPathOfObject(testObject, 'secondKey.2.value') , 'correct value');
             });
+            it('should throw exception for invalid key path', function () {
+                var _valueForKeyPathOfObject = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject;
+                assert.throws(function() {_valueForKeyPathOfObject({}, {})});
+                assert.throws(function() {_valueForKeyPathOfObject({}, 1)});
+                assert.throws(function() {_valueForKeyPathOfObject({}, null)});
+            });
         });
     })
 });
