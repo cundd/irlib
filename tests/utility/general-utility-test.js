@@ -84,8 +84,8 @@ describe('Utility', function () {
                         'subValue': 'test value'
                     }
                 };
-                assert.strictEqual(_valueForKeyPathOfObject('firstKey', testObject) , 'my value');
-                assert.strictEqual(_valueForKeyPathOfObject('secondKey.subValue', testObject) , 'test value');
+                assert.strictEqual(_valueForKeyPathOfObject('firstKey', testObject), 'my value');
+                assert.strictEqual(_valueForKeyPathOfObject('secondKey.subValue', testObject), 'test value');
             });
             it('should resolve array index', function () {
                 var testObject = {
@@ -95,18 +95,24 @@ describe('Utility', function () {
                         'thirdValue'
                     ],
                     'secondKey': [
-                        { 'value': 'wrong value'},
-                        { 'value': 'wrong value'},
-                        { 'value': 'correct value'}
+                        {'value': 'wrong value'},
+                        {'value': 'wrong value'},
+                        {'value': 'correct value'}
                     ]
                 };
-                assert.strictEqual(_valueForKeyPathOfObject('firstKey.1', testObject) , 'secondValue');
-                assert.strictEqual(_valueForKeyPathOfObject('secondKey.2.value', testObject) , 'correct value');
+                assert.strictEqual(_valueForKeyPathOfObject('firstKey.1', testObject), 'secondValue');
+                assert.strictEqual(_valueForKeyPathOfObject('secondKey.2.value', testObject), 'correct value');
             });
             it('should throw exception for invalid key path', function () {
-                assert.throws(function() {_valueForKeyPathOfObject({}, {})});
-                assert.throws(function() {_valueForKeyPathOfObject(1, {})});
-                assert.throws(function() {_valueForKeyPathOfObject(null, {})});
+                assert.throws(function () {
+                    _valueForKeyPathOfObject({}, {})
+                });
+                assert.throws(function () {
+                    _valueForKeyPathOfObject(1, {})
+                });
+                assert.throws(function () {
+                    _valueForKeyPathOfObject(null, {})
+                });
             });
         });
 
@@ -133,9 +139,9 @@ describe('Utility', function () {
                         'thirdValue'
                     ],
                     'secondKey': [
-                        { 'value': 'wrong value'},
-                        { 'value': 'wrong value'},
-                        { 'value': 'correct value'}
+                        {'value': 'wrong value'},
+                        {'value': 'wrong value'},
+                        {'value': 'correct value'}
                     ]
                 };
 
@@ -145,9 +151,15 @@ describe('Utility', function () {
                 assert.strictEqual(testObject.secondKey[2].value, 'new value 2');
             });
             it('should throw exception for invalid key path', function () {
-                assert.throws(function() {_setValueForKeyPathOfObject(null, {}, {})});
-                assert.throws(function() {_setValueForKeyPathOfObject(null, 1, {})});
-                assert.throws(function() {_setValueForKeyPathOfObject(null, null, {})});
+                assert.throws(function () {
+                    _setValueForKeyPathOfObject(null, {}, {})
+                });
+                assert.throws(function () {
+                    _setValueForKeyPathOfObject(null, 1, {})
+                });
+                assert.throws(function () {
+                    _setValueForKeyPathOfObject(null, null, {})
+                });
             });
         });
     })
