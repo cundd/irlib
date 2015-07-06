@@ -16,7 +16,7 @@ describe('View.Template', function () {
         getFixturesDivToEnableBubbling = function () {
             return document.getElementById('mocha-fixtures');
         },
-        getTemplateDomString = function() {
+        getTemplateDomString = function () {
             return '<div class="some-element"><header>{{headline}}</header><section>My content</section></div>';
         },
         createTemplateDom = function (id) {
@@ -232,6 +232,17 @@ describe('View.Template', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
         });
+        it('should build a DOM element and replace nested variables', function () {
+            var view = new IrLib.View.Template('<div><h1>{{meta.headline}}</h1></div>'),
+                variables = {'meta': {'headline': 'This worked'}},
+                ELEMENT_NODE = 1;
+
+            view.setVariables(variables);
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        });
         it('should throw an exception if the template is not set', function () {
             var view = new IrLib.View.Template();
             assert.throws(function () {
@@ -429,7 +440,7 @@ describe('View.Template', function () {
             assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
         });
         it('should throw exception if not added to the DOM', function () {
-            assert.throw(function() {
+            assert.throw(function () {
                 var view = new (IrLib.View.Template.extend({
                         template: '<div><h1>{{headline}}</h1></div>'
                     })),

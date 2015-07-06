@@ -13,6 +13,7 @@
     require('components/*');
     require('view/interface');
     require('view/*');
+    require('view/parser/*');
 
 })(typeof exports === 'undefined'? this.IrLib = {}: exports);
 
