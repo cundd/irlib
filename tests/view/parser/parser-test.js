@@ -104,9 +104,9 @@ describe('View.Parser.Parser', function () {
             assert.strictEqual(blocks[4].content, '</span></div>');
         });
 
-        it('should return multiple blocks for complex variable template with edge cases', function () {
+        it.only('should return multiple blocks for complex variable template with edge cases', function () {
             var parser = new IrLib.View.Parser.Parser();
-            var blocks = parser.parse('<div><h1>This article is about {{article.topic}} {{article.readCount}}</h1><span>Written by {{{author.firstName}}} {} {{author.lastName}}</span></div>');
+            var blocks = parser.parse('<div><h1>This article is about {{article.topic}} {{article.readCount}}</h1><span>Written by {{{author.firstName}}} {{}} {{author.lastName}}</span></div>');
             var blockIndex = 0;
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[blockIndex].content, '<div><h1>This article is about ');
@@ -159,7 +159,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[blockIndex].content, 'author.lastName');
             assert.strictEqual(blocks[blockIndex].type, IrLib.View.Parser.BlockType.VARIABLE);
-            assert.strictEqual(blocks[blockIndex].meta.isSave, true);
+            assert.strictEqual(blocks[blockIndex].meta.isSave, false);
             blockIndex++;
 
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);

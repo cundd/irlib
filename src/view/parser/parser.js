@@ -5,8 +5,6 @@ require('view/parser/interface');
 
 /**
  * Template Parser implementation
- *
- * @implements EventListener
  */
 IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     /**
@@ -20,9 +18,19 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     BLOCK_END_CHAR: '}',
 
     /**
+     * Number the block start and end characters have to occur to build an un-save block
+     */
+    BLOCK_DELIMITER_REPEAT_NO_SAVE: 2,
+
+    /**
+     * Number the block start and end characters have to occur to build an save block
+     */
+    BLOCK_DELIMITER_REPEAT_SAVE: 3,
+
+    /**
      * Regular expression to match variable blocks
      */
-    PATTERN_VARIABLE: /^\{{1,2}[a-zA-Z0-9\-_\.]+}{1,2}$/,
+    PATTERN_VARIABLE: /^\{{2,3}[a-zA-Z0-9\-_\.]+}{2,3}$/,
 
     /**
      * Parses the given input string and returns a sequence of Blocks
@@ -55,6 +63,10 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
             _PATTERN_VARIABLE = this.PATTERN_VARIABLE,
             _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
             _BLOCK_END_CHAR = this.BLOCK_END_CHAR,
+            _BLOCK_DELIMITER_REPEAT_NO_SAVE = this.BLOCK_DELIMITER_REPEAT_NO_SAVE,
+            _BLOCK_DELIMITER_REPEAT_SAVE = this.BLOCK_DELIMITER_REPEAT_SAVE,
+            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_START_CHAR),
+            blockEndString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_END_CHAR),
             tokensLength = tokens.length,
             blocks = [],
             startsWithBlockStart,
@@ -69,26 +81,32 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
 
             // Don't check for brackets for tokens that are too short
             if (currentTokenLength > 2) {
-                startsWithBlockStart = currentToken.charAt(0) === _BLOCK_START_CHAR;
+                startsWithBlockStart = currentToken.substr(0, _BLOCK_DELIMITER_REPEAT_NO_SAVE) === blockStartString;
             } else {
                 startsWithBlockStart = false;
             }
 
             if (startsWithBlockStart && _PATTERN_VARIABLE.test(currentToken)) {
-                currentContent = currentToken.substring(1, currentTokenLength - 1);
+                currentContent = currentToken.substring(
+                    _BLOCK_DELIMITER_REPEAT_NO_SAVE,
+                    currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAVE
+                );
 
                 var contentFirstCharacterIsBlockStart = currentContent.charAt(0) === _BLOCK_START_CHAR;
-
-                if (contentFirstCharacterIsBlockStart &&
-                    currentContent.charAt(currentTokenLength - 3) === _BLOCK_END_CHAR) { // Case 1 = save: {{varName}}
+                if (
+                    contentFirstCharacterIsBlockStart &&
+                    (currentContent.charAt(
+                        currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAVE - _BLOCK_DELIMITER_REPEAT_NO_SAVE - 1
+                    ) === _BLOCK_END_CHAR)
+                ) { // Case 1 = save: {{{varName}}}
                     blocks[i] = new Block(
                         BlockType.VARIABLE,
-                        currentToken.substring(2, currentTokenLength - 2),
+                        currentToken.substring(_BLOCK_DELIMITER_REPEAT_SAVE, currentTokenLength - _BLOCK_DELIMITER_REPEAT_SAVE),
                         {isSave: true}
                     );
                 } else if (contentFirstCharacterIsBlockStart) { // Case 2 = invalid: {{varName}
                     blocks[i] = new Block(BlockType.STATIC, currentToken);
-                } else { // Case 3 = not save: {varName}
+                } else { // Case 3 = not save: {{varName}}
                     blocks[i] = new Block(
                         BlockType.VARIABLE,
                         currentContent,
@@ -115,8 +133,12 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
      */
     _tokenize: function (input) {
         var inputLength = input.length,
-            blockStartChar = this.BLOCK_START_CHAR,
-            blockEndChar = this.BLOCK_END_CHAR,
+            _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
+            _BLOCK_END_CHAR = this.BLOCK_END_CHAR,
+            _BLOCK_DELIMITER_REPEAT_NO_SAVE = this.BLOCK_DELIMITER_REPEAT_NO_SAVE,
+            _BLOCK_DELIMITER_REPEAT_SAVE = this.BLOCK_DELIMITER_REPEAT_SAVE,
+            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_START_CHAR),
+            blockEndString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_END_CHAR),
             tokens = [],
             startCursor = 0,
             endCursor = 0,
@@ -125,37 +147,22 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
             nextStartCursor,
             content;
 
-        //while((startCursor = input.indexOf(blockStartChar, endCursor)) !== -1) {
-        //    //console.log(startCursor, input.substr(startCursor));
-        //
-        //    endCursor = input.indexOf(blockEndChar, startCursor + 1);
-        //    //console.log(input.charAt(endCursor));
-        //    if (input.charAt(endCursor + 1) === '}') {
-        //        endCursor++;
-        //    }
-        //
-        //    block = input.substr(startCursor, endCursor - startCursor + 1);
-        //
-        //    tokens[currentBlockIndex++] = block;
-        //    console.log('Block', startCursor, endCursor, block);
-        //
-        //    if (++i > 100) {
-        //        throw new Error('invalid loop?');
-        //        //break;
-        //    }
-        //}
-
         do {
             // If the first character is a bracket look for the ending one
-            if (input.charAt(startCursor) === blockStartChar) {
-                endCursor = input.indexOf(blockEndChar, startCursor + 1);
-                if (input.charAt(endCursor + 1) === '}') {
+            if (input.charAt(startCursor) === _BLOCK_START_CHAR) {
+                endCursor = input.indexOf(
+                    blockEndString,
+                    startCursor
+                );
+                endCursor += _BLOCK_DELIMITER_REPEAT_NO_SAVE - 1;
+
+                if (input.charAt(endCursor + 1) === _BLOCK_END_CHAR) {
                     endCursor++;
                 }
-                nextStartCursor = endCursor + 1;
 
+                nextStartCursor = endCursor + 1;
             } else { // Look for the beginning of the next block
-                nextStartCursor = input.indexOf(blockStartChar, startCursor + 1);
+                nextStartCursor = input.indexOf(blockStartString, startCursor + 1);
                 if (nextStartCursor === -1) {
                     endCursor = inputLength;
                 } else {
