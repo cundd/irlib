@@ -23,6 +23,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _template: '',
 
     /**
+     * Array of parse template blocks
+     *
+     * @type {IrLib.View.Parser.Block[]}
+     */
+    _templateBlocks: null,
+
+    /**
      * Defines if a redraw is required
      *
      * @type {Boolean}
@@ -49,6 +56,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @type {Node}
      */
     _lastInsertedNode: null,
+
+    /**
+     * Template parser instance
+     *
+     * @type {IrLib.View.Parser.Interface}
+     */
+    _templateParser: null,
 
     init: function (template, variables) {
         if (arguments.length > 0) { // Check if the template argument is given
@@ -95,7 +109,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             }
 
             this._dom = this._createDom(
-                this._renderVariables(_template)
+                this._renderVariables()
             );
             //template = this._renderActions(template);
             this._needsRedraw = false;
@@ -119,22 +133,56 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     /**
      * Replace the variables inside the given template
      *
-     * @param {String} template
      * @returns {String}
      */
-    _renderVariables: function (template) {
-        var inline_escapeHtml = this._escapeHtml;
-        this._variables.forEach(function (value, key) {
-            var replaceExpression;
-            replaceExpression = new RegExp('\\{\\{\\{' + key + '\\}\\}\\}', 'g');
-            template = template.replace(replaceExpression, value);
+    _renderVariables: function () {
+        var BlockType = IrLib.View.Parser.BlockType,
+            _GeneralUtility = IrLib.Utility.GeneralUtility,
+            templateBlocks = this.getTemplateBlocks(),
+            inline_escapeHtml = this._escapeHtml,
+            variables = this.getVariables(),
+            renderedTemplate = '',
+            currentVariableValue, currentMeta, currentTemplateBlock, i;
 
-            replaceExpression = new RegExp('\\{\\{' + key + '\\}\\}', 'g');
-            template = template.replace(replaceExpression, inline_escapeHtml(value));
-        });
+        for (i = 0; i < templateBlocks.length; i++) {
+            /** @var {IrLib.View.Parser.Block} currentTemplateBlock */
+            currentTemplateBlock = templateBlocks[i];
+            switch (currentTemplateBlock.type) {
+                case BlockType.VARIABLE:
+                    currentVariableValue = _GeneralUtility.valueForKeyPathOfObject(
+                        currentTemplateBlock.content,
+                        variables
+                    );
+                    currentMeta = currentTemplateBlock.meta;
+                    if (!currentMeta.isSave) {
+                        currentVariableValue = inline_escapeHtml(currentVariableValue);
+                    }
 
-        /* Clean up unresolved variables */
-        return template.replace(/\{\{[\w\.\-]+}}/g, '');
+                    renderedTemplate += currentVariableValue;
+                    break;
+
+                case BlockType.STATIC:
+                    /* falls through */
+                default:
+                    renderedTemplate += currentTemplateBlock.content;
+                    break;
+
+            }
+
+        }
+
+        return renderedTemplate;
+    },
+
+    /**
+     * Resolve the variable for the given key path
+     *
+     * @param {String} keyPath
+     * @returns {*}
+     * @private
+     */
+    _resolveVariable: function(keyPath) {
+        return GeneralUtility.valueForKeyPathOfObject(keyPath, this._variables);
     },
 
     /**
@@ -220,7 +268,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * Set the variables
      *
      * @param {Object|IrLib.Dictionary} data
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     setVariables: function (data) {
         if (data instanceof IrLib.Dictionary) {
@@ -237,7 +285,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      *
      * @param {String} key
      * @param {*} value
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     assignVariable: function (key, value) {
         this._variables[key] = value;
@@ -268,6 +316,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             this._template = templateTemporary;
         }
         this._needsRedraw = true;
+        this._templateBlocks = null;
         return this;
     },
 
@@ -278,6 +327,19 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     getTemplate: function () {
         return this._template;
+    },
+
+    /**
+     * Returns the template blocks
+     *
+     * @returns {IrLib.View.Parser.Block[]}
+     */
+    getTemplateBlocks: function () {
+        if (!this._templateBlocks) {
+            var templateParser = this.getTemplateParser();
+            this._templateBlocks = templateParser.parse(this._template);
+        }
+        return this._templateBlocks;
     },
 
     /**
@@ -322,6 +384,18 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
+     * Returns the template parser interface
+     *
+     * @returns {IrLib.View.Parser.Interface}
+     */
+    getTemplateParser: function () {
+        if (!this._templateParser) {
+            this._templateParser = new IrLib.View.Parser.Parser();
+        }
+        return this._templateParser;
+    },
+
+    /**
      * Returns if the View is in the visible DOM
      *
      * @returns {Boolean}
@@ -335,7 +409,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * Appends the View to the given DOM element, while replacing the previously rendered element
      *
      * @param {Node|HTMLElement} element
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     appendTo: function (element) {
         if (!element || typeof element.appendChild !== 'function') {
@@ -375,7 +449,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     /**
      * Removes the element from it's parent
      *
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     remove: function () {
         var lastInsertedNode = this._lastInsertedNode;

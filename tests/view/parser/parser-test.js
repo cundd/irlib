@@ -76,6 +76,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.STATIC);
             assert.strictEqual(blocks[0].content, '{{{authorName}}');
+
         });
 
         it('should return multiple blocks for complex variable template', function () {
@@ -104,7 +105,7 @@ describe('View.Parser.Parser', function () {
             assert.strictEqual(blocks[4].content, '</span></div>');
         });
 
-        it.only('should return multiple blocks for complex variable template with edge cases', function () {
+        it('should return multiple blocks for complex variable template with edge cases', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('<div><h1>This article is about {{article.topic}} {{article.readCount}}</h1><span>Written by {{{author.firstName}}} {{}} {{author.lastName}}</span></div>');
             var blockIndex = 0;
