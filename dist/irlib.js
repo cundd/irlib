@@ -1404,12 +1404,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         var BlockType = IrLib.View.Parser.BlockType,
             _GeneralUtility = IrLib.Utility.GeneralUtility,
             templateBlocks = this.getTemplateBlocks(),
+            templateBlocksLength = templateBlocks.length,
             inline_escapeHtml = this._escapeHtml,
             variables = this.getVariables(),
             renderedTemplate = '',
             currentVariableValue, currentMeta, currentTemplateBlock, i;
 
-        for (i = 0; i < templateBlocks.length; i++) {
+        for (i = 0; i < templateBlocksLength; i++) {
             /** @var {IrLib.View.Parser.Block} currentTemplateBlock */
             currentTemplateBlock = templateBlocks[i];
             switch (currentTemplateBlock.type) {
