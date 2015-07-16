@@ -14,10 +14,10 @@ describe('View.Parser.Block', function () {
             assert.deepEqual(block.meta, {});
         });
         it('should initialize with the given block type, content and meta data', function () {
-            var block = new IrLib.View.Parser.Block('STA', 'the content', {'isSave': true});
+            var block = new IrLib.View.Parser.Block('STA', 'the content', {'isSafe': true});
             assert.strictEqual(block.type, IrLib.View.Parser.BlockType.STATIC);
             assert.strictEqual(block.content, 'the content');
-            assert.isTrue(block.meta.isSave);
+            assert.isTrue(block.meta.isSafe);
         });
     });
 });

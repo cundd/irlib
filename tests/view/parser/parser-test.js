@@ -21,21 +21,21 @@ describe('View.Parser.Parser', function () {
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.STATIC);
             assert.strictEqual(blocks[0].content, 'my template');
         });
-        it('should return single block for escaped variable in template', function () {
+        it('should return single block for unsafe variable in template', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('{{myVariable}}');
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[0].content, 'myVariable');
-            assert.strictEqual(blocks[0].meta.isSave, false);
+            assert.strictEqual(blocks[0].meta.isSafe, false);
         });
-        it('should return single block for unescaped variable template', function () {
+        it('should return single block for safe variable template', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('{{{myVariable}}}');
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[0].content, 'myVariable');
-            assert.strictEqual(blocks[0].meta.isSave, true);
+            assert.strictEqual(blocks[0].meta.isSafe, true);
         });
         it('should return single block for nested variable template', function () {
             var parser = new IrLib.View.Parser.Parser();
@@ -43,7 +43,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[0].content, 'parent.child');
-            assert.strictEqual(blocks[0].meta.isSave, false);
+            assert.strictEqual(blocks[0].meta.isSafe, false);
         });
         it('should return single block for complex variable template', function () {
             var parser = new IrLib.View.Parser.Parser();
@@ -51,7 +51,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[0].content, 'my-parent.child_variable.lastElement');
-            assert.strictEqual(blocks[0].meta.isSave, false);
+            assert.strictEqual(blocks[0].meta.isSafe, false);
         });
         it('should return single block for invalid variable template', function () {
             var parser = new IrLib.View.Parser.Parser(),
@@ -89,7 +89,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[1], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[1].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[1].content, 'article.topic');
-            assert.strictEqual(blocks[1].meta.isSave, false);
+            assert.strictEqual(blocks[1].meta.isSafe, false);
 
             assert.instanceOf(blocks[2], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[2].type, IrLib.View.Parser.BlockType.STATIC);
@@ -98,7 +98,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[3], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[3].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[3].content, 'authorName');
-            assert.strictEqual(blocks[3].meta.isSave, true);
+            assert.strictEqual(blocks[3].meta.isSafe, true);
 
             assert.instanceOf(blocks[4], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[4].type, IrLib.View.Parser.BlockType.STATIC);
@@ -117,7 +117,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[blockIndex].content, 'article.topic');
             assert.strictEqual(blocks[blockIndex].type, IrLib.View.Parser.BlockType.VARIABLE);
-            assert.strictEqual(blocks[blockIndex].meta.isSave, false);
+            assert.strictEqual(blocks[blockIndex].meta.isSafe, false);
             blockIndex++;
 
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
@@ -128,7 +128,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[blockIndex].content, 'article.readCount');
             assert.strictEqual(blocks[blockIndex].type, IrLib.View.Parser.BlockType.VARIABLE);
-            assert.strictEqual(blocks[blockIndex].meta.isSave, false);
+            assert.strictEqual(blocks[blockIndex].meta.isSafe, false);
             blockIndex++;
 
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
@@ -139,7 +139,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[blockIndex].content, 'author.firstName');
             assert.strictEqual(blocks[blockIndex].type, IrLib.View.Parser.BlockType.VARIABLE);
-            assert.strictEqual(blocks[blockIndex].meta.isSave, true);
+            assert.strictEqual(blocks[blockIndex].meta.isSafe, true);
             blockIndex++;
 
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
@@ -160,7 +160,7 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[blockIndex].content, 'author.lastName');
             assert.strictEqual(blocks[blockIndex].type, IrLib.View.Parser.BlockType.VARIABLE);
-            assert.strictEqual(blocks[blockIndex].meta.isSave, false);
+            assert.strictEqual(blocks[blockIndex].meta.isSafe, false);
             blockIndex++;
 
             assert.instanceOf(blocks[blockIndex], IrLib.View.Parser.Block);

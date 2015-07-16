@@ -155,7 +155,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                         variables
                     );
                     currentMeta = currentTemplateBlock.meta;
-                    if (!currentMeta.isSave) {
+                    if (!currentMeta.isSafe) {
                         currentVariableValue = inline_escapeHtml(currentVariableValue);
                     }
 

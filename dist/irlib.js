@@ -1420,7 +1420,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                         variables
                     );
                     currentMeta = currentTemplateBlock.meta;
-                    if (!currentMeta.isSave) {
+                    if (!currentMeta.isSafe) {
                         currentVariableValue = inline_escapeHtml(currentVariableValue);
                     }
 
@@ -1897,14 +1897,14 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     BLOCK_END_CHAR: '}',
 
     /**
-     * Number the block start and end characters have to occur to build an un-save block
+     * Number the block start and end characters have to occur to build an un-safe block
      */
-    BLOCK_DELIMITER_REPEAT_NO_SAVE: 2,
+    BLOCK_DELIMITER_REPEAT_NO_SAFE: 2,
 
     /**
-     * Number the block start and end characters have to occur to build an save block
+     * Number the block start and end characters have to occur to build an safe block
      */
-    BLOCK_DELIMITER_REPEAT_SAVE: 3,
+    BLOCK_DELIMITER_REPEAT_SAFE: 3,
 
     /**
      * Regular expression to match variable blocks
@@ -1942,9 +1942,9 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
             _PATTERN_VARIABLE = this.PATTERN_VARIABLE,
             _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
             _BLOCK_END_CHAR = this.BLOCK_END_CHAR,
-            _BLOCK_DELIMITER_REPEAT_NO_SAVE = this.BLOCK_DELIMITER_REPEAT_NO_SAVE,
-            _BLOCK_DELIMITER_REPEAT_SAVE = this.BLOCK_DELIMITER_REPEAT_SAVE,
-            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_START_CHAR),
+            _BLOCK_DELIMITER_REPEAT_NO_SAFE = this.BLOCK_DELIMITER_REPEAT_NO_SAFE,
+            _BLOCK_DELIMITER_REPEAT_SAFE = this.BLOCK_DELIMITER_REPEAT_SAFE,
+            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAFE + 1).join(_BLOCK_START_CHAR),
             tokensLength = tokens.length,
             blocks = [],
             startsWithBlockStart,
@@ -1959,36 +1959,36 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
 
             // Don't check for brackets for tokens that are too short
             if (currentTokenLength > 2) {
-                startsWithBlockStart = currentToken.substr(0, _BLOCK_DELIMITER_REPEAT_NO_SAVE) === blockStartString;
+                startsWithBlockStart = currentToken.substr(0, _BLOCK_DELIMITER_REPEAT_NO_SAFE) === blockStartString;
             } else {
                 startsWithBlockStart = false;
             }
 
             if (startsWithBlockStart && _PATTERN_VARIABLE.test(currentToken)) {
                 currentContent = currentToken.substring(
-                    _BLOCK_DELIMITER_REPEAT_NO_SAVE,
-                    currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAVE
+                    _BLOCK_DELIMITER_REPEAT_NO_SAFE,
+                    currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAFE
                 );
 
                 var contentFirstCharacterIsBlockStart = currentContent.charAt(0) === _BLOCK_START_CHAR;
                 if (
                     contentFirstCharacterIsBlockStart &&
                     (currentContent.charAt(
-                        currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAVE - _BLOCK_DELIMITER_REPEAT_NO_SAVE - 1
+                        currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAFE - _BLOCK_DELIMITER_REPEAT_NO_SAFE - 1
                     ) === _BLOCK_END_CHAR)
-                ) { // Case 1 = save: {{{varName}}}
+                ) { // Case 1 = safe: {{{varName}}}
                     blocks[i] = new Block(
                         BlockType.VARIABLE,
-                        currentToken.substring(_BLOCK_DELIMITER_REPEAT_SAVE, currentTokenLength - _BLOCK_DELIMITER_REPEAT_SAVE),
-                        {isSave: true}
+                        currentToken.substring(_BLOCK_DELIMITER_REPEAT_SAFE, currentTokenLength - _BLOCK_DELIMITER_REPEAT_SAFE),
+                        {isSafe: true}
                     );
                 } else if (contentFirstCharacterIsBlockStart) { // Case 2 = invalid: {{varName}
                     blocks[i] = new Block(BlockType.STATIC, currentToken);
-                } else { // Case 3 = not save: {{varName}}
+                } else { // Case 3 = not safe: {{varName}}
                     blocks[i] = new Block(
                         BlockType.VARIABLE,
                         currentContent,
-                        {isSave: false}
+                        {isSafe: false}
                     );
                 }
 
@@ -2013,9 +2013,9 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
         var inputLength = input.length,
             _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
             _BLOCK_END_CHAR = this.BLOCK_END_CHAR,
-            _BLOCK_DELIMITER_REPEAT_NO_SAVE = this.BLOCK_DELIMITER_REPEAT_NO_SAVE,
-            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_START_CHAR),
-            blockEndString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAVE + 1).join(_BLOCK_END_CHAR),
+            _BLOCK_DELIMITER_REPEAT_NO_SAFE = this.BLOCK_DELIMITER_REPEAT_NO_SAFE,
+            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAFE + 1).join(_BLOCK_START_CHAR),
+            blockEndString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAFE + 1).join(_BLOCK_END_CHAR),
             tokens = [],
             startCursor = 0,
             endCursor = 0,
@@ -2031,7 +2031,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
                     blockEndString,
                     startCursor
                 );
-                endCursor += _BLOCK_DELIMITER_REPEAT_NO_SAVE - 1;
+                endCursor += _BLOCK_DELIMITER_REPEAT_NO_SAFE - 1;
 
                 if (input.charAt(endCursor + 1) === _BLOCK_END_CHAR) {
                     endCursor++;
