@@ -7,5 +7,6 @@ IrLib.View.Parser.BlockType = {
     STATIC: 'STA',
     VARIABLE: 'VAR',
     REPEATING: 'REP',
+    EXPRESSION: 'EXP',
     CONDITIONAL: 'CON'
 };

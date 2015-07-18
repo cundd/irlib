@@ -1825,6 +1825,7 @@ IrLib.View.Parser.BlockType = {
     STATIC: 'STA',
     VARIABLE: 'VAR',
     REPEATING: 'REP',
+    EXPRESSION: 'EXP',
     CONDITIONAL: 'CON'
 };
 
@@ -1846,6 +1847,57 @@ IrLib.View.Parser.Block = function(type, content, meta) {
     this.type = type;
     this.content = content;
     this.meta = meta || {};
+};
+
+
+/**
+ * Created by daniel on 05.07.15.
+ */
+IrLib.View.Parser = IrLib.View.Parser || {};
+
+IrLib.View.Parser.ExpressionType = {
+    UNKNOWN: 'UNK',
+
+    VIEW: 'view',
+
+    REPEATING_START: 'for',
+    REPEATING_END: 'endfor',
+    CONDITIONAL_START: 'if',
+    CONDITIONAL_END: 'endif',
+
+    ELSE: 'else',
+
+    /**
+     * Returns the keyword if it is a valid type, or UNKNOWN otherwise
+     *
+     * @param {String} keyword
+     * @returns {String}
+     */
+    getTypeForKeyword: function(keyword) {
+        return this.isKeyword(keyword) ? keyword : this.UNKNOWN;
+    },
+
+    /**
+     * Returns if the given value is a valid type
+     *
+     * @param {String} keyword
+     * @returns {Boolean}
+     */
+    isKeyword: function(keyword) {
+        if (typeof keyword !== 'string') {
+            return false;
+        }
+        var objectKeys = Object.keys(this),
+            objectKeysLength = objectKeys.length;
+
+
+        for (var i = 0; i < objectKeysLength; i++) {
+            if (this[objectKeys[i]] === keyword) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 
@@ -1876,6 +1928,30 @@ IrLib.View.Parser.Interface = IrLib.CoreObject.extend({
 /**
  * Created by COD on 25.06.15.
  */
+
+IrLib.View.Template = IrLib.View.Template || {};
+
+/**
+ * Interface for template parsers
+ *
+ * @interface
+ */
+IrLib.View.Template.ParserInterface = IrLib.CoreObject.extend({
+    /**
+     * Parses the given input string and returns a sequence of Blocks
+     *
+     * @param {String} input
+     * @return {Block[]}
+     */
+    parse: function(input) {
+        throw new IrLib.MissingImplementationError('parse');
+    }
+});
+
+
+/**
+ * Created by COD on 25.06.15.
+ */
 (function() {/*require('view\/parser\/interface');// */
 
 }());
@@ -1886,6 +1962,16 @@ IrLib.View.Parser.Interface = IrLib.CoreObject.extend({
  * Template Parser implementation
  */
 IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
+    /**
+     * Start of an expression
+     */
+    EXPRESSION_START: '{%',
+
+    /**
+     * End of an expression
+     */
+    EXPRESSION_END: '%}',
+
     /**
      * Start character of a block
      */
@@ -1939,12 +2025,16 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     _analyze: function (tokens) {
         var Block = IrLib.View.Parser.Block,
             BlockType = IrLib.View.Parser.BlockType,
+            ExpressionType = IrLib.View.Parser.ExpressionType,
             _PATTERN_VARIABLE = this.PATTERN_VARIABLE,
             _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
             _BLOCK_END_CHAR = this.BLOCK_END_CHAR,
             _BLOCK_DELIMITER_REPEAT_NO_SAFE = this.BLOCK_DELIMITER_REPEAT_NO_SAFE,
             _BLOCK_DELIMITER_REPEAT_SAFE = this.BLOCK_DELIMITER_REPEAT_SAFE,
+            _EXPRESSION_START = this.EXPRESSION_START,
+            _EXPRESSION_END = this.EXPRESSION_END,
             blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAFE + 1).join(_BLOCK_START_CHAR),
+            expressionLength = _EXPRESSION_START.length,
             tokensLength = tokens.length,
             blocks = [],
             startsWithBlockStart,
@@ -1959,12 +2049,13 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
 
             // Don't check for brackets for tokens that are too short
             if (currentTokenLength > 2) {
-                startsWithBlockStart = currentToken.substr(0, _BLOCK_DELIMITER_REPEAT_NO_SAFE) === blockStartString;
+                startsWithBlockStart = currentToken.substr(0, 1) === _BLOCK_START_CHAR;
             } else {
                 startsWithBlockStart = false;
             }
 
-            if (startsWithBlockStart && _PATTERN_VARIABLE.test(currentToken)) {
+            if (startsWithBlockStart && currentToken.substr(0, _BLOCK_DELIMITER_REPEAT_NO_SAFE) === blockStartString &&
+                _PATTERN_VARIABLE.test(currentToken)) {
                 currentContent = currentToken.substring(
                     _BLOCK_DELIMITER_REPEAT_NO_SAFE,
                     currentTokenLength - _BLOCK_DELIMITER_REPEAT_NO_SAFE
@@ -1992,6 +2083,25 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
                     );
                 }
 
+            } else if (startsWithBlockStart &&
+                currentToken.substr(0, expressionLength) === _EXPRESSION_START &&
+                currentToken.substr(currentTokenLength - expressionLength) == _EXPRESSION_END
+            ) {
+                var expressionType;
+                currentContent = currentToken.substring(expressionLength, currentTokenLength - expressionLength);
+
+                if (ExpressionType.isKeyword(currentContent)) {
+                    expressionType = currentContent;
+                } else if (ExpressionType.isKeyword(currentContent.substring(0, currentContent.indexOf(' ')))) {
+                    expressionType = currentContent.substring(0, currentContent.indexOf(' '));
+                } else {
+                    expressionType = ExpressionType.UNKNOWN;
+                }
+                blocks[i] = new Block(BlockType.EXPRESSION, currentContent, {
+                    expressionType: expressionType
+                });
+
+
                 /* handle other cases */
             } else {
                 blocks[i] = new Block(BlockType.STATIC, currentToken);
@@ -2013,9 +2123,6 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
         var inputLength = input.length,
             _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
             _BLOCK_END_CHAR = this.BLOCK_END_CHAR,
-            _BLOCK_DELIMITER_REPEAT_NO_SAFE = this.BLOCK_DELIMITER_REPEAT_NO_SAFE,
-            blockStartString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAFE + 1).join(_BLOCK_START_CHAR),
-            blockEndString = new Array(_BLOCK_DELIMITER_REPEAT_NO_SAFE + 1).join(_BLOCK_END_CHAR),
             tokens = [],
             startCursor = 0,
             endCursor = 0,
@@ -2028,18 +2135,16 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
             // If the first character is a bracket look for the ending one
             if (input.charAt(startCursor) === _BLOCK_START_CHAR) {
                 endCursor = input.indexOf(
-                    blockEndString,
+                    _BLOCK_END_CHAR,
                     startCursor
                 );
-                endCursor += _BLOCK_DELIMITER_REPEAT_NO_SAFE - 1;
-
-                if (input.charAt(endCursor + 1) === _BLOCK_END_CHAR) {
+                while (input.charAt(endCursor + 1) === _BLOCK_END_CHAR && endCursor < inputLength) {
                     endCursor++;
                 }
 
                 nextStartCursor = endCursor + 1;
             } else { // Look for the beginning of the next block
-                nextStartCursor = input.indexOf(blockStartString, startCursor + 1);
+                nextStartCursor = input.indexOf(_BLOCK_START_CHAR, startCursor + 1);
                 if (nextStartCursor === -1) {
                     endCursor = inputLength;
                 } else {

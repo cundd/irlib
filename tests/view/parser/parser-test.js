@@ -5,7 +5,7 @@
 'use strict';
 var assert = chai.assert;
 
-describe('View.Parser.Parser', function () {
+describe.only('View.Parser.Parser', function () {
     //describe('new', function () {
     //    it('should initialize with the given block type and content', function () {
     //        var block = new IrLib.View.Parser.Block('STATIC', 'the content');
@@ -76,7 +76,46 @@ describe('View.Parser.Parser', function () {
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.STATIC);
             assert.strictEqual(blocks[0].content, '{{{authorName}}');
-
+        });
+        it('should return single block for expression template', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%an expression%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'an expression');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.UNKNOWN);
+        });
+        it('should return single block for expression template (if)', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%if condition%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'if condition');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_START);
+        });
+        it('should return single block if expression template (endif)', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%endif%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'endif');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_END);
+        });
+        it('should return single block for expression template (for)', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%for var in container%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'for var in container');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.REPEATING_START);
+        });
+        it('should return single block for expression template (endfor)', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%endfor%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'endfor');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.REPEATING_END);
         });
 
         it('should return multiple blocks for complex variable template', function () {
