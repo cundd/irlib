@@ -7,6 +7,7 @@ IrLib.View = IrLib.View || {};
 /**
  * Defines a common interface for Views
  *
+ * @implements IrLib.View.SubViewInterface
  * @interface
  */
 IrLib.View.Interface = IrLib.CoreObject.extend({
@@ -81,5 +82,14 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      */
     dispatchEvent: function (event) {
         throw new IrLib.MissingImplementationError('dispatchEvent');
+    },
+
+    /**
+     * Returns the string representation of the rendered template
+     *
+     * @returns {String}
+     */
+    toString: function () {
+        throw new IrLib.MissingImplementationError('toString');
     }
 });

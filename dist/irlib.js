@@ -1206,6 +1206,7 @@ IrLib.View = IrLib.View || {};
 /**
  * Defines a common interface for Views
  *
+ * @implements IrLib.View.SubViewInterface
  * @interface
  */
 IrLib.View.Interface = IrLib.CoreObject.extend({
@@ -1280,8 +1281,60 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      */
     dispatchEvent: function (event) {
         throw new IrLib.MissingImplementationError('dispatchEvent');
+    },
+
+    /**
+     * Returns the string representation of the rendered template
+     *
+     * @returns {String}
+     */
+    toString: function () {
+        throw new IrLib.MissingImplementationError('toString');
     }
 });
+
+
+/**
+ * Created by COD on 25.06.15.
+ */
+
+IrLib.View = IrLib.View || {};
+
+/**
+ * Current template block information
+ *
+ * @param {Number} index
+ * @param {Block[]} blockStream
+ * @constructor
+ */
+IrLib.View.State = function (index, blockStream) {
+    this.index = index|0;
+    this.blockStream = blockStream;
+};
+
+
+/**
+ * Created by COD on 25.06.15.
+ */
+
+IrLib.View = IrLib.View || {};
+
+/**
+ * Defines the interface for Views that can be used as subview inside another View
+ *
+ * @interface
+ */
+IrLib.View.SubViewInterface = function () {
+};
+
+/**
+ * Returns the string representation of the rendered template
+ *
+ * @returns {String}
+ */
+IrLib.View.SubViewInterface.prototype.toString = function () {
+    throw new IrLib.MissingImplementationError('toString');
+};
 
 
 /**
@@ -1294,8 +1347,16 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
  * @implements EventListener
  * @implements IrLib.View.Interface
  * @implements IrLib.View.ContextInterface
+ * @implements IrLib.View.SubViewInterface
  */
 IrLib.View.Template = IrLib.View.Interface.extend({
+    needs: ['serviceLocator'],
+
+    /**
+     * @type {IrLib.ServiceLocator}
+     */
+    serviceLocator: null,
+
     /**
      * Registry of event listeners
      *
@@ -1412,13 +1473,20 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 throw new ReferenceError('Template not specified');
             }
 
-            this._dom = this._createDom(
-                this._renderVariables()
-            );
+            this._dom = this._createDom(this.toString());
             //template = this._renderActions(template);
             this._needsRedraw = false;
         }
         return this._dom;
+    },
+
+    /**
+     * Returns the string representation of the rendered template
+     *
+     * @returns {String}
+     */
+    toString: function () {
+        return this._renderVariables();
     },
 
     /**
@@ -1442,16 +1510,17 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _renderVariables: function () {
         var BlockType = IrLib.View.Parser.BlockType,
             _GeneralUtility = IrLib.Utility.GeneralUtility,
+            State = IrLib.View.State,
             templateBlocks = this.getTemplateBlocks(),
             templateBlocksLength = templateBlocks.length,
             inline_escapeHtml = this._escapeHtml,
             variables = this.getVariables(),
             renderedTemplate = '',
-            currentVariableValue, currentMeta, currentTemplateBlock, i;
+            currentVariableValue, currentMeta, currentTemplateBlock, index;
 
-        for (i = 0; i < templateBlocksLength; i++) {
+        for (index = 0; index < templateBlocksLength; index++) {
             /** @var {IrLib.View.Parser.Block} currentTemplateBlock */
-            currentTemplateBlock = templateBlocks[i];
+            currentTemplateBlock = templateBlocks[index];
             switch (currentTemplateBlock.type) {
                 case BlockType.VARIABLE:
                     currentVariableValue = _GeneralUtility.valueForKeyPathOfObject(
@@ -1464,6 +1533,12 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                     }
 
                     renderedTemplate += currentVariableValue;
+                    break;
+
+                case BlockType.EXPRESSION:
+                    var state = new State(index, templateBlocks);
+                    renderedTemplate += this._renderExpression(currentTemplateBlock, state);
+                    index = state.index;
                     break;
 
                 case BlockType.STATIC:
@@ -1479,6 +1554,98 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
+     * Renders the expression of the current block
+     *
+     * @param {IrLib.View.Parser.Block} block
+     * @param {IrLib.View.State} state
+     * @returns {String}
+     * @private
+     */
+    _renderExpression: function (block, state) {
+        var ExpressionType = IrLib.View.Parser.ExpressionType,
+            expressionParts = block.content.split(' '),
+            meta = block.meta,
+            output, view;
+
+        switch (meta.expressionType) {
+            case ExpressionType.VIEW:
+                view = this._resolveView(expressionParts[1]);
+                view.setContext(this);
+                view.setVariables(this.variables);
+
+                output = view.toString();
+                break;
+
+            case ExpressionType.CONDITIONAL_START:
+                if (expressionParts.length < 2) {
+                    throw new ReferenceError('Condition missing');
+                }
+                var conditionKey = expressionParts[1],
+                    conditionValue = this._resolveVariable(conditionKey);
+
+                if (
+                    (Array.isArray(conditionValue) && conditionValue.length > 0) ||
+                    (typeof conditionValue === 'object' && Object.keys(conditionValue).length > 0) || !!conditionValue
+                ) {
+                    /* Continue rendering the next blocks */
+                } else {
+                    /* Skip forward to the closing block */
+                    this._scanToEndExpression(ExpressionType.CONDITIONAL_START, ExpressionType.CONDITIONAL_END, state);
+                }
+                output = '';
+
+                break;
+
+            case ExpressionType.UNKNOWN:
+            /* falls through */
+            default:
+                output = '';
+
+        }
+
+        //renderedTemplate +=
+        return output;
+    },
+
+    /**
+     * Skip forward to the matching end block
+     *
+     * @param {IrLib.View.Parser.ExpressionType|string} startExpression
+     * @param {IrLib.View.Parser.ExpressionType|string} endExpression
+     * @param {IrLib.View.State} state
+     * @private
+     */
+    _scanToEndExpression: function (startExpression, endExpression, state) {
+        //ExpressionType.CONDITIONAL_END, state
+        var blockStream = state.blockStream,
+            blockStreamLength = blockStream.length,
+            EXPRESSION = IrLib.View.Parser.BlockType.EXPRESSION,
+            i = state.index,
+            nestingDepth = 0,
+            block, expressionType;
+
+        for (; i < blockStreamLength; i++) {
+            /** @type {IrLib.View.Parser.Block} */
+            block = blockStream[i];
+            if (block.type === EXPRESSION) {
+                expressionType = block.meta.expressionType;
+                if (expressionType === startExpression) {
+                    nestingDepth++;
+                } else if (expressionType === endExpression) {
+                    nestingDepth--;
+                }
+                if (nestingDepth < 1) {
+                    break;
+                }
+
+            }
+        }
+
+        state.index = i;
+
+    },
+
+    /**
      * Resolve the variable for the given key path
      *
      * @param {String} keyPath
@@ -1486,7 +1653,26 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @private
      */
     _resolveVariable: function (keyPath) {
-        return GeneralUtility.valueForKeyPathOfObject(keyPath, this._variables);
+        return IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this._variables);
+    },
+
+    /**
+     * Resolve the requested View
+     *
+     * @param {String} viewIdentifier
+     * @returns {IrLib.View.SubViewInterface}
+     * @private
+     */
+    _resolveView: function (viewIdentifier) {
+        var view;
+        try {
+            view = this.serviceLocator.get(viewIdentifier);
+        } catch (exception) {
+        }
+        if (view instanceof IrLib.View.Interface) {
+            return view;
+        }
+        throw new ReferenceError('No view for identifier "' + viewIdentifier + '"');
     },
 
     /**
@@ -1575,6 +1761,11 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {IrLib.View.Interface}
      */
     setVariables: function (data) {
+        if (typeof data !== 'object') {
+            throw new TypeError(
+                'Initialization argument has to be of type object, ' + (typeof data) + ' given', 1437219149
+            );
+        }
         if (data instanceof IrLib.Dictionary) {
             this._variables = data;
         } else {
@@ -1868,6 +2059,60 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         this.render().dispatchEvent(event);
     }
 });
+
+/**
+ * Created by COD on 25.06.15.
+ */
+
+/**
+ * Factory class to create View instances
+ *
+ */
+IrLib.View.ViewFactory = {
+    /**
+     * Cache for resolved class identifiers
+     *
+     * @type {Object}
+     */
+    classIdentifierToConstructorMap: {},
+
+    create: function (classIdentifier) {
+        if (typeof classIdentifier !== 'string') {
+            throw new TypeError('Argument "classIdentifier" is not of type string');
+        }
+        var classIdentifierParts = classIdentifier.split('.');
+
+    },
+
+    /**
+     *
+     * @param {String[]} classIdentifierParts
+     * @private
+     */
+    _getConstructorForClassIdentifier: function (classIdentifierParts) {
+        var classIdentifierPartsLength = classIdentifierParts.length,
+            currentClassIdentifierPart, currentClassIdentifierPartFirstCharacter, currentRoot;
+
+        if (typeof window !== 'undefined') {
+            currentRoot = window;
+        } else if (typeof global !== 'undefined') {
+            currentRoot = global;
+        }
+        for (var i = 0; i < classIdentifierPartsLength; i++) {
+            currentClassIdentifierPart = classIdentifierParts[i];
+
+            // Check if the first character is uppercase
+            currentClassIdentifierPartFirstCharacter = currentClassIdentifierPart.charAt(0);
+            if (currentClassIdentifierPartFirstCharacter !== currentClassIdentifierPartFirstCharacter.toUpperCase()) {
+                return null;
+            }
+
+
+        }
+    }
+
+};
+
 
 }());
 
