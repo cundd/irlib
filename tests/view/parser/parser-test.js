@@ -117,6 +117,14 @@ describe.only('View.Parser.Parser', function () {
             assert.strictEqual(blocks[0].content, 'endfor');
             assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.REPEATING_END);
         });
+        it('should return single block for expression template (view)', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%view viewName%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'view viewName');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.VIEW);
+        });
 
         it('should return multiple blocks for complex variable template', function () {
             var parser = new IrLib.View.Parser.Parser();
