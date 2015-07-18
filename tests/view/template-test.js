@@ -211,6 +211,52 @@ describe('View.Template', function () {
             assert.instanceOf(view.variables, IrLib.Dictionary);
         });
     });
+    describe('setContext()', function () {
+        it('should overwrite previous context', function () {
+            var context = new IrLib.View.Template(),
+                initialContext = new IrLib.View.Template(),
+                view = new (IrLib.View.Template.extend({
+                    context: initialContext
+                }));
+
+            assert.strictEqual(view._context, initialContext);
+            view.setContext(context);
+            assert.strictEqual(view._context, context);
+        });
+    });
+    describe('context=', function () {
+        it('should overwrite previous context', function () {
+            var context = new IrLib.View.Template(),
+                initialContext = new IrLib.View.Template(),
+                view = new (IrLib.View.Template.extend({
+                    context: initialContext
+                }));
+
+            assert.strictEqual(view._context, initialContext);
+            view.context = context;
+            assert.strictEqual(view._context, context);
+        });
+    });
+    describe('getContext()', function () {
+        it('should return initial context', function () {
+            var initialContext = new IrLib.View.Template(),
+                view = new (IrLib.View.Template.extend({
+                    context: initialContext
+                }));
+
+            assert.strictEqual(view.getContext(), initialContext);
+        });
+    });
+    describe('=context', function () {
+        it('should return initial context', function () {
+            var initialContext = new IrLib.View.Template(),
+                view = new (IrLib.View.Template.extend({
+                    context: initialContext
+                }));
+
+            assert.strictEqual(view.context, initialContext);
+        });
+    });
     describe('render()', function () {
         it('should build a DOM element', function () {
             var view = new IrLib.View.Template('<div><h1>Headline</h1></div>'),

@@ -5,14 +5,7 @@
 'use strict';
 var assert = chai.assert;
 
-describe.only('View.Parser.Parser', function () {
-    //describe('new', function () {
-    //    it('should initialize with the given block type and content', function () {
-    //        var block = new IrLib.View.Parser.Block('STATIC', 'the content');
-    //        assert.strictEqual(block.type, IrLib.View.Parser.BlockType.STATIC);
-    //        assert.strictEqual(block.content, 'the content');
-    //    });
-    //});
+describe('View.Parser.Parser', function () {
     describe('parse', function () {
         it('should return single block for static template', function () {
             var parser = new IrLib.View.Parser.Parser();

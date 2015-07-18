@@ -6,6 +6,8 @@
  * A template based view
  *
  * @implements EventListener
+ * @implements IrLib.View.Interface
+ * @implements IrLib.View.ContextInterface
  */
 IrLib.View.Template = IrLib.View.Interface.extend({
     /**
@@ -44,6 +46,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _variables: null,
 
     /**
+     * Views context
+     *
+     * @type {IrLib.View.Interface}
+     */
+    _context: null,
+
+    /**
      * DOM element
      *
      * @type {Node|HTMLElement}
@@ -74,6 +83,10 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             this.setTemplate(this.template.slice(0));
         }
 
+        if (typeof this.context !== 'undefined') { // Check if a context is inherited
+            this._context = this.context;
+        }
+
         this.setVariables(variables || {});
         this.eventListeners = {};
 
@@ -91,6 +104,11 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 enumerable: true,
                 get: this.getVariables,
                 set: this.setVariables
+            },
+            'context': {
+                enumerable: true,
+                get: this.getContext,
+                set: this.setContext
             }
         });
     },
@@ -163,13 +181,12 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                     break;
 
                 case BlockType.STATIC:
-                    /* falls through */
+                /* falls through */
                 default:
                     renderedTemplate += currentTemplateBlock.content;
                     break;
 
             }
-
         }
 
         return renderedTemplate;
@@ -182,7 +199,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @returns {*}
      * @private
      */
-    _resolveVariable: function(keyPath) {
+    _resolveVariable: function (keyPath) {
         return GeneralUtility.valueForKeyPathOfObject(keyPath, this._variables);
     },
 
@@ -394,6 +411,26 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             this._templateParser = new IrLib.View.Parser.Parser();
         }
         return this._templateParser;
+    },
+
+    /**
+     * Returns the View's context
+     *
+     * @returns {IrLib.View.Interface}
+     */
+    getContext: function () {
+        return this._context;
+    },
+
+    /**
+     * Sets the View's context
+     *
+     * @param {IrLib.View.Interface} context
+     * @returns {IrLib.View.Template}
+     */
+    setContext: function (context) {
+        this._context = context;
+        return this;
     },
 
     /**
