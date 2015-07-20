@@ -65,25 +65,32 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
     /**
      * Returns the value for the key path of the given object
      *
-     * @param {String} keyPath
-     * @param {Object} object
+     * @param {String} keyPath Collection of object keys concatenated with a dot (".")
+     * @param {Object} object Root object to fetch the property
+     * @param {Boolean} [graceful] Do not throw an exception for unresolved key paths
      * @returns {*}
      */
-    valueForKeyPathOfObject: function (keyPath, object) {
+    valueForKeyPathOfObject: function (keyPath, object, graceful) {
         if (typeof keyPath !== 'string') {
             throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
         }
         var keyPathParts = keyPath.split('.'),
+            keyPathPartsLength = keyPathParts.length,
             currentValue = object,
             currentKeyPathPart, i;
 
-        for (i = 0; i < keyPathParts.length; i++) {
+        for (i = 0; i < keyPathPartsLength; i++) {
             currentKeyPathPart = keyPathParts[i];
             if (typeof currentValue !== 'object') {
-                throw new TypeError(
-                    'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
-                    1436019551
-                );
+                if (!graceful) {
+
+                    throw new TypeError(
+                        'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
+                        1436019551
+                    );
+                } else {
+                    return undefined;
+                }
             }
             currentValue = currentValue[currentKeyPathPart];
         }
@@ -93,9 +100,9 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
     /**
      * Sets the value for the key path of the given object
      *
-     * @param {*} value
-     * @param {String} keyPath
-     * @param {Object} object
+     * @param {*} value New value to set
+     * @param {String} keyPath Collection of object keys concatenated with a dot (".")
+     * @param {Object} object Root object to set the property
      * @returns {*}
      */
     setValueForKeyPathOfObject: function (value, keyPath, object) {

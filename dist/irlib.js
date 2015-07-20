@@ -299,25 +299,32 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
     /**
      * Returns the value for the key path of the given object
      *
-     * @param {String} keyPath
-     * @param {Object} object
+     * @param {String} keyPath Collection of object keys concatenated with a dot (".")
+     * @param {Object} object Root object to fetch the property
+     * @param {Boolean} [graceful] Do not throw an exception for unresolved key paths
      * @returns {*}
      */
-    valueForKeyPathOfObject: function (keyPath, object) {
+    valueForKeyPathOfObject: function (keyPath, object, graceful) {
         if (typeof keyPath !== 'string') {
             throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
         }
         var keyPathParts = keyPath.split('.'),
+            keyPathPartsLength = keyPathParts.length,
             currentValue = object,
             currentKeyPathPart, i;
 
-        for (i = 0; i < keyPathParts.length; i++) {
+        for (i = 0; i < keyPathPartsLength; i++) {
             currentKeyPathPart = keyPathParts[i];
             if (typeof currentValue !== 'object') {
-                throw new TypeError(
-                    'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
-                    1436019551
-                );
+                if (!graceful) {
+
+                    throw new TypeError(
+                        'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
+                        1436019551
+                    );
+                } else {
+                    return undefined;
+                }
             }
             currentValue = currentValue[currentKeyPathPart];
         }
@@ -327,9 +334,9 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
     /**
      * Sets the value for the key path of the given object
      *
-     * @param {*} value
-     * @param {String} keyPath
-     * @param {Object} object
+     * @param {*} value New value to set
+     * @param {String} keyPath Collection of object keys concatenated with a dot (".")
+     * @param {Object} object Root object to set the property
      * @returns {*}
      */
     setValueForKeyPathOfObject: function (value, keyPath, object) {
@@ -1514,6 +1521,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             templateBlocks = this.getTemplateBlocks(),
             templateBlocksLength = templateBlocks.length,
             inline_escapeHtml = this._escapeHtml,
+            inline_resolveVariable = this._resolveVariable.bind(this),
             variables = this.getVariables(),
             renderedTemplate = '',
             currentVariableValue, currentMeta, currentTemplateBlock, index;
@@ -1523,10 +1531,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             currentTemplateBlock = templateBlocks[index];
             switch (currentTemplateBlock.type) {
                 case BlockType.VARIABLE:
-                    currentVariableValue = _GeneralUtility.valueForKeyPathOfObject(
-                        currentTemplateBlock.content,
-                        variables
-                    );
+                    currentVariableValue = inline_resolveVariable(currentTemplateBlock.content);
                     currentMeta = currentTemplateBlock.meta;
                     if (!currentMeta.isSafe) {
                         currentVariableValue = inline_escapeHtml(currentVariableValue);
@@ -1600,10 +1605,8 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             /* falls through */
             default:
                 output = '';
-
         }
 
-        //renderedTemplate +=
         return output;
     },
 
@@ -1637,7 +1640,6 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 if (nestingDepth < 1) {
                     break;
                 }
-
             }
         }
 
@@ -1653,7 +1655,8 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @private
      */
     _resolveVariable: function (keyPath) {
-        return IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this._variables);
+        var result = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this.getVariables(), true);
+        return result !== undefined ? result : '';
     },
 
     /**

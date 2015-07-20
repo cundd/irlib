@@ -114,6 +114,18 @@ describe('Utility', function () {
                     _valueForKeyPathOfObject(null, {})
                 });
             });
+            it('should throw exception for unresolved key path if not graceful', function () {
+                assert.throws(function () {
+                    _valueForKeyPathOfObject('a.b', {})
+                });
+                assert.throws(function () {
+                    _valueForKeyPathOfObject('a.b', {'a': 1})
+                });
+            });
+            it('should not throw exception for unresolved key path if graceful', function () {
+                _valueForKeyPathOfObject('a.b', {}, true);
+                _valueForKeyPathOfObject('a.b', {'a': 1}, true);
+            });
         });
 
         describe('setValueForKeyPathOfObject()', function () {
