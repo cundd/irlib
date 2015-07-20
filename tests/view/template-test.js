@@ -366,6 +366,16 @@ describe('View.Template', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>This <strong>worked</strong></h1>');
         });
+        it('should not render empty for undefined variables', function () {
+            var view = new IrLib.View.Template('<div><h1>{{{headline}}}</h1></div>');
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<h1></h1>');
+        });
+        it('should not throw for undefined variables', function () {
+            var view = new IrLib.View.Template('<div><h1>{{{meta.headline}}}</h1></div>');
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<h1></h1>');
+        });
         it('should render View in template', function () {
             var sl = new IrLib.ServiceLocator(),
                 ELEMENT_NODE = 1,
@@ -440,6 +450,58 @@ describe('View.Template', function () {
             view.setVariables({
                 condition: false,
                 innerCondition: true
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '');
+        });
+        it('should render nested conditional with key path in template (true / true)', function () {
+            var view = new IrLib.View.Template(
+                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setVariables({
+                parameters: {
+                    condition: true,
+                    innerCondition: true
+                }
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+        });
+        it('should render nested conditional with key path in template (true / false)', function () {
+            var view = new IrLib.View.Template(
+                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setVariables({
+                parameters: {
+                    condition: true,
+                    innerCondition: false
+                }
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
+        });
+        it('should render nested conditional with key path empty in template (false / false)', function () {
+            var view = new IrLib.View.Template(
+                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setVariables({
+                parameters: {
+                    condition: false,
+                    innerCondition: false
+                }
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '');
+        });
+        it('should render nested conditional with key path empty in template (false/ true)', function () {
+            var view = new IrLib.View.Template(
+                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setVariables({
+                parameters: {
+                    condition: false,
+                    innerCondition: true
+                }
             });
 
             var result = view.render();
@@ -592,6 +654,40 @@ describe('View.Template', function () {
                 result = view.reload();
                 assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
             });
+        });
+
+        it('should update nested conditional in template', function () {
+            var view = new IrLib.View.Template(
+                '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setVariables({
+                    condition: true,
+                    innerCondition: true
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+
+            view.variables.innerCondition = false;
+            result = view.reload(true)._dom;
+            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
+        });
+
+        it('should update nested conditional in template', function () {
+            var view = new IrLib.View.Template(
+                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setVariables({
+                parameters: {
+                    condition: true,
+                    innerCondition: true
+                }
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+
+            view.variables.parameters.innerCondition = false;
+            result = view.reload(true)._dom;
+            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
         });
     });
 
