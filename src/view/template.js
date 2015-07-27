@@ -81,6 +81,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     _templateParser: null,
 
+    /**
+     * Stack of last condition results
+     *
+     * @type {Boolean[]}
+     */
+    _lastConditionStateStack: [],
+
     init: function (template, variables) {
         if (arguments.length > 0) { // Check if the template argument is given
             if (typeof template !== 'string') {
@@ -175,6 +182,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             templateBlocksLength = templateBlocks.length,
             inline_escapeHtml = this._escapeHtml,
             inline_resolveVariable = this._resolveVariable.bind(this),
+            inline_renderExpression = this._renderExpression.bind(this),
             renderedTemplate = '',
             currentVariableValue, currentMeta, currentTemplateBlock, index;
 
@@ -194,7 +202,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
 
                 case BlockType.EXPRESSION:
                     var state = new State(index, templateBlocks);
-                    renderedTemplate += this._renderExpression(currentTemplateBlock, state);
+                    renderedTemplate += inline_renderExpression(currentTemplateBlock, state);
                     index = state.index;
                     break;
 
@@ -221,6 +229,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _renderExpression: function (block, state) {
         var ExpressionType = IrLib.View.Parser.ExpressionType,
             expressionParts = block.content.split(' '),
+            lastConditionStateStack = this._lastConditionStateStack,
             meta = block.meta,
             output, view;
 
@@ -233,6 +242,15 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 output = view.toString();
                 break;
 
+            case ExpressionType.ELSE:
+                if (lastConditionStateStack.pop() === true) {
+                    /* Skip forward to the closing block */
+                    state.index++;
+                    this._scanToEndExpression(ExpressionType.CONDITIONAL_START, ExpressionType.CONDITIONAL_END, state);
+                }
+                output = '';
+                break;
+
             case ExpressionType.CONDITIONAL_START:
                 if (expressionParts.length < 2) {
                     throw new ReferenceError('Condition missing');
@@ -240,17 +258,21 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 var conditionKey = expressionParts[1],
                     conditionValue = this._resolveVariable(conditionKey);
 
-                if (
-                    (Array.isArray(conditionValue) && conditionValue.length > 0) ||
-                    (typeof conditionValue === 'object' && Object.keys(conditionValue).length > 0) || !!conditionValue
-                ) {
+                if (this._evaluateConditionValue(conditionValue)) {
                     /* Continue rendering the next blocks */
+                    lastConditionStateStack.push(true);
                 } else {
-                    /* Skip forward to the closing block */
+                    /* Skip forward to the closing or else block */
+                    state.index++;
                     this._scanToEndExpression(ExpressionType.CONDITIONAL_START, ExpressionType.CONDITIONAL_END, state);
+                    lastConditionStateStack.push(false);
                 }
                 output = '';
+                break;
 
+            case ExpressionType.CONDITIONAL_END:
+                output = '';
+                //output = ' eni ';
                 break;
 
             case ExpressionType.UNKNOWN:
@@ -263,6 +285,20 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
+     * Evaluate the condition value
+     *
+     * @param {*} conditionValue
+     * @returns {boolean}
+     * @private
+     */
+    _evaluateConditionValue: function (conditionValue) {
+        return (
+            (Array.isArray(conditionValue) && conditionValue.length > 0) ||
+            (typeof conditionValue === 'object' && Object.keys(conditionValue).length > 0) || !!conditionValue
+        );
+    },
+
+    /**
      * Skip forward to the matching end block
      *
      * @param {IrLib.View.Parser.ExpressionType|string} startExpression
@@ -271,12 +307,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @private
      */
     _scanToEndExpression: function (startExpression, endExpression, state) {
-        //ExpressionType.CONDITIONAL_END, state
         var blockStream = state.blockStream,
             blockStreamLength = blockStream.length,
             EXPRESSION = IrLib.View.Parser.BlockType.EXPRESSION,
+            EXPRESSION_TYPE_ELSE = IrLib.View.Parser.ExpressionType.ELSE,
+            nestingDepth = 1,
             i = state.index,
-            nestingDepth = 0,
+            balanced = false,
             block, expressionType;
 
         for (; i < blockStreamLength; i++) {
@@ -284,19 +321,26 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             block = blockStream[i];
             if (block.type === EXPRESSION) {
                 expressionType = block.meta.expressionType;
-                if (expressionType === startExpression) {
+                if (expressionType === startExpression) { // Start of a new if/for
                     nestingDepth++;
-                } else if (expressionType === endExpression) {
+                } else if (expressionType === endExpression) { // End of the last if/for
                     nestingDepth--;
-                }
-                if (nestingDepth < 1) {
+                    if (nestingDepth < 1) {
+                        i++;
+                        balanced = true;
+                        break;
+                    }
+                } else if (nestingDepth === 1 && expressionType === EXPRESSION_TYPE_ELSE) { // Matching else was found
+                    balanced = true;
                     break;
                 }
             }
         }
 
+        if (!balanced) {
+            console.log('Not balanced');
+        }
         state.index = i;
-
     },
 
     /**

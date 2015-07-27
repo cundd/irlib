@@ -94,6 +94,14 @@ describe('View.Parser.Parser', function () {
             assert.strictEqual(blocks[0].content, 'endif');
             assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_END);
         });
+        it('should return single block if expression template (endif)', function () {
+            var parser = new IrLib.View.Parser.Parser();
+            var blocks = parser.parse('{%else%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'else');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.ELSE);
+        });
         it('should return single block for expression template (for)', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('{%for var in container%}');

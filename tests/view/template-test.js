@@ -411,6 +411,40 @@ describe('View.Template', function () {
             var result = view.render();
             assert.strictEqual(result.innerHTML, '');
         });
+        it('should throw for missing condition', function () {
+            var view = new IrLib.View.Template('<section>{%if%}Condition fulfilled{%endif%}</section>');
+            view.setVariables({condition: true});
+
+            assert.throws(function() {
+                view.render();
+            });
+        });
+        it('should render else in template', function () {
+            var view = new IrLib.View.Template('<section>{%if condition%}Condition fulfilled{%else%}else statement{%endif%}</section>');
+            view.setVariables({condition: false});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'else statement');
+        });
+        it('should not render else in template', function () {
+            var view = new IrLib.View.Template('<section>{%if condition%}Condition fulfilled{%else%}not fulfilled{%endif%}</section>');
+            view.setVariables({condition: true});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Condition fulfilled');
+        });
+        it('should handle nested if-else in template', function () {
+            var view = new IrLib.View.Template('<section>{%if condition%}Outer condition fulfilled{%else%}Outer not fulfilled{%if inner.condition%} inner condition fulfilled{%else%} inner else{%endif%}{%endif%}</section>');
+            view.setVariables({
+                condition: false,
+                inner: {
+                    condition: true
+                }
+            });
+
+            var result = view.render();
+            assert.strictEqual(result.outerHTML, '<section>Outer not fulfilled inner condition fulfilled</section>');
+        });
         it('should render nested conditional in template (true / true)', function () {
             var view = new IrLib.View.Template(
                 '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
