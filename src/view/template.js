@@ -378,8 +378,8 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 throw error;
             }
         }
-        // Key paths for computed variables must NOT contain a dot
-        if (!result && keyPath.indexOf('.') === -1) {
+
+        if (!result && keyPath.indexOf('.') === -1) { // Key paths for computed variables must NOT contain a dot
             result = this._resolveAndEvaluateComputed(keyPath);
         }
 
@@ -395,6 +395,10 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     _resolveAndEvaluateComputed: function (key) {
         var _computed = this.computed,
+            registeredComputed;
+        if (!_computed) {
+            return undefined;
+        }
             registeredComputed = _computed[key];
         if (typeof registeredComputed === 'function') {
             return registeredComputed.call(this);

@@ -541,7 +541,7 @@ describe('View.Template', function () {
             assert.strictEqual(result.innerHTML, '');
         });
     });
-    describe.only('render() with computed variables', function () {
+    describe('render() with computed variables', function () {
         it('should build a DOM element and replace computed variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
                 computed = {
@@ -558,17 +558,6 @@ describe('View.Template', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
         });
-        //it('should build a DOM element and replace nested computed variables', function () {
-        //    var view = new IrLib.View.Template('<div><h1>{{meta.headline}}</h1></div>'),
-        //        variables = {'meta': {'headline': 'This worked'}},
-        //        ELEMENT_NODE = 1;
-        //
-        //    view.setVariables(variables);
-        //
-        //    var result = view.render();
-        //    assert.strictEqual(result.nodeType, ELEMENT_NODE);
-        //    assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-        //});
         it('should inherit the computed variables', function () {
             var template = '<div><h1>{{headline}}</h1></div>',
                 view = new (IrLib.View.Template.extend({
