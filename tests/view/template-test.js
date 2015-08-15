@@ -276,7 +276,6 @@ describe('View.Template', function () {
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
-
         });
         it('should build a DOM element and replace variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
@@ -415,7 +414,7 @@ describe('View.Template', function () {
             var view = new IrLib.View.Template('<section>{%if%}Condition fulfilled{%endif%}</section>');
             view.setVariables({condition: true});
 
-            assert.throws(function() {
+            assert.throws(function () {
                 view.render();
             });
         });
@@ -540,6 +539,88 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.innerHTML, '');
+        });
+    });
+    describe.only('render() with computed variables', function () {
+        it('should build a DOM element and replace computed variables', function () {
+            var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
+                computed = {
+                    headline: function () {
+                        return 'This worked'
+                    }
+                },
+                ELEMENT_NODE = 1;
+
+            view.setComputed(computed);
+
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        });
+        //it('should build a DOM element and replace nested computed variables', function () {
+        //    var view = new IrLib.View.Template('<div><h1>{{meta.headline}}</h1></div>'),
+        //        variables = {'meta': {'headline': 'This worked'}},
+        //        ELEMENT_NODE = 1;
+        //
+        //    view.setVariables(variables);
+        //
+        //    var result = view.render();
+        //    assert.strictEqual(result.nodeType, ELEMENT_NODE);
+        //    assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        //});
+        it('should inherit the computed variables', function () {
+            var template = '<div><h1>{{headline}}</h1></div>',
+                view = new (IrLib.View.Template.extend({
+                    template: template,
+                    computed: {
+                        headline: function () {
+                            return 'This worked'
+                        }
+                    }
+                })),
+                ELEMENT_NODE = 1;
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        });
+        it('should bind this in computed variables functions', function () {
+            var template = '<div><h1>{{headline}}</h1></div>',
+                view = new (IrLib.View.Template.extend({
+                    template: template,
+                    computed: {
+                        headline: function () {
+                            return this.variables.what + ' worked'
+                        }
+                    }
+                })),
+                ELEMENT_NODE = 1;
+
+            view.variables = {
+                what: 'This'
+            };
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        });
+        it.skip('should treat variables of type function as computed variable', function () {
+            var template = '<div><h1>{{meta.headline}}</h1></div>',
+                view = new (IrLib.View.Template.extend({
+                    template: template
+                })),
+                ELEMENT_NODE = 1;
+
+            view.variables = {
+                meta: {
+                    headline: function() {
+                        return 'This worked';
+                    }
+                }
+            };
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
         });
     });
     describe('appendTo()', function () {
@@ -694,8 +775,8 @@ describe('View.Template', function () {
             var view = new IrLib.View.Template(
                 '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
             view.setVariables({
-                    condition: true,
-                    innerCondition: true
+                condition: true,
+                innerCondition: true
             });
 
             var result = view.render();

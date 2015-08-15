@@ -306,7 +306,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      */
     valueForKeyPathOfObject: function (keyPath, object, graceful) {
         if (typeof keyPath !== 'string') {
-            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
+            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
         var keyPathParts = keyPath.split('.'),
             keyPathPartsLength = keyPathParts.length,
@@ -317,10 +317,8 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             currentKeyPathPart = keyPathParts[i];
             if (typeof currentValue !== 'object') {
                 if (!graceful) {
-
                     throw new TypeError(
-                        'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
-                        1436019551
+                        'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue)
                     );
                 } else {
                     return undefined;
@@ -341,7 +339,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      */
     setValueForKeyPathOfObject: function (value, keyPath, object) {
         if (typeof keyPath !== 'string') {
-            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
+            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
         var lastIndexOfDot = keyPath.lastIndexOf('.'), keyPathToParent, childKey, parentObject;
 
@@ -357,8 +355,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         }
         if (typeof parentObject !== 'object') {
             throw new TypeError(
-                'Can not set key ' + keyPath + ' of value of type ' + (typeof parentObject),
-                1436019552
+                'Can not set key ' + keyPath + ' of value of type ' + (typeof parentObject)
             );
         }
         parentObject[childKey] = value;
@@ -1400,6 +1397,13 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     _variables: null,
 
     /**
+     * Dictionary of computed variables
+     *
+     * @type {IrLib.Dictionary}
+     */
+    _computed: null,
+
+    /**
      * Views context
      *
      * @type {IrLib.View.Interface}
@@ -1444,6 +1448,10 @@ IrLib.View.Template = IrLib.View.Interface.extend({
             this.setTemplate(this.template.slice(0));
         }
 
+        if (typeof this.computed === 'object') { // Check if a computed variables are inherited
+            this.setComputed(this.computed);
+        }
+
         if (typeof this.context !== 'undefined') { // Check if a context is inherited
             this._context = this.context;
         }
@@ -1465,6 +1473,11 @@ IrLib.View.Template = IrLib.View.Interface.extend({
                 enumerable: true,
                 get: this.getVariables,
                 set: this.setVariables
+            },
+            'computed': {
+                enumerable: true,
+                get: this.getComputed,
+                set: this.setComputed
             },
             'context': {
                 enumerable: true,
@@ -1684,7 +1697,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         }
 
         if (!balanced) {
-            console.log('Not balanced');
+            IrLib.Logger.log('Not balanced');
         }
         state.index = i;
     },
@@ -1697,8 +1710,36 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      * @private
      */
     _resolveVariable: function (keyPath) {
-        var result = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this.getVariables(), true);
+        var result;
+        try {
+            result = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this.getVariables(), false);
+        } catch (error) {
+            if (!(error instanceof TypeError)) {
+                throw error;
+            }
+        }
+        // Key paths for computed variables must NOT contain a dot
+        if (!result && keyPath.indexOf('.') === -1) {
+            result = this._resolveAndEvaluateComputed(keyPath);
+        }
+
         return result !== undefined ? result : '';
+    },
+
+    /**
+     * Resolve the variable for the given key path
+     *
+     * @param {String} key
+     * @returns {*}
+     * @private
+     */
+    _resolveAndEvaluateComputed: function (key) {
+        var _computed = this.computed,
+            registeredComputed = _computed[key];
+        if (typeof registeredComputed === 'function') {
+            return registeredComputed.call(this);
+        }
+        return undefined;
     },
 
     /**
@@ -1800,16 +1841,14 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     //},
 
     /**
-     * Set the variables
+     * Sets the variables
      *
      * @param {Object|IrLib.Dictionary} data
      * @returns {IrLib.View.Interface}
      */
     setVariables: function (data) {
         if (typeof data !== 'object') {
-            throw new TypeError(
-                'Initialization argument has to be of type object, ' + (typeof data) + ' given', 1437219149
-            );
+            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
         }
         if (data instanceof IrLib.Dictionary) {
             this._variables = data;
@@ -1821,7 +1860,7 @@ IrLib.View.Template = IrLib.View.Interface.extend({
     },
 
     /**
-     * Add the variable with the given key and value
+     * Adds the variable with the given key and value
      *
      * @param {String} key
      * @param {*} value
@@ -1840,6 +1879,34 @@ IrLib.View.Template = IrLib.View.Interface.extend({
      */
     getVariables: function () {
         return this._variables;
+    },
+
+    /**
+     * Sets the registered computed variables
+     *
+     * @param {Object|IrLib.Dictionary} data
+     * @returns {IrLib.View.Interface}
+     */
+    setComputed: function (data) {
+        if (typeof data !== 'object') {
+            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
+        }
+        if (data instanceof IrLib.Dictionary) {
+            this._computed = data;
+        } else {
+            this._computed = new IrLib.Dictionary(data);
+        }
+        this._needsRedraw = true;
+        return this;
+    },
+
+    /**
+     * Returns the registered computed variables
+     *
+     * @returns {IrLib.Dictionary}
+     */
+    getComputed: function() {
+        return this._computed;
     },
 
     /**
@@ -2353,10 +2420,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
      */
     parse: function (input) {
         if (typeof input !== 'string') {
-            throw new TypeError(
-                'Expected argument "input" to be of type string, ' + (typeof input) + ' given',
-                1436105669
-            );
+            throw new TypeError('Expected argument "input" to be of type string, ' + (typeof input) + ' given');
         }
 
         var tokens = this._tokenize(input);
