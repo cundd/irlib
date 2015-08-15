@@ -72,7 +72,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      */
     valueForKeyPathOfObject: function (keyPath, object, graceful) {
         if (typeof keyPath !== 'string') {
-            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
+            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
         var keyPathParts = keyPath.split('.'),
             keyPathPartsLength = keyPathParts.length,
@@ -83,10 +83,8 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             currentKeyPathPart = keyPathParts[i];
             if (typeof currentValue !== 'object') {
                 if (!graceful) {
-
                     throw new TypeError(
-                        'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue),
-                        1436019551
+                        'Can not get key ' + currentKeyPathPart + ' of value of type ' + (typeof currentValue)
                     );
                 } else {
                     return undefined;
@@ -107,7 +105,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      */
     setValueForKeyPathOfObject: function (value, keyPath, object) {
         if (typeof keyPath !== 'string') {
-            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given', 1436018907);
+            throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
         var lastIndexOfDot = keyPath.lastIndexOf('.'), keyPathToParent, childKey, parentObject;
 
@@ -123,8 +121,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         }
         if (typeof parentObject !== 'object') {
             throw new TypeError(
-                'Can not set key ' + keyPath + ' of value of type ' + (typeof parentObject),
-                1436019552
+                'Can not set key ' + keyPath + ' of value of type ' + (typeof parentObject)
             );
         }
         parentObject[childKey] = value;

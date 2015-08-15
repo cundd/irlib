@@ -50,10 +50,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
      */
     parse: function (input) {
         if (typeof input !== 'string') {
-            throw new TypeError(
-                'Expected argument "input" to be of type string, ' + (typeof input) + ' given',
-                1436105669
-            );
+            throw new TypeError('Expected argument "input" to be of type string, ' + (typeof input) + ' given');
         }
 
         var tokens = this._tokenize(input);
