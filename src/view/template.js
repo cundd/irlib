@@ -370,6 +370,9 @@ IrLib.View.Template = IrLib.View.Interface.extend({
         var result;
         try {
             result = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this.getVariables(), false);
+            if (typeof result === 'function') {
+                result = result(this);
+            }
         } catch (error) {
             if (!(error instanceof TypeError)) {
                 throw error;

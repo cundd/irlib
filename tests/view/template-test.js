@@ -604,7 +604,7 @@ describe('View.Template', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
         });
-        it.skip('should treat variables of type function as computed variable', function () {
+        it('should treat variables of type function as computed variable', function () {
             var template = '<div><h1>{{meta.headline}}</h1></div>',
                 view = new (IrLib.View.Template.extend({
                     template: template
@@ -615,6 +615,25 @@ describe('View.Template', function () {
                 meta: {
                     headline: function() {
                         return 'This worked';
+                    }
+                }
+            };
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+        });
+        it('should treat variables of type function as computed variable and pass the view as first argument', function () {
+            var template = '<div><h1>{{meta.headline}}</h1></div>',
+                view = new (IrLib.View.Template.extend({
+                    template: template
+                })),
+                ELEMENT_NODE = 1;
+
+            view.variables = {
+                what: 'This',
+                meta: {
+                    headline: function(view) {
+                        return view.variables.what + ' worked';
                     }
                 }
             };
