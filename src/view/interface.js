@@ -11,10 +11,14 @@ IrLib.View = IrLib.View || {};
  * @interface
  */
 IrLib.View.Interface = IrLib.CoreObject.extend({
+    init: function (template, variables) {
+    },
+
     /**
      * Renders the template
      *
      * @return {Node|HTMLElement}
+     * @abstract
      */
     render: function () {
         throw new IrLib.MissingImplementationError('render');
@@ -25,6 +29,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      *
      * @param {Object|IrLib.Dictionary} data
      * @return {IrLib.View.Interface}
+     * @abstract
      */
     setVariables: function (data) {
         throw new IrLib.MissingImplementationError('setVariables');
@@ -36,6 +41,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      * @param {String} key
      * @param {*} value
      * @return {IrLib.View.Interface}
+     * @abstract
      */
     assignVariable: function (key, value) {
         throw new IrLib.MissingImplementationError('assignVariable');
@@ -46,6 +52,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      *
      * @param {Node|HTMLElement} element
      * @return {IrLib.View.Interface}
+     * @abstract
      */
     appendTo: function (element) {
         throw new IrLib.MissingImplementationError('appendTo');
@@ -55,6 +62,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      * Removes the element from it's parent
      *
      * @returns {IrLib.View.Interface}
+     * @abstract
      */
     remove: function () {
         throw new IrLib.MissingImplementationError('remove');
@@ -66,6 +74,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      * @param {String} type
      * @param {EventListener|Function} listener
      * @param {Boolean} [useCapture]
+     * @abstract
      */
     addEventListener: function (type, listener, useCapture) {
         throw new IrLib.MissingImplementationError('addEventListener');
@@ -79,6 +88,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      *
      * @param {Event} event
      * @return {Boolean}
+     * @abstract
      */
     dispatchEvent: function (event) {
         throw new IrLib.MissingImplementationError('dispatchEvent');
@@ -88,6 +98,7 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
      * Returns the string representation of the rendered template
      *
      * @returns {String}
+     * @abstract
      */
     toString: function () {
         throw new IrLib.MissingImplementationError('toString');
