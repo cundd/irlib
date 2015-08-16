@@ -64,6 +64,17 @@ describe('View.LoopView', function () {
             assert.instanceOf(view.template, IrLib.View.Interface);
             assert.strictEqual(view.template._template, getTemplateDomString());
         });
+        it('should throw for invalid template type', function () {
+            //assert.throws(function() {
+            //    new IrLib.View.LoopView(1);
+            //});
+            //assert.throws(function() {
+            //    new IrLib.View.LoopView(1.0);
+            //});
+            assert.throws(function() {
+                new IrLib.View.LoopView({});
+            });
+        });
     });
     describe('setTemplate()', function () {
         it('should overwrite the template and set needsRedraw (string)', function () {
@@ -275,7 +286,7 @@ describe('View.LoopView', function () {
         it('should repeat the template in reasonable time', function () {
             var view = new IrLib.View.LoopView('<section><div>{{article.content}}</div></section>', [], 'article'),
                 content = [];
-            for (var i = 11500; i > 0; i--) {
+            for (var i = 500; i > 0; i--) {
                 content.push({
                     content: 'Content ' + i
                 });
@@ -338,6 +349,33 @@ describe('View.LoopView', function () {
                 ''
             )
         });
+        it('should repeat the View in template', function () {
+            var sl = new IrLib.ServiceLocator(),
+                view;
+
+            sl.registerMultiple({
+                loopView: IrLib.View.LoopView.extend({
+                    template: '<section><div>{%view header%}</div></section>'
+                }),
+                header: IrLib.View.Template.extend({
+                    template: '<h1>{{this.headline}}</h1>'
+                })
+            });
+
+            view = sl.get('loopView');
+            view.content = [
+                {headline: 'Heading 1'},
+                {headline: 'Heading 2'}
+            ];
+
+            var result = view.toString();
+            assert.strictEqual(
+                result,
+                '<section><div><h1>Heading 1</h1></div></section>' +
+                '<section><div><h1>Heading 2</h1></div></section>' +
+                ''
+            );
+        });
     });
 
     describe('render()', function () {
@@ -366,7 +404,7 @@ describe('View.LoopView', function () {
             var ELEMENT_NODE = 1,
                 view = new IrLib.View.LoopView('<section><div>{{article.content}}</div></section>', [], 'article'),
                 content = [];
-            for (var i = 11500; i > 0; i--) {
+            for (var i = 500; i > 0; i--) {
                 content.push({
                     content: 'Content ' + i
                 });
@@ -381,19 +419,19 @@ describe('View.LoopView', function () {
         it('should build a DOM element with conditions', function () {
             var ELEMENT_NODE = 1,
                 view = new IrLib.View.LoopView(
-                '<section><div>' +
-                '{%if article.isImportant%}' +
-                '{{article.content}}' +
-                '{%endif%}' +
-                '</div></section>',
-                [
-                    {'content': 'Hello 1', isImportant: true},
-                    {'content': 'Hello 2', isImportant: false},
-                    {'content': 'Hello 3', isImportant: false},
-                    {'content': 'Hello 4', isImportant: true}
-                ],
-                'article'
-            );
+                    '<section><div>' +
+                    '{%if article.isImportant%}' +
+                    '{{article.content}}' +
+                    '{%endif%}' +
+                    '</div></section>',
+                    [
+                        {'content': 'Hello 1', isImportant: true},
+                        {'content': 'Hello 2', isImportant: false},
+                        {'content': 'Hello 3', isImportant: false},
+                        {'content': 'Hello 4', isImportant: true}
+                    ],
+                    'article'
+                );
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
@@ -408,21 +446,21 @@ describe('View.LoopView', function () {
         it('should build a DOM element with conditions and else', function () {
             var ELEMENT_NODE = 1,
                 view = new IrLib.View.LoopView(
-                '<section><div>' +
-                '{%if article.isImportant%}' +
-                'Important: {{article.content}}!' +
-                '{%else%}' +
-                '{{article.content}}' +
-                '{%endif%}' +
-                '</div></section>',
-                [
-                    {'content': 'Hello 1', isImportant: true},
-                    {'content': 'Hello 2', isImportant: false},
-                    {'content': 'Hello 3', isImportant: false},
-                    {'content': 'Hello 4', isImportant: true}
-                ],
-                'article'
-            );
+                    '<section><div>' +
+                    '{%if article.isImportant%}' +
+                    'Important: {{article.content}}!' +
+                    '{%else%}' +
+                    '{{article.content}}' +
+                    '{%endif%}' +
+                    '</div></section>',
+                    [
+                        {'content': 'Hello 1', isImportant: true},
+                        {'content': 'Hello 2', isImportant: false},
+                        {'content': 'Hello 3', isImportant: false},
+                        {'content': 'Hello 4', isImportant: true}
+                    ],
+                    'article'
+                );
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
@@ -434,126 +472,41 @@ describe('View.LoopView', function () {
                 ''
             )
         });
+        it('should render View in template', function () {
+            var sl = new IrLib.ServiceLocator(),
+                ELEMENT_NODE = 1,
+                view;
+
+            sl.registerMultiple({
+                loopView: IrLib.View.LoopView.extend({
+                    template: '<section><div>{%view header%}</div></section>'
+                }),
+                header: IrLib.View.Template.extend({
+                    template: '<h1>{{this.headline}}</h1>'
+                })
+            });
+
+            view = sl.get('loopView');
+            view.content = [
+                {headline: 'Heading 1'},
+                {headline: 'Heading 2'}
+            ];
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(
+                result.innerHTML,
+                '<section><div><h1>Heading 1</h1></div></section>' +
+                '<section><div><h1>Heading 2</h1></div></section>' +
+                ''
+            );
+        });
+        it('should throw if content is not set', function () {
+            assert.throws(function () {
+                (new IrLib.View.LoopView('<div></div>')).render();
+            });
+        });
     });
-    //    it('should build a DOM element and replace variables', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>'),
-    //            variables = {'headline': 'This worked'},
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.setVariables(variables);
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-    //    });
-    //    it('should build a DOM element and replace nested variables', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{meta.headline}}</h1></div>'),
-    //            variables = {'meta': {'headline': 'This worked'}},
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.setVariables(variables);
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-    //    });
-    //    it('should throw an exception if the template is not set', function () {
-    //        var view = new IrLib.View.LoopView();
-    //        assert.throws(function () {
-    //            view.render();
-    //        });
-    //    });
-    //    it('should trim whitespaces', function () {
-    //        var view = new IrLib.View.LoopView("    \t\n<div><h1>Headline</h1></div> "),
-    //            ELEMENT_NODE = 1;
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
-    //
-    //    });
-    //    it('should inherit the template (string)', function () {
-    //        var template = '<div><h1>{{headline}}</h1></div>',
-    //            view = new (IrLib.View.LoopView.extend({
-    //                template: template
-    //            })),
-    //            variables = {'headline': 'This worked'},
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.setVariables(variables);
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-    //    });
-    //    it('should inherit the template (selector)', function () {
-    //        var template = '#my-template',
-    //            variables = {'headline': 'This worked'},
-    //            ELEMENT_NODE = 1,
-    //            view;
-    //
-    //        createTemplateDom(template);
-    //        view = new (IrLib.View.LoopView.extend({
-    //            template: template
-    //        }));
-    //
-    //        view.setVariables(variables);
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<header>This worked</header><section>My content</section>');
-    //    });
-    //    it('should escape variable content', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>'),
-    //            variables = {'headline': 'This <strong>worked</strong>'},
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.setVariables(variables);
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>This &lt;strong&gt;worked&lt;/strong&gt;</h1>');
-    //    });
-    //    it('should not escape variable content', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{{headline}}}</h1></div>'),
-    //            variables = {'headline': 'This <strong>worked</strong>'},
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.setVariables(variables);
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>This <strong>worked</strong></h1>');
-    //    });
-    //    it('should not render empty for undefined variables', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{{headline}}}</h1></div>');
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '<h1></h1>');
-    //    });
-    //    it('should not throw for undefined variables', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{{meta.headline}}}</h1></div>');
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '<h1></h1>');
-    //    });
-    //    it('should render View in template', function () {
-    //        var sl = new IrLib.ServiceLocator(),
-    //            ELEMENT_NODE = 1,
-    //            view;
-    //
-    //        sl.registerMultiple({
-    //            mainView: (IrLib.View.LoopView.extend({
-    //                template: '<section><div>{%view header%}</div></section>'
-    //            })),
-    //            header: (IrLib.View.LoopView.extend({
-    //                template: '<h1>{{{headline}}}</h1>'
-    //            }))
-    //        });
-    //
-    //        view = sl.get('mainView');
-    //        view.setVariables({'headline': 'This <strong>worked</strong>'});
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<div><h1>This <strong>worked</strong></h1></div>');
-    //    });
     //    it('should render conditional in template', function () {
     //        var view = new IrLib.View.LoopView('<section>{%if condition%}Condition fulfilled{%endif%}</section>');
     //        view.setVariables({condition: true});

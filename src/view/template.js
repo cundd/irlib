@@ -106,7 +106,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {String}
      */
     toString: function () {
-        return this._renderVariables();
+        return this._renderBlocks();
     },
 
     /**
@@ -114,7 +114,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {String}
      */
-    _renderVariables: function () {
+    _renderBlocks: function () {
         var BlockType = IrLib.View.Parser.BlockType,
             State = IrLib.View.State,
             templateBlocks = this.getTemplateBlocks(),
@@ -336,7 +336,12 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @private
      */
     _resolveView: function (viewIdentifier) {
-        var view;
+        var _serviceLocator = this.serviceLocator,
+            view;
+
+        if (!_serviceLocator) {
+            throw new ReferenceError('Service Locator must be set to resolve views for identifier "' + viewIdentifier + '"');
+        }
         try {
             view = this.serviceLocator.get(viewIdentifier);
         } catch (exception) {

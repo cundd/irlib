@@ -56,7 +56,8 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 throw new ReferenceError('Template not specified');
             }
 
-            this._dom = this._createDom(this.toString());
+            var domWithRoot = this._createDom(this.toString());
+            this._dom = domWithRoot.firstChild;
             //template = this._renderActions(template);
             this._needsRedraw = false;
         }
@@ -232,7 +233,6 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         var root = document.createElement('div');
         if (template) {
             root.innerHTML = template;
-            return root.firstChild;
         }
         return root;
     }

@@ -1418,7 +1418,8 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 throw new ReferenceError('Template not specified');
             }
 
-            this._dom = this._createDom(this.toString());
+            var domWithRoot = this._createDom(this.toString());
+            this._dom = domWithRoot.firstChild;
             //template = this._renderActions(template);
             this._needsRedraw = false;
         }
@@ -1594,7 +1595,6 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         var root = document.createElement('div');
         if (template) {
             root.innerHTML = template;
-            return root.firstChild;
         }
         return root;
     }
@@ -1735,7 +1735,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {String}
      */
     toString: function () {
-        return this._renderVariables();
+        return this._renderBlocks();
     },
 
     /**
@@ -1743,7 +1743,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {String}
      */
-    _renderVariables: function () {
+    _renderBlocks: function () {
         var BlockType = IrLib.View.Parser.BlockType,
             State = IrLib.View.State,
             templateBlocks = this.getTemplateBlocks(),
@@ -1965,7 +1965,12 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @private
      */
     _resolveView: function (viewIdentifier) {
-        var view;
+        var _serviceLocator = this.serviceLocator,
+            view;
+
+        if (!_serviceLocator) {
+            throw new ReferenceError('Service Locator must be set to resolve views for identifier "' + viewIdentifier + '"');
+        }
         try {
             view = this.serviceLocator.get(viewIdentifier);
         } catch (exception) {
@@ -2234,7 +2239,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      *
      * @type {Array}
      */
-    _content: [],
+    _content: null,
 
     /**
      * Template to repeat
@@ -2242,6 +2247,13 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      * @type {IrLib.View.Interface}
      */
     _templateView: null,
+
+    /**
+     * Original template input
+     *
+     * @type {String}
+     */
+    _originalTemplate: '',
 
     /**
      * Key to use to access the current iteration value
@@ -2306,11 +2318,12 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
         if (this._needsRedraw) {
             delete this._dom;
 
+            //this._dom = this._createDom(this.toString());
+
             var domNode = this._createDom();
-
             this._render(domNode);
-
             this._dom = domNode;
+
             this._needsRedraw = false;
         }
         return this._dom;
@@ -2333,8 +2346,12 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      * @private
      */
     _render: function (appendToNode) {
-        var content = this._content,
-            contentLength = content.length,
+        var content = this._content;
+        if (content === null) {
+            throw new ReferenceError('No content defined');
+        }
+
+        var contentLength = content.length,
             _template = this.getTemplateView(),
             _asKey = this.getAsKey(),
             renderedContent = '',
@@ -2417,11 +2434,10 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      * @returns {IrLib.View.LoopView}
      */
     setTemplate: function (template) {
-        if (template instanceof IrLib.View.Interface) {
-            this._templateView = template;
-        } else if (typeof template == 'string') {
-            this._templateView = new IrLib.View.Template(template);
+        if (!(template instanceof IrLib.View.Interface) && typeof template !== 'string') {
+            throw new TypeError('Invalid type for template, ' + (typeof content) + ' given');
         }
+        this._originalTemplate = template;
         return this;
     },
 
@@ -2431,7 +2447,35 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      * @returns {IrLib.View.Interface}
      */
     getTemplateView: function () {
+        if (!this._templateView) {
+            this._templateView = this._createTemplateViewFromTemplate();
+        }
         return this._templateView;
+    },
+
+    /**
+     * Create the actual template view from the input template
+     *
+     * @returns {IrLib.View.Interface}
+     * @private
+     */
+    _createTemplateViewFromTemplate: function () {
+        var _serviceLocator = this.serviceLocator,
+            _originalTemplate = this._originalTemplate,
+            templateView;
+
+        if (typeof _originalTemplate == 'string') {
+            templateView = new IrLib.View.Template(_originalTemplate);
+            if (_serviceLocator) {
+                _serviceLocator.resolveDependencies(templateView, IrLib.View.Template);
+            }
+        } else if (_originalTemplate instanceof IrLib.View.Interface) {
+            templateView = _originalTemplate;
+        } else {
+            throw new TypeError('Invalid type for template, ' + (typeof content) + ' given');
+        }
+
+        return templateView;
     },
 
     /**
