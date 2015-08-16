@@ -265,7 +265,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 } else if (expressionType === endExpression) { // End of the last if/for
                     nestingDepth--;
                     if (nestingDepth < 1) {
-                        i++;
                         balanced = true;
                         break;
                     }
