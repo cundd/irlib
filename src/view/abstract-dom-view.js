@@ -9,7 +9,7 @@ require('view/interface');
  * @implements EventListener
  * @abstract
  */
-IrLib.View.AbstractDomView = IrLib.View.Interface.extend({
+IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     /**
      * Registry of event listeners
      *
@@ -38,8 +38,8 @@ IrLib.View.AbstractDomView = IrLib.View.Interface.extend({
      */
     _lastInsertedNode: null,
 
-    init: function (template, variables) {
-        this._super(template, variables);
+    init: function () {
+        this._super();
         this.eventListeners = {};
     },
 
@@ -64,9 +64,12 @@ IrLib.View.AbstractDomView = IrLib.View.Interface.extend({
     },
 
     /**
-     * @abstract
+     * Returns if a redraw is required
+     *
+     * @returns {Boolean}
      */
-    toString: function () {
+    getNeedsRedraw: function () {
+        return this._needsRedraw;
     },
 
     /**
@@ -221,13 +224,16 @@ IrLib.View.AbstractDomView = IrLib.View.Interface.extend({
     /**
      * Creates the Document Object Model for the given template string
      *
-     * @param {String} template
+     * @param {String} [template]
      * @returns {Node|HTMLElement}
-     * @private
+     * @protected
      */
     _createDom: function (template) {
         var root = document.createElement('div');
-        root.innerHTML = template;
-        return root.firstChild;
+        if (template) {
+            root.innerHTML = template;
+            return root.firstChild;
+        }
+        return root;
     }
 });

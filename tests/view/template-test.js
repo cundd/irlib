@@ -410,6 +410,79 @@ describe('View.Template', function () {
             var result = view.render();
             assert.strictEqual(result.innerHTML, '');
         });
+        it('should render nested conditional in template', function () {
+            var view = new IrLib.View.Template('<section><div>{%if article.isImportant%}Fulfilled{%endif%}</div></section>');
+            view.setVariables({article: {isImportant: true}, meta: {name:'My condition'}});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<div>Fulfilled</div>');
+        });
+        it('should render conditional in template with variable content', function () {
+            var view = new IrLib.View.Template('<section><div>{%if condition%}Condition "{{name}}" fulfilled{%endif%}</div></section>');
+            view.setVariables({condition: true, name:'My condition'});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<div>Condition "My condition" fulfilled</div>');
+        });
+        it('should render conditional in template with nested variable content', function () {
+            var view = new IrLib.View.Template('<section><div>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</div></section>');
+            view.setVariables({condition: true, meta: {name:'My condition'}});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<div>Condition "My condition" fulfilled</div>');
+        });
+        it('should render conditional empty in template with variable content', function () {
+            var view = new IrLib.View.Template(
+                '<section><span>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+            );
+            view.setVariables({condition: false, name:'My condition'});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<span></span>');
+        });
+        it('should render conditional empty in template with nested variable content', function () {
+            var view = new IrLib.View.Template(
+                '<section><span>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+            );
+            view.setVariables({condition: false, meta: {name:'My condition'}});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<span></span>');
+        });
+
+        it('should render nested conditional in template with variable content', function () {
+            var view = new IrLib.View.Template('<section>{%if condition.value%}Condition "{{name}}" fulfilled{%endif%}</section>');
+            view.setVariables({condition: {value: true}, name:'My condition'});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Condition "My condition" fulfilled');
+        });
+        it('should render nested conditional in template with nested variable content', function () {
+            var view = new IrLib.View.Template('<section>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</section>');
+            view.setVariables({condition: {value: true}, meta: {name:'My condition'}});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, 'Condition "My condition" fulfilled');
+        });
+        it('should render nested conditional empty in template with variable content', function () {
+            var view = new IrLib.View.Template(
+                '<section><span>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+            );
+            view.setVariables({condition: {value: false}, name:'My condition'});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<span></span>');
+        });
+        it('should render nested conditional empty in template with nested variable content', function () {
+            var view = new IrLib.View.Template(
+                '<section><span>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+            );
+            view.setVariables({condition: {value: false}, meta: {name:'My condition'}});
+
+            var result = view.render();
+            assert.strictEqual(result.innerHTML, '<span></span>');
+        });
+
         it('should throw for missing condition', function () {
             var view = new IrLib.View.Template('<section>{%if%}Condition fulfilled{%endif%}</section>');
             view.setVariables({condition: true});

@@ -47,13 +47,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     _computed: null,
 
     /**
-     * Views context
-     *
-     * @type {IrLib.View.Interface}
-     */
-    _context: null,
-
-    /**
      * Template parser instance
      *
      * @type {IrLib.View.Parser.Interface}
@@ -83,10 +76,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this.setComputed(this.computed);
         }
 
-        if (typeof this.context !== 'undefined') { // Check if a context is inherited
-            this._context = this.context;
-        }
-
         this.setVariables(variables || {});
         this.defineProperties({
             'template': {
@@ -107,11 +96,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 enumerable: true,
                 get: this.getComputed,
                 set: this.setComputed
-            },
-            'context': {
-                enumerable: true,
-                get: this.getContext,
-                set: this.setContext
             }
         });
     },
@@ -585,15 +569,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     },
 
     /**
-     * Returns if a redraw is required
-     *
-     * @returns {Boolean}
-     */
-    getNeedsRedraw: function () {
-        return this._needsRedraw;
-    },
-
-    /**
      * Returns the template parser interface
      *
      * @returns {IrLib.View.Parser.Interface}
@@ -603,25 +578,5 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this._templateParser = new IrLib.View.Parser.Parser();
         }
         return this._templateParser;
-    },
-
-    /**
-     * Returns the View's context
-     *
-     * @returns {IrLib.View.Interface}
-     */
-    getContext: function () {
-        return this._context;
-    },
-
-    /**
-     * Sets the View's context
-     *
-     * @param {IrLib.View.Interface} context
-     * @returns {IrLib.View.Template}
-     */
-    setContext: function (context) {
-        this._context = context;
-        return this;
     }
 });
