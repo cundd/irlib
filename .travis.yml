@@ -19,6 +19,9 @@ addons:
 
 sudo: false
 
+before_script:
+  - npm install -g grunt-cli;
+  - npm install;
 script:
   - >
     if [[ "$BUILD" == "yes" ]]; then
