@@ -1,6 +1,7 @@
 /**
  * Created by COD on 03.06.15.
  */
+require('components/service-locator-proxy');
 
 var GeneralUtility = IrLib.Utility.GeneralUtility;
 var _Error = IrLib.Error;
@@ -36,7 +37,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {Object} configuration
      * @returns {IrLib.ServiceLocator}
      */
-    registerMultiple: function(configuration) {
+    registerMultiple: function (configuration) {
         var identifiers = Object.keys(configuration),
             identifier, i;
         for (i = 0; i < identifiers.length; i++) {
@@ -114,17 +115,20 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {Class} serviceClass
      * @returns {Object}
      */
-    resolveDependencies: function(instance, serviceClass) {
+    resolveDependencies: function (instance, serviceClass) {
         if (serviceClass.prototype && typeof serviceClass.prototype.needs === 'object') {
             var dependencies = serviceClass.prototype.needs,
-                dependency, i;
+                dependenciesLength = dependencies.length,
+                dependency, dependencyProperty, dependencyIdentifier, i;
 
-            if (++this.recursionLevel > 100) {
+            if (++this.recursionLevel > 1000) {
                 throw new _Error('Maximum recursion level exceeded', 1434301204);
             }
-            for (i = 0; i < dependencies.length; i++) {
-                dependency = dependencies[i];
-                instance[dependency] = this.get(dependency);
+            for (i = 0; i < dependenciesLength; i++) {
+                dependency = dependencies[i].split(':', 2);
+                dependencyIdentifier = dependency[0];
+                dependencyProperty = (dependency[1] || dependencyIdentifier);
+                instance[dependencyProperty] = this.get(dependencyIdentifier);
             }
             this.recursionLevel--;
         }
@@ -154,5 +158,4 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
             throw new _Error('Given service constructor is not callable', 1433683511);
         }
     }
-
 });

@@ -26,6 +26,10 @@ describe('ServiceLocator', function () {
         NewClassWithDependencyThatWillProduceRecursion = IrLib.CoreObject.extend({
             'needs': ['classWithNestedDependencyWithRecursion'],
             'name': 'NewClassWithDependencyThatWillProduceRecursion'
+        }),
+        NewClassWithDependencyWithDifferentName = IrLib.CoreObject.extend({
+            'needs': ['serviceLocator:sl'],
+            'name': 'NewClassWithDependencyWithDifferentName'
         });
 
     describe('register()', function () {
@@ -270,6 +274,15 @@ describe('ServiceLocator', function () {
             assert.throws(function () {
                 sl.get('classWithNestedDependencyWithRecursion');
             });
+        });
+        it('should resolve dependencies with different name', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClassWithDependencyWithDifferentName);
+            var newService = sl.get('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClassWithDependencyWithDifferentName');
+            assert.ok(newService instanceof NewClassWithDependencyWithDifferentName);
+            assert.strictEqual(newService.sl, sl);
         });
     });
 });
