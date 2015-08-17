@@ -17,6 +17,10 @@ module.exports = function (grunt) {
             unit: {
                 configFile: 'karma.conf.js'
                 //background: true
+            },
+            ci: {
+                configFile: 'karma.conf-ci.js'
+                //background: true
             }
         },
 
@@ -53,7 +57,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-shell');
 
-    grunt.registerTask('test', ['jshint', 'shell', 'mochaTest', 'karma']);
+    grunt.registerTask('test', ['jshint', 'shell', 'mochaTest', 'karma:unit']);
+    grunt.registerTask('build', ['jshint', 'shell']);
     grunt.registerTask('default', ['jshint', 'shell', 'mochaTest']);
 
 };

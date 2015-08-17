@@ -1,9 +1,38 @@
-language: javascript
+language: node_js
+node_js:
+  - "0.12"
+  - "0.11"
+  - "iojs"
 
 env:
+  - KARMA=yes MOCHA=yes BUILD=yes
+  - KARMA=yes MOCHA=no BUILD=yes
+  - KARMA=no MOCHA=yes BUILD=yes
+
   global:
 #    - secure: Secure username token goes here!
 #    - secure: Secure access key token goes here!
 
 addons:
   sauce_connect: true
+
+sudo: false
+
+script:
+  - >
+    if [[ "$BUILD" == "yes" ]]; then
+      echo;
+      echo "Build";
+      grunt build;
+    fi
+  - >
+    if [[ "$KARMA" == "yes" ]]; then
+      echo;
+      echo "Running karma tests";
+      grunt karma:ci;
+    fi
+  - >
+    if [[ "$MOCHA" == "yes" ]]; then
+      echo;
+      grunt mochaTest;
+    fi
