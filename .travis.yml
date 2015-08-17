@@ -1,0 +1,6 @@
+language: javascript
+
+env:
+  global:
+#    - secure: Secure username token goes here!
+#    - secure: Secure access key token goes here!
