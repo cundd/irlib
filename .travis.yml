@@ -6,13 +6,18 @@ node_js:
 
 env:
   matrix:
-    - KARMA=yes MOCHA=yes BUILD=no
     - KARMA=yes MOCHA=no BUILD=no
-    - KARMA=no MOCHA=yes BUILD=no
+#    - KARMA=no MOCHA=yes BUILD=no
 
   global:
     - secure: GNNCvvSI2omJQXBzOcYgkEFKRej7zSUzt5VUz7t3TZnJ2WiZDqP5iT45f3AsqJVR5B+2KaXBSDNecpOSYZR0CcGMRp2gga937GSiXrcEJxF/Su1EjcPhSWoMC5/E1KxqvqERQRexKkMz6o7uGLCVjG5NfFO54tMBHFS/o3VVhdK9gTA+je/O5HqWe+6QFICt+Gf80xIAgOxK+HTVt5azfY8ySg20NTezew/Ts4YSmz/tA0D6zOUyrS6Lyj8E4LfytzcXWgsBojIYaEdoooiy2bsszJ4rYV7Y7iFjL8M66yHOaOPG/NxvjUWcZ2dKXmSdYtU7eRA5PK4Kz2ubiWd0I+nATj8N5SK7d/SWr6VoPRCje0wTyrOMWCX814hqCYn8Y24xmOTFKh56qAZMyBgxlRvxxBZP2HlTiBTgSlSuNTcpz5wvpa5jtLS0Q0h2bKO2m2Fm1C590dMVAVcyt6vdxCqTxT5oz6t8CNDz8zfOqBU+vOA9KEEvFHGVBj9Fj/6J8L1zAt05N4jZULBfaYt3W+B5cQter1O5KFMv+uQSeM4olGrFWQEX9X5hTmXaYsKSKVFOhMAqCgpyhGkvSTvSLvfTbGowOBBY7D+ki3bggbQheVqhMYvoaLp3xbnjL8XhFKw9MB4Lqk1pnHNGY/uYYYZsPaICedKIG+fPveafjGw=
     - secure: Cz1QKlUi75xK9v/9U7kbB0rzkCYDof3quReYG1WYq2zzYTSw1vrf66/qD/xHf7JPTT5Q4CaeICz5YBtwtVu3e5UuPA9o5dBpCT693pbm8puabsr7xv5Y50wV+sQWUdJ7FqnMV2uPvFeqPXo07nODLFqH3EqGXfC7ogmwe/j5UlOzehl5CrmWXLRKVKOhlfDtZChjHZGbbbrr3BVG3S5/SI2sFf9KYPDLobuZepIXDhJF9pKB/aHtDvwhfSbKptIg+Rhbrn03StsOyOyYN8QfsygaGY6n8rf27yg5SuPP8SEmRoy+Gkbc810lV4B72DhGeIt9+Lkn1W67R5H1AaEToADUnft23aRkpJRRRKVyBeUBK5XS1X7I1sdXjOFq8OGiut/Ky38Gc1JjcdL7Qtop8os4tC9HRhUczJHTyPbSXFxsjinCXgotWeRqyHCszPeGTlJnsT94eq0JHnxiH7Ipl7dBeXKRF7Um9ngoq17mQZImlekAE3mgptDvLyJbyProVsFeSWkQd3okpAnVB5UkN44m/3gXjiGXM6CbidDsIvw6U4H1ZUTN89DL88LxD0t2U3D+KncxQ1Hbxwf0EEX98Kq9gNwShzUeA8gKH1Io6IFtkeiQbnkqrlaWmRfurZVHZQbWbfMcfN9c0OP3jC/t5m9y0fsTVeWcrkT2NphWygg=
+
+  include:
+    - node_js: "iojs"
+      env: KARMA=yes MOCHA=no BUILD=no
+    - node_js: "iojs"
+      env: KARMA=no MOCHA=yes BUILD=no
 
 addons:
   sauce_connect: true
