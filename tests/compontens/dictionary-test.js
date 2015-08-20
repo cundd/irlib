@@ -15,6 +15,11 @@ describe('Dictionary', function () {
             assert.typeOf(dictionary.keys(), 'array');
             assert.strictEqual(dictionary.keys().length, 2);
         });
+        it('should create empty dictionary for initialization argument null', function () {
+            var dictionary = new IrLib.Dictionary(null);
+            assert.typeOf(dictionary.keys(), 'array');
+            assert.strictEqual(dictionary.keys().length, 0);
+        });
         it('should throw an exception for invalid initialization argument (string)', function () {
             assert.throws(function () {
                 new IrLib.Dictionary('string');

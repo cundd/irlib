@@ -31,6 +31,9 @@ IrLib.Dictionary = IrLib.CoreObject.extend({
                     1435219260
                 );
             }
+            if (initializationValues === null) {
+                initializationValues = {};
+            }
             _initWithObject.call(this, initializationValues);
         }
         return this;
