@@ -2,6 +2,10 @@
  * Created by COD on 25.06.15.
  */
 
+/**
+ * @abstract
+ * @type {{}}
+ */
 IrLib.View.Template = IrLib.View.Template || {};
 
 /**

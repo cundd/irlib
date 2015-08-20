@@ -33,13 +33,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     _templateBlocks: null,
 
     /**
-     * Dictionary of template variables
-     *
-     * @type {IrLib.Dictionary}
-     */
-    _variables: null,
-
-    /**
      * Dictionary of computed variables
      *
      * @type {IrLib.Dictionary}
@@ -60,6 +53,19 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     _lastConditionStateStack: [],
 
+    /**
+     * Registered sub views
+     *
+     * @type {IrLib.Dictionary}
+     */
+    _subviewPlaceholders: null,
+
+    /**
+     * Render the subviews as string
+     * @type {Boolean}
+     */
+    _renderSubviewsAsPlaceholders: false,
+
     init: function (template, variables) {
         this._super(template, variables);
 
@@ -76,21 +82,14 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this.setComputed(this.computed);
         }
 
+        this._subviewPlaceholders = new IrLib.Dictionary();
+
         this.setVariables(variables || {});
         this.defineProperties({
             'template': {
                 enumerable: true,
                 get: this.getTemplate,
                 set: this.setTemplate
-            },
-            'needsRedraw': {
-                enumerable: true,
-                get: this.getNeedsRedraw
-            },
-            'variables': {
-                enumerable: true,
-                get: this.getVariables,
-                set: this.setVariables
             },
             'computed': {
                 enumerable: true,
@@ -107,6 +106,27 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     toString: function () {
         return this._renderBlocks();
+    },
+
+    /**
+     * Renders the template
+     *
+     * @return {Node|HTMLElement}
+     */
+    render: function () {
+        if (this._needsRedraw) {
+            delete this._dom;
+            var _template = this.template;
+            if (!_template) {
+                throw new ReferenceError('Template not specified');
+            }
+
+            this._renderSubviewsAsPlaceholders = true;
+            this._dom = this._createDom(this.toString());
+            this._renderSubviewsAsPlaceholders = false;
+            this._needsRedraw = false;
+        }
+        return this._dom;
     },
 
     /**
@@ -170,7 +190,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             expressionParts = block.content.split(' '),
             lastConditionStateStack = this._lastConditionStateStack,
             meta = block.meta,
-            output, view;
+            output, view, viewId;
 
         switch (meta.expressionType) {
             case ExpressionType.VIEW:
@@ -178,7 +198,13 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 view.setContext(this);
                 view.setVariables(this.variables);
 
-                output = view.toString();
+                if (this._renderSubviewsAsPlaceholders) {
+                    viewId = 'irLibView-' + (+(new Date()));
+                    this._subviewPlaceholders[viewId] = view;
+                    output = '<script id="' + viewId + '" type="text/x-placeholder"></script>';
+                } else {
+                    output = view.toString();
+                }
                 break;
 
             case ExpressionType.ELSE:
@@ -217,7 +243,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             case ExpressionType.UNKNOWN:
             /* falls through */
             default:
-                output = '';
+                output = '{%' + block.content + '%}';
         }
 
         return output;
@@ -321,7 +347,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
         if (!_computed) {
             return undefined;
         }
-            registeredComputed = _computed[key];
+        registeredComputed = _computed[key];
         if (typeof registeredComputed === 'function') {
             return registeredComputed.call(this);
         }
@@ -431,45 +457,24 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     //    return template;
     //},
 
-    /**
-     * Sets the variables
-     *
-     * @param {Object|IrLib.Dictionary} data
-     * @returns {IrLib.View.Interface}
-     */
-    setVariables: function (data) {
-        if (typeof data !== 'object') {
-            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
-        }
-        if (data instanceof IrLib.Dictionary) {
-            this._variables = data;
-        } else {
-            this._variables = new IrLib.Dictionary(data);
-        }
-        this._needsRedraw = true;
-        return this;
-    },
+    replaceSubviewPlaceholders: function () {
+        var _dom = this._dom;
+        this._subviewPlaceholders.forEach(function (view, elementId) {
+            var placeholder = _dom.querySelector('#' + elementId);
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.replaceChild(view.render(), placeholder);
+                view.addStoredEventListeners();
 
-    /**
-     * Adds the variable with the given key and value
-     *
-     * @param {String} key
-     * @param {*} value
-     * @returns {IrLib.View.Interface}
+            } else {
+                IrLib.Logger.warn('Could not find subview placeholder #' + elementId);
+            }
+        });
+    }, /**
+     * @inheritDoc
      */
-    assignVariable: function (key, value) {
-        this._variables[key] = value;
-        this._needsRedraw = true;
-        return this;
-    },
-
-    /**
-     * Returns the currently assigned variables
-     *
-     * @returns {IrLib.Dictionary}
-     */
-    getVariables: function () {
-        return this._variables;
+    appendTo: function (element) {
+        this._super(element);
+        this.replaceSubviewPlaceholders();
     },
 
     /**
@@ -496,7 +501,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.Dictionary}
      */
-    getComputed: function() {
+    getComputed: function () {
         return this._computed;
     },
 

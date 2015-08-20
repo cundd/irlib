@@ -130,7 +130,7 @@ describe('Controller+View', function () {
 
                 childNode.dispatchEvent(buildEvent('click', controller));
 
-                assert.strictEqual(view.render().firstChild, childNode);
+                assert.strictEqual(view.render().lastChild, childNode);
                 assert.isTrue(clicked, 'Child element was not clicked');
                 assert.isFalse(keyPressed, 'A key has been pressed');
                 assert.equal(handler, controller);
@@ -230,7 +230,7 @@ describe('Controller+View', function () {
 
                 childNode.dispatchEvent(buildEvent('click', controller));
 
-                assert.strictEqual(view.render().firstChild, childNode);
+                assert.strictEqual(view.render().lastChild, childNode);
                 assert.isTrue(clicked, 'Child element was not clicked');
                 assert.isFalse(keyPressed, 'A key has been pressed');
                 assert.equal(handler, controller);
@@ -331,7 +331,7 @@ describe('Controller+View', function () {
 
                 childNode.dispatchEvent(buildEvent('click', controller));
 
-                assert.strictEqual(view.render().firstChild, childNode);
+                assert.strictEqual(view.render().lastChild, childNode);
                 assert.isTrue(clicked, 'Child element was not clicked');
                 assert.isFalse(keyPressed, 'A key has been pressed');
                 assert.equal(handler, controller);
@@ -431,7 +431,7 @@ describe('Controller+View', function () {
 
                 childNode.dispatchEvent(buildEvent('click', controller));
 
-                assert.strictEqual(view.render().firstChild, childNode);
+                assert.strictEqual(view.render().lastChild, childNode);
                 assert.isTrue(clicked, 'Child element was not clicked');
                 assert.isFalse(keyPressed, 'A key has been pressed');
                 assert.equal(handler, controller);

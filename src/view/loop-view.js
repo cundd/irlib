@@ -140,7 +140,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
             _template = this.getTemplateView(),
             _asKey = this.getAsKey(),
             renderedContent = '',
-            currentVariables, scope, i;
+            templateCopy, currentVariables, scope, i;
 
         if (!_template) {
             throw new ReferenceError('Template not specified');
@@ -148,6 +148,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
 
         _template.setContext(this);
         for (i = 0; i < contentLength; i++) {
+            templateCopy = _template.clone();
             currentVariables = content[i];
             scope = {
                 _meta: {
@@ -161,6 +162,9 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
 
             if(appendToNode) {
                 appendToNode.appendChild(_template.render());
+                if (_template instanceof IrLib.View.Template || typeof _template.replaceSubviewPlaceholders === 'function') {
+                    _template.replaceSubviewPlaceholders();
+                }
             } else {
                 renderedContent += _template.toString();
             }
@@ -190,6 +194,22 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      */
     getContent: function () {
         return this._content;
+    },
+
+    /**
+     * Set the variables
+     *
+     * @param {Object|IrLib.Dictionary} data
+     * @return {IrLib.View.Interface}
+     * @abstract
+     */
+    setVariables: function (data) {
+        this._super(data);
+        if (typeof data.content !== 'undefined') {
+            this.setContent(data.content);
+            //    throw new TypeError('Loop View only accepts variables with a property called "content". See setContent()');
+        }
+        return this;
     },
 
     /**

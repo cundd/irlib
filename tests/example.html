@@ -8,6 +8,8 @@
             font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial;
             margin: 0;
             padding: 0;
+            background: #1f1f1f;
+            color: #ccc;
         }
 
         *, *:after, *:before {
@@ -33,6 +35,10 @@
             background: #353535;
             color: #555;
         }
+
+        .content {
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -48,31 +54,80 @@
             <a href="#" id="delete">Delete</a>
         </div>
         <div class="saved">Saved {{saved}} times</div>
+
+        <div class="content">
+            {%Blackxpression view/textField%}
+            <!--{%view view/textField%}-->
+            <br>
+            {%view view/loopView%}
+        </div>
     </div>
 </script>
 
 <script type="application/javascript">
-    var controller = new (IrLib.Controller.extend({
-        view: new IrLib.View.Template('#my-template', {saved: 0}),
-        events: {
-            click: function (e) {
-                IrLib.Logger.log('Clicked element', e.target);
-                IrLib.Logger.log('attached to view', e.irTarget);
+    var sl = new IrLib.ServiceLocator();
 
-                if (e.target.id === 'save') {
-                    this.view.assignVariable('saved', this.view.variables.saved + 1);
-                    this.view.reload();
-                }
+    sl.registerMultiple({
+        appView: function () {
+            return sl.resolveDependencies(
+                    new IrLib.View.Template('#my-template', {saved: 0}),
+                    IrLib.View.Template
+            );
+        },
+        'view/loopView': IrLib.View.LoopView.extend({
+            template: 'view/textField',
+            content: [
+                {},
+                {}
+            ]
+        }),
+        'view/textField': IrLib.View.Template.extend({
+            template: '<input type="text">',
+            init: function () {
+                this._super();
+                this.addEventListener('keydown', function (e) {
+                    console.log(e)
+                });
+                this.addEventListener('click', function (e) {
+                    console.log(e)
+                });
+            },
 
-                if (e.target.id === 'delete') {
-                    this.view.assignVariable('saved', 0);
-                    this.view.reload();
+//            appendTo: function(e) {
+//                console.log('fff');
+//                this._super(e);
+//                this.addEventListener('keydown', function(e) {
+//                    console.log(e)
+//                });
+//                this.addEventListener('click', function(e) {
+//                    console.log(e)
+//                });
+//            }
+        }),
+        appController: IrLib.Controller.extend({
+            needs: ['appView:view'],
+            events: {
+                click: function (e) {
+//                    IrLib.Logger.log('Clicked element', e.target);
+//                    IrLib.Logger.log('attached to view', e.irTarget);
+
+                    if (e.target.id === 'save') {
+                        this.view.assignVariable('saved', this.view.variables.saved + 1);
+                        this.view.reload();
+                    }
+
+                    if (e.target.id === 'delete') {
+                        this.view.assignVariable('saved', 0);
+                        this.view.reload();
+                    }
                 }
             }
-        }
-    }));
+        })
+    });
 
-    controller.view.appendTo(document.getElementById('root'));
+    var controller = sl.get('appController');
+    var view = controller.view;
+    view.appendTo(document.getElementById('root'));
     controller.initializeEventListeners();
 </script>
 

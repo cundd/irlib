@@ -179,6 +179,15 @@ IrLib.CoreObject = Class.extend({
     defineProperties: function (properties) {
         Object.defineProperties(this, properties);
         return this;
+    },
+
+    /**
+     * Returns a deep copy of this object
+     *
+     * @returns {*}
+     */
+    clone: function() {
+        return IrLib.Utility.GeneralUtility.clone(this, 1);
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
@@ -369,9 +378,78 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      */
     isNumeric: function (value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
-    }
+    },
 
+    /**
+     * Returns a deep copy of the given object
+     *
+     * @param {*}obj
+     * @param {Number} depth
+     * @returns {*}
+     */
+    clone: function (obj, depth) {
+        var copy;
+        if (arguments.length < 2) {
+            depth = 10;
+        }
+
+        // Handle the 3 simple types, and null or undefined
+        if (null === obj || "object" !== typeof obj) {
+            return obj;
+        }
+
+        // Handle Date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        // Handle Array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                if (depth - 1 > 0) {
+                    copy[i] = _GeneralUtility.clone(obj[i], depth - 1);
+                } else {
+                    copy[i] = obj[i];
+                }
+            }
+            return copy;
+        }
+
+        // Handle Object
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) {
+                if (depth - 1 > 0) {
+                    copy[attr] = _GeneralUtility.clone(obj[attr], depth - 1);
+                } else {
+                    copy[attr] = obj[attr];
+                }
+            }
+        }
+        return copy;
+    },
+
+    /**
+     * Adds the class to the given element
+     *
+     * @param {*} element HTML node or selector
+     * @param {String} className
+     */
+    addClass: function (element, className) {
+        element = _GeneralUtility.domNode(element);
+        if (element) {
+            if (element.classList) {
+                element.classList.add(className);
+            } else {
+                element.className += ' ' + className;
+            }
+        }
+    }
 };
+
 
 /**
  * Created by COD on 14.04.15.
@@ -1235,6 +1313,16 @@ IrLib.Url.prototype = {
  */
 (function() {/*require('view\/interface');// */
 
+}());
+
+
+(function() {/*require('view\/abstract-variable-view');// */
+
+/**
+ * Created by COD on 25.06.15.
+ */
+(function() {/*require('view\/interface');// */
+
 /**
  * Created by COD on 25.06.15.
  */
@@ -1350,10 +1438,90 @@ IrLib.View.Interface = IrLib.CoreObject.extend({
 /**
  * An abstract context-aware view
  *
+ * @implements IrLib.View.VariableViewInterface
+ * @abstract
+ */
+IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
+    /**
+     * Dictionary of template variables
+     *
+     * @type {IrLib.Dictionary}
+     */
+    _variables: null,
+
+    init: function () {
+        this._super();
+
+        this.defineProperties({
+            'variables': {
+                enumerable: true,
+                get: this.getVariables,
+                set: this.setVariables
+            }
+        });
+    },
+
+    /**
+     * @abstract
+     */
+    toString: function () {
+        throw new IrLib.MissingImplementationError('assignVariable');
+    },
+
+    /**
+     * Sets the variables
+     *
+     * @param {Object|IrLib.Dictionary} data
+     * @returns {IrLib.View.Interface}
+     */
+    setVariables: function (data) {
+        if (typeof data !== 'object') {
+            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
+        }
+        if (data instanceof IrLib.Dictionary) {
+            this._variables = data;
+        } else {
+            this._variables = new IrLib.Dictionary(data);
+        }
+        this._needsRedraw = true;
+        return this;
+    },
+
+    /**
+     * Adds the variable with the given key and value
+     *
+     * @param {String} key
+     * @param {*} value
+     * @returns {IrLib.View.Interface}
+     */
+    assignVariable: function (key, value) {
+        this._variables[key] = value;
+        this._needsRedraw = true;
+        return this;
+    },
+
+    /**
+     * Returns the currently assigned variables
+     *
+     * @returns {IrLib.Dictionary}
+     */
+    getVariables: function () {
+        return this._variables;
+    }
+});
+
+
+}());
+
+
+
+/**
+ * An abstract context-aware view
+ *
  * @implements IrLib.View.ContextInterface
  * @abstract
  */
-IrLib.View.AbstractContextAwareView = IrLib.View.Interface.extend({
+IrLib.View.AbstractContextAwareView = IrLib.View.AbstractVariableView.extend({
     /**
      * Views context
      *
@@ -1376,12 +1544,6 @@ IrLib.View.AbstractContextAwareView = IrLib.View.Interface.extend({
                 set: this.setContext
             }
         );
-    },
-
-    /**
-     * @abstract
-     */
-    toString: function () {
     },
 
     /**
@@ -1423,11 +1585,18 @@ IrLib.View.AbstractContextAwareView = IrLib.View.Interface.extend({
  */
 IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     /**
+     * Tag name for the HTML node that encapsulates the generated nodes
+     *
+     * @type {String}
+     */
+    tagName: 'div',
+
+    /**
      * Registry of event listeners
      *
      * @type {Object}
      */
-    eventListeners: {},
+    _eventListeners: {},
 
     /**
      * Defines if a redraw is required
@@ -1452,7 +1621,20 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
 
     init: function () {
         this._super();
-        this.eventListeners = {};
+
+        if (typeof this.eventListeners === 'object') { // Check if a eventListeners variables are inherited
+            this._eventListeners = this.eventListeners;
+        } else {
+            this._eventListeners = {};
+        }
+
+        this.defineProperty(
+            'needsRedraw',
+            {
+                enumerable: true,
+                get: this.getNeedsRedraw
+            }
+        );
     },
 
     /**
@@ -1468,9 +1650,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 throw new ReferenceError('Template not specified');
             }
 
-            var domWithRoot = this._createDom(this.toString());
-            this._dom = domWithRoot.firstChild;
-            //template = this._renderActions(template);
+            this._dom = this._createDom(this.toString());
             this._needsRedraw = false;
         }
         return this._dom;
@@ -1507,6 +1687,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         }
 
         this.render();
+
         if (this._lastInsertedNode) {
             element.replaceChild(this._dom, this._lastInsertedNode);
         } else {
@@ -1514,7 +1695,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         }
         this._lastInsertedNode = this._dom;
 
-        this._addEventListeners(this._dom, Object.keys(this.eventListeners));
+        this.addStoredEventListeners();
         return this;
     },
 
@@ -1522,7 +1703,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * Reloads the Views output in the DOM
      *
      * @param {Boolean} [force]
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     reload: function (force) {
         var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null);
@@ -1556,7 +1737,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Event} event
      */
     handleEvent: function (event) {
-        var imps = this.eventListeners[event.type],
+        var imps = this._eventListeners[event.type],
             patchedEvent, currentImp, i;
 
         if (imps) {
@@ -1594,7 +1775,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Boolean} [useCapture] Currently ignored
      */
     addEventListener: function (type, listener, useCapture) {
-        var _eventListeners = this.eventListeners;
+        var _eventListeners = this._eventListeners;
         if (!_eventListeners[type]) {
             _eventListeners[type] = [listener];
         }
@@ -1622,6 +1803,13 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     },
 
     /**
+     * Add the stored event listeners to the DOM Node
+     */
+    addStoredEventListeners: function() {
+        this._addEventListeners(this._dom, Object.keys(this._eventListeners));
+    },
+
+    /**
      * Dispatches an Event at the View, invoking the affected EventListeners in the appropriate order.
      *
      * The normal event processing rules (including the capturing and optional bubbling phase) apply to events
@@ -1642,7 +1830,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @protected
      */
     _createDom: function (template) {
-        var root = document.createElement('div');
+        var root = document.createElement(this.tagName);
         if (template) {
             root.innerHTML = template;
         }
@@ -1712,13 +1900,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     _templateBlocks: null,
 
     /**
-     * Dictionary of template variables
-     *
-     * @type {IrLib.Dictionary}
-     */
-    _variables: null,
-
-    /**
      * Dictionary of computed variables
      *
      * @type {IrLib.Dictionary}
@@ -1739,6 +1920,19 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     _lastConditionStateStack: [],
 
+    /**
+     * Registered sub views
+     *
+     * @type {IrLib.Dictionary}
+     */
+    _subviewPlaceholders: null,
+
+    /**
+     * Render the subviews as string
+     * @type {Boolean}
+     */
+    _renderSubviewsAsPlaceholders: false,
+
     init: function (template, variables) {
         this._super(template, variables);
 
@@ -1755,21 +1949,14 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this.setComputed(this.computed);
         }
 
+        this._subviewPlaceholders = new IrLib.Dictionary();
+
         this.setVariables(variables || {});
         this.defineProperties({
             'template': {
                 enumerable: true,
                 get: this.getTemplate,
                 set: this.setTemplate
-            },
-            'needsRedraw': {
-                enumerable: true,
-                get: this.getNeedsRedraw
-            },
-            'variables': {
-                enumerable: true,
-                get: this.getVariables,
-                set: this.setVariables
             },
             'computed': {
                 enumerable: true,
@@ -1786,6 +1973,27 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     toString: function () {
         return this._renderBlocks();
+    },
+
+    /**
+     * Renders the template
+     *
+     * @return {Node|HTMLElement}
+     */
+    render: function () {
+        if (this._needsRedraw) {
+            delete this._dom;
+            var _template = this.template;
+            if (!_template) {
+                throw new ReferenceError('Template not specified');
+            }
+
+            this._renderSubviewsAsPlaceholders = true;
+            this._dom = this._createDom(this.toString());
+            this._renderSubviewsAsPlaceholders = false;
+            this._needsRedraw = false;
+        }
+        return this._dom;
     },
 
     /**
@@ -1849,7 +2057,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             expressionParts = block.content.split(' '),
             lastConditionStateStack = this._lastConditionStateStack,
             meta = block.meta,
-            output, view;
+            output, view, viewId;
 
         switch (meta.expressionType) {
             case ExpressionType.VIEW:
@@ -1857,7 +2065,13 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 view.setContext(this);
                 view.setVariables(this.variables);
 
-                output = view.toString();
+                if (this._renderSubviewsAsPlaceholders) {
+                    viewId = 'irLibView-' + (+(new Date()));
+                    this._subviewPlaceholders[viewId] = view;
+                    output = '<script id="' + viewId + '" type="text/x-placeholder"></script>';
+                } else {
+                    output = view.toString();
+                }
                 break;
 
             case ExpressionType.ELSE:
@@ -1896,7 +2110,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             case ExpressionType.UNKNOWN:
             /* falls through */
             default:
-                output = '';
+                output = '{%' + block.content + '%}';
         }
 
         return output;
@@ -2000,7 +2214,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
         if (!_computed) {
             return undefined;
         }
-            registeredComputed = _computed[key];
+        registeredComputed = _computed[key];
         if (typeof registeredComputed === 'function') {
             return registeredComputed.call(this);
         }
@@ -2110,45 +2324,24 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     //    return template;
     //},
 
-    /**
-     * Sets the variables
-     *
-     * @param {Object|IrLib.Dictionary} data
-     * @returns {IrLib.View.Interface}
-     */
-    setVariables: function (data) {
-        if (typeof data !== 'object') {
-            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
-        }
-        if (data instanceof IrLib.Dictionary) {
-            this._variables = data;
-        } else {
-            this._variables = new IrLib.Dictionary(data);
-        }
-        this._needsRedraw = true;
-        return this;
-    },
+    replaceSubviewPlaceholders: function () {
+        var _dom = this._dom;
+        this._subviewPlaceholders.forEach(function (view, elementId) {
+            var placeholder = _dom.querySelector('#' + elementId);
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.replaceChild(view.render(), placeholder);
+                view.addStoredEventListeners();
 
-    /**
-     * Adds the variable with the given key and value
-     *
-     * @param {String} key
-     * @param {*} value
-     * @returns {IrLib.View.Interface}
+            } else {
+                IrLib.Logger.warn('Could not find subview placeholder #' + elementId);
+            }
+        });
+    }, /**
+     * @inheritDoc
      */
-    assignVariable: function (key, value) {
-        this._variables[key] = value;
-        this._needsRedraw = true;
-        return this;
-    },
-
-    /**
-     * Returns the currently assigned variables
-     *
-     * @returns {IrLib.Dictionary}
-     */
-    getVariables: function () {
-        return this._variables;
+    appendTo: function (element) {
+        this._super(element);
+        this.replaceSubviewPlaceholders();
     },
 
     /**
@@ -2175,7 +2368,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.Dictionary}
      */
-    getComputed: function() {
+    getComputed: function () {
         return this._computed;
     },
 
@@ -2263,6 +2456,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
         return this._templateParser;
     }
 });
+
 
 }());
 
@@ -2405,7 +2599,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
             _template = this.getTemplateView(),
             _asKey = this.getAsKey(),
             renderedContent = '',
-            currentVariables, scope, i;
+            templateCopy, currentVariables, scope, i;
 
         if (!_template) {
             throw new ReferenceError('Template not specified');
@@ -2413,6 +2607,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
 
         _template.setContext(this);
         for (i = 0; i < contentLength; i++) {
+            templateCopy = _template.clone();
             currentVariables = content[i];
             scope = {
                 _meta: {
@@ -2426,6 +2621,9 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
 
             if(appendToNode) {
                 appendToNode.appendChild(_template.render());
+                if (_template instanceof IrLib.View.Template || typeof _template.replaceSubviewPlaceholders === 'function') {
+                    _template.replaceSubviewPlaceholders();
+                }
             } else {
                 renderedContent += _template.toString();
             }
@@ -2455,6 +2653,22 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      */
     getContent: function () {
         return this._content;
+    },
+
+    /**
+     * Set the variables
+     *
+     * @param {Object|IrLib.Dictionary} data
+     * @return {IrLib.View.Interface}
+     * @abstract
+     */
+    setVariables: function (data) {
+        this._super(data);
+        if (typeof data.content !== 'undefined') {
+            this.setContent(data.content);
+            //    throw new TypeError('Loop View only accepts variables with a property called "content". See setContent()');
+        }
+        return this;
     },
 
     /**
@@ -2590,6 +2804,52 @@ IrLib.View.SubViewInterface = function () {
  */
 IrLib.View.SubViewInterface.prototype.toString = function () {
     throw new IrLib.MissingImplementationError('toString');
+};
+
+
+/**
+ * Created by COD on 25.06.15.
+ */
+
+IrLib.View = IrLib.View || {};
+
+/**
+ * Defines a common interface for Views with variables
+ *
+ * @interface
+ */
+IrLib.View.VariableViewInterface = function () {
+};
+
+
+/**
+ * Sets the variables
+ *
+ * @param {Object|IrLib.Dictionary} data
+ * @returns {IrLib.View.Interface}
+ */
+IrLib.View.VariableViewInterface.prototype.setVariables = function (data) {
+    throw new IrLib.MissingImplementationError('setVariables');
+};
+
+/**
+ * Adds the variable with the given key and value
+ *
+ * @param {String} key
+ * @param {*} value
+ * @returns {IrLib.View.Interface}
+ */
+IrLib.View.VariableViewInterface.prototype.assignVariable = function (key, value) {
+    throw new IrLib.MissingImplementationError('assignVariable');
+};
+
+/**
+ * Returns the currently assigned variables
+ *
+ * @returns {IrLib.Dictionary}
+ */
+IrLib.View.VariableViewInterface.prototype.getVariables = function () {
+    throw new IrLib.MissingImplementationError('getVariables');
 };
 
 
@@ -2765,6 +3025,10 @@ IrLib.View.Parser.Interface = IrLib.CoreObject.extend({
  * Created by COD on 25.06.15.
  */
 
+/**
+ * @abstract
+ * @type {{}}
+ */
 IrLib.View.Template = IrLib.View.Template || {};
 
 /**

@@ -71,7 +71,7 @@ describe('View.LoopView', function () {
             //assert.throws(function() {
             //    new IrLib.View.LoopView(1.0);
             //});
-            assert.throws(function() {
+            assert.throws(function () {
                 new IrLib.View.LoopView({});
             });
         });
@@ -382,7 +382,7 @@ describe('View.LoopView', function () {
         it('should build a DOM element', function () {
             var ELEMENT_NODE = 1,
                 view = new IrLib.View.LoopView(
-                    '<section><div>{{article.content}}</div></section>',
+                    '<section>{{article.content}}</section>',
                     [
                         {content: 'Content 1'},
                         {content: 'Content 2'},
@@ -394,9 +394,9 @@ describe('View.LoopView', function () {
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML,
-                '<section><div>Content 1</div></section>' +
-                '<section><div>Content 2</div></section>' +
-                '<section><div>Content 3</div></section>' +
+                '<div><section>Content 1</section></div>' +
+                '<div><section>Content 2</section></div>' +
+                '<div><section>Content 3</section></div>' +
                 ''
             )
         });
@@ -419,8 +419,37 @@ describe('View.LoopView', function () {
         it('should build a DOM element with conditions', function () {
             var ELEMENT_NODE = 1,
                 view = new IrLib.View.LoopView(
+                    '<section>' +
+                    '{%if article.isImportant%}' +
+                    '{{article.content}}' +
+                    '{%endif%}' +
+                    '</section>',
+                    [
+                        {'content': 'Hello 1', isImportant: true},
+                        {'content': 'Hello 2', isImportant: false},
+                        {'content': 'Hello 3', isImportant: false},
+                        {'content': 'Hello 4', isImportant: true}
+                    ],
+                    'article'
+                );
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML,
+                '<div><section>Hello 1</section></div>' +
+                '<div><section></section></div>' +
+                '<div><section></section></div>' +
+                '<div><section>Hello 4</section></div>' +
+                ''
+            )
+        });
+        it('should build a DOM element with conditions and else', function () {
+            var ELEMENT_NODE = 1,
+                view = new IrLib.View.LoopView(
                     '<section><div>' +
                     '{%if article.isImportant%}' +
+                    'Important: {{article.content}}!' +
+                    '{%else%}' +
                     '{{article.content}}' +
                     '{%endif%}' +
                     '</div></section>',
@@ -436,23 +465,26 @@ describe('View.LoopView', function () {
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML,
-                '<section><div>Hello 1</div></section>' +
-                '<section><div></div></section>' +
-                '<section><div></div></section>' +
-                '<section><div>Hello 4</div></section>' +
+                '<div><section><div>Important: Hello 1!</div></section></div>' +
+                '<div><section><div>Hello 2</div></section></div>' +
+                '<div><section><div>Hello 3</div></section></div>' +
+                '<div><section><div>Important: Hello 4!</div></section></div>' +
                 ''
             )
         });
-        it('should build a DOM element with conditions and else', function () {
+        it('should build a DOM element with conditions and else with template instance', function () {
             var ELEMENT_NODE = 1,
                 view = new IrLib.View.LoopView(
-                    '<section><div>' +
-                    '{%if article.isImportant%}' +
-                    'Important: {{article.content}}!' +
-                    '{%else%}' +
-                    '{{article.content}}' +
-                    '{%endif%}' +
-                    '</div></section>',
+                    new (IrLib.View.Template.extend({
+                        template: '<div>' +
+                        '{%if article.isImportant%}' +
+                        'Important: {{article.content}}!' +
+                        '{%else%}' +
+                        '{{article.content}}' +
+                        '{%endif%}' +
+                        '</div>',
+                        tagName: 'section'
+                    })),
                     [
                         {'content': 'Hello 1', isImportant: true},
                         {'content': 'Hello 2', isImportant: false},
@@ -479,7 +511,7 @@ describe('View.LoopView', function () {
 
             sl.registerMultiple({
                 loopView: IrLib.View.LoopView.extend({
-                    template: '<section><div>{%view header%}</div></section>'
+                    template: '<section>{%view header%}</section>'
                 }),
                 header: IrLib.View.Template.extend({
                     template: '<h1>{{this.headline}}</h1>'
@@ -496,8 +528,8 @@ describe('View.LoopView', function () {
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(
                 result.innerHTML,
-                '<section><div><h1>Heading 1</h1></div></section>' +
-                '<section><div><h1>Heading 2</h1></div></section>' +
+                '<div><section><div><h1>Heading 1</h1></div></section></div>' +
+                '<div><section><div><h1>Heading 2</h1></div></section></div>' +
                 ''
             );
         });
@@ -507,334 +539,252 @@ describe('View.LoopView', function () {
             });
         });
     });
-    //    it('should render conditional in template', function () {
-    //        var view = new IrLib.View.LoopView('<section>{%if condition%}Condition fulfilled{%endif%}</section>');
-    //        view.setVariables({condition: true});
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Condition fulfilled');
-    //    });
-    //    it('should render conditional empty in template', function () {
-    //        var view = new IrLib.View.LoopView('<section>{%if condition%}Condition fulfilled{%endif%}</section>');
-    //        view.setVariables({condition: false});
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '');
-    //    });
-    //    it('should throw for missing condition', function () {
-    //        var view = new IrLib.View.LoopView('<section>{%if%}Condition fulfilled{%endif%}</section>');
-    //        view.setVariables({condition: true});
-    //
-    //        assert.throws(function () {
-    //            view.render();
-    //        });
-    //    });
-    //    it('should render else in template', function () {
-    //        var view = new IrLib.View.LoopView('<section>{%if condition%}Condition fulfilled{%else%}else statement{%endif%}</section>');
-    //        view.setVariables({condition: false});
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'else statement');
-    //    });
-    //    it('should not render else in template', function () {
-    //        var view = new IrLib.View.LoopView('<section>{%if condition%}Condition fulfilled{%else%}not fulfilled{%endif%}</section>');
-    //        view.setVariables({condition: true});
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Condition fulfilled');
-    //    });
-    //    it('should handle nested if-else in template', function () {
-    //        var view = new IrLib.View.LoopView('<section>{%if condition%}Outer condition fulfilled{%else%}Outer not fulfilled{%if inner.condition%} inner condition fulfilled{%else%} inner else{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            condition: false,
-    //            inner: {
-    //                condition: true
-    //            }
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.outerHTML, '<section>Outer not fulfilled inner condition fulfilled</section>');
-    //    });
-    //    it('should render nested conditional in template (true / true)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            condition: true,
-    //            innerCondition: true
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
-    //    });
-    //    it('should render nested conditional in template (true / false)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            condition: true,
-    //            innerCondition: false
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
-    //    });
-    //    it('should render nested conditional empty in template (false / false)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            condition: false,
-    //            innerCondition: false
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '');
-    //    });
-    //    it('should render nested conditional empty in template (false/ true)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            condition: false,
-    //            innerCondition: true
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '');
-    //    });
-    //    it('should render nested conditional with key path in template (true / true)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            parameters: {
-    //                condition: true,
-    //                innerCondition: true
-    //            }
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
-    //    });
-    //    it('should render nested conditional with key path in template (true / false)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            parameters: {
-    //                condition: true,
-    //                innerCondition: false
-    //            }
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
-    //    });
-    //    it('should render nested conditional with key path empty in template (false / false)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            parameters: {
-    //                condition: false,
-    //                innerCondition: false
-    //            }
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '');
-    //    });
-    //    it('should render nested conditional with key path empty in template (false/ true)', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            parameters: {
-    //                condition: false,
-    //                innerCondition: true
-    //            }
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, '');
-    //    });
-    //});
-    //
-    //describe('appendTo()', function () {
-    //    it('should build a DOM element and insert it to the parent', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>Headline</h1></div>'),
-    //            element = document.createElement('div'),
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.appendTo(element);
-    //
-    //        var result = element.firstChild;
-    //        assert.isDefined(result);
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>Headline</h1>');
-    //    });
-    //    it('should build a DOM element and replace variables', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>'),
-    //            variables = {'headline': 'This worked'},
-    //            element = document.createElement('div'),
-    //            ELEMENT_NODE = 1;
-    //
-    //        view.setVariables(variables);
-    //
-    //        view.appendTo(element);
-    //
-    //        var result = element.firstChild;
-    //        assert.isDefined(result);
-    //        assert.strictEqual(result.nodeType, ELEMENT_NODE);
-    //        assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-    //    });
-    //    it('should use the result from render()', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>Headline</h1></div>'),
-    //            element = document.createElement('div');
-    //
-    //        view.appendTo(element);
-    //
-    //        var result = element.firstChild;
-    //        assert.strictEqual(result, view.render());
-    //        assert.strictEqual(result, view._dom);
-    //        assert.strictEqual(result, view._lastInsertedNode);
-    //    });
-    //    it('should throw an exception if the element is not a valid node', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>');
-    //        assert.throws(function () {
-    //            view.appendTo({});
-    //        });
-    //    });
-    //    it('should throw an exception if the element is not defined', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>');
-    //        assert.throws(function () {
-    //            view.appendTo();
-    //        });
-    //    });
-    //    it('should throw an exception if the template is not set', function () {
-    //        var view = new IrLib.View.LoopView();
-    //        assert.throws(function () {
-    //            view.appendTo(document.createElement('div'));
-    //        });
-    //    });
-    //});
-    //describe('remove()', function () {
-    //    it('should remove the View from DOM', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>Headline</h1></div>'),
-    //            element = document.createElement('div');
-    //
-    //        view.appendTo(element);
-    //        assert.isDefined(element.firstChild);
-    //        assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
-    //
-    //        view.remove();
-    //
-    //        assert.isNull(element.firstChild);
-    //    });
-    //    it('should remove the View from DOM and allow to append it afterwards', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>Headline</h1></div>'),
-    //            element = document.createElement('div');
-    //
-    //        view.appendTo(element);
-    //        assert.isDefined(element.firstChild);
-    //        assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
-    //
-    //        view.remove();
-    //
-    //        assert.isNull(element.firstChild);
-    //
-    //        view.appendTo(element);
-    //        assert.isNotNull(element.firstChild);
-    //        assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
-    //    });
-    //    it('should do nothing if not inserted', function () {
-    //        (new IrLib.View.LoopView()).remove();
-    //    });
-    //});
-    //describe('isVisible()', function () {
-    //    it('should return false at initialization', function () {
-    //        assert.isFalse((new IrLib.View.LoopView('<div><h1>Headline</h1></div>')).isVisible());
-    //    });
-    //    it('should return false if not added to the document', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>Headline</h1></div>'),
-    //            element = document.createElement('div');
-    //
-    //        view.appendTo(element);
-    //        assert.isFalse(view.isVisible());
-    //    });
-    //    it('should return true if added to the visible DOM', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>Headline</h1></div>'),
-    //            element = document.createElement('div');
-    //
-    //        view.appendTo(element);
-    //        getFixturesDivToEnableBubbling().appendChild(element);
-    //        assert.isTrue(view.isVisible());
-    //    });
-    //});
-    //describe('reload()', function () {
-    //    it('should update the DOM element', function () {
-    //        var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>'),
-    //            element = document.createElement('div'),
-    //            result;
-    //
-    //        view.variables = {'headline': 'This worked'};
-    //        view.appendTo(element);
-    //        result = element.firstChild;
-    //        assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-    //
-    //        view.variables = {'headline': 'Refreshed'};
-    //        view.reload();
-    //
-    //        result = element.firstChild;
-    //        assert.isDefined(result);
-    //        assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
-    //    });
-    //    it('should throw exception if not added to the DOM', function () {
-    //        assert.throw(function () {
-    //            var view = new (IrLib.View.LoopView.extend({
-    //                    template: '<div><h1>{{headline}}</h1></div>'
-    //                })),
-    //                result;
-    //
-    //            view.variables = {'headline': 'This worked'};
-    //            result = view.render();
-    //            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
-    //
-    //            view.variables = {'headline': 'Refreshed'};
-    //            result = view.render();
-    //            assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
-    //            result = view.reload();
-    //            assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
-    //        });
-    //    });
-    //
-    //    it('should update nested conditional in template', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if condition%}Outer condition fulfilled{%if innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            condition: true,
-    //            innerCondition: true
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
-    //
-    //        view.variables.innerCondition = false;
-    //        result = view.reload(true)._dom;
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
-    //    });
-    //
-    //    it('should update nested conditional in template', function () {
-    //        var view = new IrLib.View.LoopView(
-    //            '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
-    //        view.setVariables({
-    //            parameters: {
-    //                condition: true,
-    //                innerCondition: true
-    //            }
-    //        });
-    //
-    //        var result = view.render();
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
-    //
-    //        view.variables.parameters.innerCondition = false;
-    //        result = view.reload(true)._dom;
-    //        assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
-    //    });
-    //});
+    describe('setVariables()', function () {
+        it('should accept data with the "content" property', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>'),
+                content = [{obj: 1}, {obj: 2}];
+
+            view.setVariables({content: content});
+            assert.strictEqual(view.content, content);
+        });
+        it('should throw for data with the "content" property not of type array', function () {
+            assert.throws(function () {
+                (new IrLib.View.LoopView('<div></div>')).setVariables({content: ""});
+            });
+        });
+    });
+    describe('appendTo()', function () {
+        it('should build a DOM element and insert it to the parent', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>', [true, true]),
+                element = document.createElement('div'),
+                ELEMENT_NODE = 1;
+
+            view.appendTo(element);
+
+            var result = element.firstChild;
+            assert.isDefined(result);
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<div><h1>Headline</h1></div><div><h1>Headline</h1></div>');
+        });
+        it('should build a DOM element and replace variables', function () {
+            var view = new IrLib.View.LoopView(
+                    '<h1>{{this.headline}}</h1>',
+                    [
+                        {'headline': 'This worked'},
+                        {'headline': 'This worked too'}
+                    ]
+                ),
+                element = document.createElement('div'),
+                ELEMENT_NODE = 1;
+
+            view.appendTo(element);
+
+            var result = element.firstChild;
+            assert.isDefined(result);
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div><div><h1>This worked too</h1></div>');
+        });
+        it('should use the result from render()', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>', [true, true]),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+
+            var result = element.firstChild;
+            assert.strictEqual(result, view.render());
+            assert.strictEqual(result, view._dom);
+            assert.strictEqual(result, view._lastInsertedNode);
+        });
+        it('should build DOM element with View in template', function () {
+            var sl = new IrLib.ServiceLocator(),
+                element = document.createElement('div'),
+                ELEMENT_NODE = 1,
+                view;
+
+            sl.registerMultiple({
+                loopView: IrLib.View.LoopView.extend({
+                    template: '<div class="header">{%view header%}</div>'
+                }),
+                header: IrLib.View.Template.extend({
+                    tagName: 'h1',
+                    template: '{{this.headline}}'
+                })
+            });
+
+            view = sl.get('loopView');
+            view.content = [
+                {headline: 'Heading 1'},
+                {headline: 'Heading 2'}
+            ];
+
+            view.appendTo(element);
+
+            var result = element.firstChild;
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(
+                result.innerHTML,
+                '<div><div class="header"><h1>Heading 1</h1></div></div>' +
+                '<div><div class="header"><h1>Heading 2</h1></div></div>' +
+                ''
+            );
+        });
+        it('should throw an exception if the element is not a valid node', function () {
+            var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>');
+            assert.throws(function () {
+                view.appendTo({});
+            });
+        });
+        it('should throw an exception if the element is not defined', function () {
+            var view = new IrLib.View.LoopView('<div><h1>{{headline}}</h1></div>');
+            assert.throws(function () {
+                view.appendTo();
+            });
+        });
+        it('should throw an exception if the template is not set', function () {
+            var view = new IrLib.View.LoopView();
+            assert.throws(function () {
+                view.appendTo(document.createElement('div'));
+            });
+        });
+    });
+    describe('remove()', function () {
+        it('should remove the View from DOM', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>', [true, true]),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            assert.isDefined(element.firstChild);
+            assert.strictEqual(element.firstChild.innerHTML, '<div><h1>Headline</h1></div><div><h1>Headline</h1></div>');
+
+            view.remove();
+
+            assert.isNull(element.firstChild);
+        });
+        it('should remove the View from DOM and allow to append it afterwards', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>', [true, true]),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            assert.isDefined(element.firstChild);
+            assert.strictEqual(element.firstChild.innerHTML, '<div><h1>Headline</h1></div><div><h1>Headline</h1></div>');
+
+            view.remove();
+
+            assert.isNull(element.firstChild);
+
+            view.appendTo(element);
+            assert.isNotNull(element.firstChild);
+            assert.strictEqual(element.firstChild.innerHTML, '<div><h1>Headline</h1></div><div><h1>Headline</h1></div>');
+        });
+        it('should do nothing if not inserted', function () {
+            (new IrLib.View.LoopView()).remove();
+        });
+    });
+    describe('isVisible()', function () {
+        it('should return false at initialization', function () {
+            assert.isFalse((new IrLib.View.LoopView('<h1>Headline</h1>', [])).isVisible());
+        });
+        it('should return false if not added to the document', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>', []),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            assert.isFalse(view.isVisible());
+        });
+        it('should return true if added to the visible DOM', function () {
+            var view = new IrLib.View.LoopView('<h1>Headline</h1>', []),
+                element = document.createElement('div');
+
+            view.appendTo(element);
+            getFixturesDivToEnableBubbling().appendChild(element);
+            assert.isTrue(view.isVisible());
+        });
+    });
+    describe('reload()', function () {
+        it('should update the DOM element', function () {
+            var view = new IrLib.View.LoopView('<h1>{{this.headline}}</h1>'),
+                element = document.createElement('div'),
+                result;
+
+            view.content = [{'headline': 'This worked'}];
+            view.appendTo(element);
+            result = element.firstChild;
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
+
+            view.content = [{'headline': 'Refreshed'}];
+            view.reload();
+
+            result = element.firstChild;
+            assert.isDefined(result);
+            assert.strictEqual(result.innerHTML, '<div><h1>Refreshed</h1></div>');
+        });
+        it('should throw exception if not added to the DOM', function () {
+            assert.throw(function () {
+                var view = new (IrLib.View.LoopView.extend({
+                        template: '<h1>{{this.headline}}</h1>',
+                        content: [{'headline': 'This worked'}]
+                    })),
+                    result;
+
+                result = view.render();
+                assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
+
+                view.content = [{'headline': 'Refreshed'}];
+                view.reload();
+            }, ReferenceError, 'Can not reload because the view does not seem to be in the DOM');
+        });
+
+        it('should update nested conditional in template', function () {
+            var view = new IrLib.View.LoopView(
+                '<section>{%if this.condition%}Outer condition fulfilled{%if this.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>'
+            );
+            view.setContent([
+                {
+                    condition: true,
+                    innerCondition: true
+                },
+                {
+                    condition: true,
+                    innerCondition: true
+                }
+            ]);
+
+            view.appendTo(document.createElement('div'));
+            assert.strictEqual(
+                view._dom.innerHTML,
+                '<div><section>Outer condition fulfilled inner Condition fulfilled</section></div>' +
+                '<div><section>Outer condition fulfilled inner Condition fulfilled</section></div>' +
+                ''
+            );
+
+            view.content[0].innerCondition = false;
+            view.reload(true);
+            assert.strictEqual(
+                view._dom.innerHTML,
+                '<div><section>Outer condition fulfilled</section></div>' +
+                '<div><section>Outer condition fulfilled inner Condition fulfilled</section></div>' +
+                ''
+            );
+        });
+
+        it('should update nested conditional in template with nested parameters', function () {
+            var view = new IrLib.View.LoopView(
+                '<section>{%if this.parameters.condition%}Outer condition fulfilled{%if this.parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+            view.setContent([{
+                parameters: {
+                    condition: true,
+                    innerCondition: true
+                }
+            }]);
+
+            view.appendTo(document.createElement('div'));
+            assert.strictEqual(view._dom.innerHTML, '<div><section>Outer condition fulfilled inner Condition fulfilled</section></div>');
+
+            view.content[0].parameters.innerCondition = false;
+            view.reload(true);
+            assert.strictEqual(view._dom.innerHTML, '<div><section>Outer condition fulfilled</section></div>');
+        });
+    });
     //
     //if (TestRunner.name !== 'mocha-cli') {
     //    describe('addEventListener()', function () {

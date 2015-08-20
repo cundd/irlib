@@ -275,7 +275,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
+            assert.strictEqual(result.innerHTML, '<div><h1>Headline</h1></div>')
         });
         it('should build a DOM element and replace variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
@@ -286,7 +286,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should build a DOM element and replace nested variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{meta.headline}}</h1></div>'),
@@ -297,7 +297,18 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
+        });
+        it('should build a DOM element with changed tag name', function () {
+            var view = new (IrLib.View.Template.extend({
+                    tagName: 'section',
+                    template: '&nbsp;'
+                })),
+                ELEMENT_NODE = 1;
+
+            var result = view.render();
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.outerHTML, '<section>&nbsp;</section>')
         });
         it('should throw an exception if the template is not set', function () {
             var view = new IrLib.View.Template();
@@ -311,7 +322,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>Headline</h1>')
+            assert.strictEqual(result.innerHTML, '<div><h1>Headline</h1></div>')
 
         });
         it('should inherit the template (string)', function () {
@@ -325,7 +336,7 @@ describe('View.Template', function () {
             view.setVariables(variables);
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should inherit the template (selector)', function () {
             var template = '#my-template',
@@ -341,7 +352,7 @@ describe('View.Template', function () {
             view.setVariables(variables);
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<header>This worked</header><section>My content</section>');
+            assert.strictEqual(result.innerHTML, '<div class="some-element"><header>This worked</header><section>My content</section></div>');
         });
         it('should escape variable content', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
@@ -352,7 +363,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This &lt;strong&gt;worked&lt;/strong&gt;</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This &lt;strong&gt;worked&lt;/strong&gt;</h1></div>');
         });
         it('should not escape variable content', function () {
             var view = new IrLib.View.Template('<div><h1>{{{headline}}}</h1></div>'),
@@ -363,17 +374,17 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This <strong>worked</strong></h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This <strong>worked</strong></h1></div>');
         });
         it('should not render empty for undefined variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{{headline}}}</h1></div>');
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '<h1></h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1></h1></div>');
         });
         it('should not throw for undefined variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{{meta.headline}}}</h1></div>');
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '<h1></h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1></h1></div>');
         });
         it('should render View in template', function () {
             var sl = new IrLib.ServiceLocator(),
@@ -394,57 +405,58 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<div><h1>This <strong>worked</strong></h1></div>');
+            assert.match(result.innerHTML, new RegExp('<div><script id="irLibView-\\d{13}" type="text/x-placeholder"></script></div>'));
+            //assert.strictEqual(result.innerHTML, '<div><h1>This <strong>worked</strong></h1></div>');
         });
         it('should render conditional in template', function () {
             var view = new IrLib.View.Template('<section>{%if condition%}Condition fulfilled{%endif%}</section>');
             view.setVariables({condition: true});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Condition fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Condition fulfilled</section>');
         });
         it('should render conditional empty in template', function () {
             var view = new IrLib.View.Template('<section>{%if condition%}Condition fulfilled{%endif%}</section>');
             view.setVariables({condition: false});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '');
+            assert.strictEqual(result.innerHTML, '<section></section>');
         });
         it('should render nested conditional in template', function () {
             var view = new IrLib.View.Template('<section><div>{%if article.isImportant%}Fulfilled{%endif%}</div></section>');
-            view.setVariables({article: {isImportant: true}, meta: {name:'My condition'}});
+            view.setVariables({article: {isImportant: true}, meta: {name: 'My condition'}});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '<div>Fulfilled</div>');
+            assert.strictEqual(result.innerHTML, '<section><div>Fulfilled</div></section>');
         });
         it('should render conditional in template with variable content', function () {
-            var view = new IrLib.View.Template('<section><div>{%if condition%}Condition "{{name}}" fulfilled{%endif%}</div></section>');
-            view.setVariables({condition: true, name:'My condition'});
+            var view = new IrLib.View.Template('<section>{%if condition%}Condition "{{name}}" fulfilled{%endif%}</section>');
+            view.setVariables({condition: true, name: 'My condition'});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '<div>Condition "My condition" fulfilled</div>');
+            assert.strictEqual(result.innerHTML, '<section>Condition "My condition" fulfilled</section>');
         });
         it('should render conditional in template with nested variable content', function () {
             var view = new IrLib.View.Template('<section><div>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</div></section>');
-            view.setVariables({condition: true, meta: {name:'My condition'}});
+            view.setVariables({condition: true, meta: {name: 'My condition'}});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '<div>Condition "My condition" fulfilled</div>');
+            assert.strictEqual(result.innerHTML, '<section><div>Condition "My condition" fulfilled</div></section>');
         });
         it('should render conditional empty in template with variable content', function () {
             var view = new IrLib.View.Template(
-                '<section><span>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+                '<span>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</span>'
             );
-            view.setVariables({condition: false, name:'My condition'});
+            view.setVariables({condition: false, name: 'My condition'});
 
             var result = view.render();
             assert.strictEqual(result.innerHTML, '<span></span>');
         });
         it('should render conditional empty in template with nested variable content', function () {
             var view = new IrLib.View.Template(
-                '<section><span>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+                '<span>{%if condition%}Condition "{{meta.name}}" fulfilled{%endif%}</span>'
             );
-            view.setVariables({condition: false, meta: {name:'My condition'}});
+            view.setVariables({condition: false, meta: {name: 'My condition'}});
 
             var result = view.render();
             assert.strictEqual(result.innerHTML, '<span></span>');
@@ -452,32 +464,32 @@ describe('View.Template', function () {
 
         it('should render nested conditional in template with variable content', function () {
             var view = new IrLib.View.Template('<section>{%if condition.value%}Condition "{{name}}" fulfilled{%endif%}</section>');
-            view.setVariables({condition: {value: true}, name:'My condition'});
+            view.setVariables({condition: {value: true}, name: 'My condition'});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Condition "My condition" fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Condition "My condition" fulfilled</section>');
         });
         it('should render nested conditional in template with nested variable content', function () {
             var view = new IrLib.View.Template('<section>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</section>');
-            view.setVariables({condition: {value: true}, meta: {name:'My condition'}});
+            view.setVariables({condition: {value: true}, meta: {name: 'My condition'}});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Condition "My condition" fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Condition "My condition" fulfilled</section>');
         });
         it('should render nested conditional empty in template with variable content', function () {
             var view = new IrLib.View.Template(
-                '<section><span>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+                '<span>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</span>'
             );
-            view.setVariables({condition: {value: false}, name:'My condition'});
+            view.setVariables({condition: {value: false}, name: 'My condition'});
 
             var result = view.render();
             assert.strictEqual(result.innerHTML, '<span></span>');
         });
         it('should render nested conditional empty in template with nested variable content', function () {
             var view = new IrLib.View.Template(
-                '<section><span>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</span></section>'
+                '<span>{%if condition.value%}Condition "{{meta.name}}" fulfilled{%endif%}</span>'
             );
-            view.setVariables({condition: {value: false}, meta: {name:'My condition'}});
+            view.setVariables({condition: {value: false}, meta: {name: 'My condition'}});
 
             var result = view.render();
             assert.strictEqual(result.innerHTML, '<span></span>');
@@ -496,6 +508,13 @@ describe('View.Template', function () {
             view.setVariables({condition: false});
 
             var result = view.render();
+            assert.strictEqual(result.innerHTML, '<section>else statement</section>');
+        });
+        it('should render else in template without tag', function () {
+            var view = new IrLib.View.Template('{%if condition%}Condition fulfilled{%else%}else statement{%endif%}');
+            view.setVariables({condition: false});
+
+            var result = view.render();
             assert.strictEqual(result.innerHTML, 'else statement');
         });
         it('should not render else in template', function () {
@@ -503,7 +522,7 @@ describe('View.Template', function () {
             view.setVariables({condition: true});
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Condition fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Condition fulfilled</section>');
         });
         it('should handle nested if-else in template', function () {
             var view = new IrLib.View.Template('<section>{%if condition%}Outer condition fulfilled{%else%}Outer not fulfilled{%if inner.condition%} inner condition fulfilled{%else%} inner else{%endif%}{%endif%}</section>');
@@ -515,7 +534,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.outerHTML, '<section>Outer not fulfilled inner condition fulfilled</section>');
+            assert.strictEqual(result.outerHTML, '<div><section>Outer not fulfilled inner condition fulfilled</section></div>');
         });
         it('should render nested conditional in template (true / true)', function () {
             var view = new IrLib.View.Template(
@@ -526,7 +545,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Outer condition fulfilled inner Condition fulfilled</section>');
         });
         it('should render nested conditional in template (true / false)', function () {
             var view = new IrLib.View.Template(
@@ -537,7 +556,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Outer condition fulfilled</section>');
         });
         it('should render nested conditional empty in template (false / false)', function () {
             var view = new IrLib.View.Template(
@@ -548,7 +567,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '');
+            assert.strictEqual(result.innerHTML, '<section></section>');
         });
         it('should render nested conditional empty in template (false/ true)', function () {
             var view = new IrLib.View.Template(
@@ -559,7 +578,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '');
+            assert.strictEqual(result.innerHTML, '<section></section>');
         });
         it('should render nested conditional with key path in template (true / true)', function () {
             var view = new IrLib.View.Template(
@@ -572,7 +591,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Outer condition fulfilled inner Condition fulfilled</section>');
         });
         it('should render nested conditional with key path in template (true / false)', function () {
             var view = new IrLib.View.Template(
@@ -585,7 +604,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
+            assert.strictEqual(result.innerHTML, '<section>Outer condition fulfilled</section>');
         });
         it('should render nested conditional with key path empty in template (false / false)', function () {
             var view = new IrLib.View.Template(
@@ -598,7 +617,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '');
+            assert.strictEqual(result.innerHTML, '<section></section>');
         });
         it('should render nested conditional with key path empty in template (false/ true)', function () {
             var view = new IrLib.View.Template(
@@ -611,7 +630,7 @@ describe('View.Template', function () {
             });
 
             var result = view.render();
-            assert.strictEqual(result.innerHTML, '');
+            assert.strictEqual(result.innerHTML, '<section></section>');
         });
     });
     describe('render() with computed variables', function () {
@@ -629,7 +648,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should inherit the computed variables', function () {
             var template = '<div><h1>{{headline}}</h1></div>',
@@ -645,7 +664,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should bind this in computed variables functions', function () {
             var template = '<div><h1>{{headline}}</h1></div>',
@@ -664,7 +683,7 @@ describe('View.Template', function () {
             };
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should treat variables of type function as computed variable', function () {
             var template = '<div><h1>{{meta.headline}}</h1></div>',
@@ -675,14 +694,14 @@ describe('View.Template', function () {
 
             view.variables = {
                 meta: {
-                    headline: function() {
+                    headline: function () {
                         return 'This worked';
                     }
                 }
             };
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should treat variables of type function as computed variable and pass the view as first argument', function () {
             var template = '<div><h1>{{meta.headline}}</h1></div>',
@@ -694,14 +713,14 @@ describe('View.Template', function () {
             view.variables = {
                 what: 'This',
                 meta: {
-                    headline: function(view) {
+                    headline: function (view) {
                         return view.variables.what + ' worked';
                     }
                 }
             };
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
     });
     describe('appendTo()', function () {
@@ -715,7 +734,7 @@ describe('View.Template', function () {
             var result = element.firstChild;
             assert.isDefined(result);
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>Headline</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>Headline</h1></div>');
         });
         it('should build a DOM element and replace variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
@@ -730,7 +749,7 @@ describe('View.Template', function () {
             var result = element.firstChild;
             assert.isDefined(result);
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
         });
         it('should use the result from render()', function () {
             var view = new IrLib.View.Template('<div><h1>Headline</h1></div>'),
@@ -742,6 +761,30 @@ describe('View.Template', function () {
             assert.strictEqual(result, view.render());
             assert.strictEqual(result, view._dom);
             assert.strictEqual(result, view._lastInsertedNode);
+        });
+        it('should build DOM element with View in template', function () {
+            var sl = new IrLib.ServiceLocator(),
+                ELEMENT_NODE = 1,
+                element = document.createElement('div'),
+                view;
+
+            sl.registerMultiple({
+                mainView: (IrLib.View.Template.extend({
+                    template: '<section>{%view header%}</section>'
+                })),
+                header: (IrLib.View.Template.extend({
+                    template: '<h1>{{{headline}}}</h1>'
+                }))
+            });
+
+            view = sl.get('mainView');
+            view.setVariables({'headline': 'This <strong>worked</strong>'});
+
+            view.appendTo(element);
+
+            var result = element.firstChild;
+            assert.strictEqual(result.nodeType, ELEMENT_NODE);
+            assert.strictEqual(result.innerHTML, '<section><div><h1>This <strong>worked</strong></h1></div></section>');
         });
         it('should throw an exception if the element is not a valid node', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>');
@@ -769,7 +812,7 @@ describe('View.Template', function () {
 
             view.appendTo(element);
             assert.isDefined(element.firstChild);
-            assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
+            assert.strictEqual(element.firstChild.innerHTML, '<div><h1>Headline</h1></div>');
 
             view.remove();
 
@@ -781,7 +824,7 @@ describe('View.Template', function () {
 
             view.appendTo(element);
             assert.isDefined(element.firstChild);
-            assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
+            assert.strictEqual(element.firstChild.innerHTML, '<div><h1>Headline</h1></div>');
 
             view.remove();
 
@@ -789,7 +832,7 @@ describe('View.Template', function () {
 
             view.appendTo(element);
             assert.isNotNull(element.firstChild);
-            assert.strictEqual(element.firstChild.innerHTML, '<h1>Headline</h1>');
+            assert.strictEqual(element.firstChild.innerHTML, '<div><h1>Headline</h1></div>');
         });
         it('should do nothing if not inserted', function () {
             (new IrLib.View.Template()).remove();
@@ -824,14 +867,14 @@ describe('View.Template', function () {
             view.variables = {'headline': 'This worked'};
             view.appendTo(element);
             result = element.firstChild;
-            assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
 
             view.variables = {'headline': 'Refreshed'};
             view.reload();
 
             result = element.firstChild;
             assert.isDefined(result);
-            assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
+            assert.strictEqual(result.innerHTML, '<div><h1>Refreshed</h1></div>');
         });
         it('should throw exception if not added to the DOM', function () {
             assert.throw(function () {
@@ -842,13 +885,13 @@ describe('View.Template', function () {
 
                 view.variables = {'headline': 'This worked'};
                 result = view.render();
-                assert.strictEqual(result.innerHTML, '<h1>This worked</h1>');
+                assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
 
                 view.variables = {'headline': 'Refreshed'};
                 result = view.render();
-                assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
+                assert.strictEqual(result.innerHTML, '<div><h1>Refreshed</h1></div>');
                 result = view.reload();
-                assert.strictEqual(result.innerHTML, '<h1>Refreshed</h1>');
+                assert.strictEqual(result.innerHTML, '<div><h1>Refreshed</h1></div>');
             });
         });
 
@@ -860,17 +903,19 @@ describe('View.Template', function () {
                 innerCondition: true
             });
 
-            var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+            view.appendTo(document.createElement('div'));
+            assert.strictEqual(view._dom.innerHTML, '<section>Outer condition fulfilled inner Condition fulfilled</section>');
 
             view.variables.innerCondition = false;
-            result = view.reload(true)._dom;
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
+            view.reload(true);
+            assert.strictEqual(view._dom.innerHTML, '<section>Outer condition fulfilled</section>');
         });
 
-        it('should update nested conditional in template', function () {
+        it('should update nested conditional with key path in template', function () {
             var view = new IrLib.View.Template(
-                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>');
+                '<section>{%if parameters.condition%}Outer condition fulfilled{%if parameters.innerCondition%} inner Condition fulfilled{%endif%}{%endif%}</section>'
+            );
+
             view.setVariables({
                 parameters: {
                     condition: true,
@@ -878,12 +923,12 @@ describe('View.Template', function () {
                 }
             });
 
-            var result = view.render();
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled inner Condition fulfilled');
+            view.appendTo(document.createElement('div'));
+            assert.strictEqual(view._dom.innerHTML, '<section>Outer condition fulfilled inner Condition fulfilled</section>');
 
             view.variables.parameters.innerCondition = false;
-            result = view.reload(true)._dom;
-            assert.strictEqual(result.innerHTML, 'Outer condition fulfilled');
+            view.reload(true);
+            assert.strictEqual(view._dom.innerHTML, '<section>Outer condition fulfilled</section>');
         });
     });
 
@@ -930,7 +975,7 @@ describe('View.Template', function () {
 
                 childNode.dispatchEvent(buildEvent('click'));
 
-                assert.strictEqual(view.render().firstChild, childNode);
+                assert.strictEqual(view.render().lastChild, childNode);
                 assert.isTrue(clicked, 'Child element was not clicked');
                 assert.isFalse(keyPressed, 'A key has been pressed');
                 assert.equal(target, childNode);
