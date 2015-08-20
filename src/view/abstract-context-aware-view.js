@@ -2,6 +2,7 @@
  * Created by COD on 25.06.15.
  */
 require('view/interface');
+require('view/abstract-variable-view');
 
 /**
  * An abstract context-aware view
@@ -9,7 +10,7 @@ require('view/interface');
  * @implements IrLib.View.ContextInterface
  * @abstract
  */
-IrLib.View.AbstractContextAwareView = IrLib.View.Interface.extend({
+IrLib.View.AbstractContextAwareView = IrLib.View.AbstractVariableView.extend({
     /**
      * Views context
      *
@@ -32,12 +33,6 @@ IrLib.View.AbstractContextAwareView = IrLib.View.Interface.extend({
                 set: this.setContext
             }
         );
-    },
-
-    /**
-     * @abstract
-     */
-    toString: function () {
     },
 
     /**
