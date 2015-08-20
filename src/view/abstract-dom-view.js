@@ -11,11 +11,18 @@ require('view/interface');
  */
 IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     /**
+     * Tag name for the HTML node that encapsulates the generated nodes
+     *
+     * @type {String}
+     */
+    tagName: 'div',
+
+    /**
      * Registry of event listeners
      *
      * @type {Object}
      */
-    eventListeners: {},
+    _eventListeners: {},
 
     /**
      * Defines if a redraw is required
@@ -40,7 +47,20 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
 
     init: function () {
         this._super();
-        this.eventListeners = {};
+
+        if (typeof this.eventListeners === 'object') { // Check if a eventListeners variables are inherited
+            this._eventListeners = this.eventListeners;
+        } else {
+            this._eventListeners = {};
+        }
+
+        this.defineProperty(
+            'needsRedraw',
+            {
+                enumerable: true,
+                get: this.getNeedsRedraw
+            }
+        );
     },
 
     /**
@@ -56,9 +76,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 throw new ReferenceError('Template not specified');
             }
 
-            var domWithRoot = this._createDom(this.toString());
-            this._dom = domWithRoot.firstChild;
-            //template = this._renderActions(template);
+            this._dom = this._createDom(this.toString());
             this._needsRedraw = false;
         }
         return this._dom;
@@ -95,6 +113,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         }
 
         this.render();
+
         if (this._lastInsertedNode) {
             element.replaceChild(this._dom, this._lastInsertedNode);
         } else {
@@ -102,7 +121,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         }
         this._lastInsertedNode = this._dom;
 
-        this._addEventListeners(this._dom, Object.keys(this.eventListeners));
+        this.addStoredEventListeners();
         return this;
     },
 
@@ -110,7 +129,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * Reloads the Views output in the DOM
      *
      * @param {Boolean} [force]
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     reload: function (force) {
         var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null);
@@ -144,7 +163,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Event} event
      */
     handleEvent: function (event) {
-        var imps = this.eventListeners[event.type],
+        var imps = this._eventListeners[event.type],
             patchedEvent, currentImp, i;
 
         if (imps) {
@@ -182,7 +201,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Boolean} [useCapture] Currently ignored
      */
     addEventListener: function (type, listener, useCapture) {
-        var _eventListeners = this.eventListeners;
+        var _eventListeners = this._eventListeners;
         if (!_eventListeners[type]) {
             _eventListeners[type] = [listener];
         }
@@ -210,6 +229,13 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     },
 
     /**
+     * Add the stored event listeners to the DOM Node
+     */
+    addStoredEventListeners: function() {
+        this._addEventListeners(this._dom, Object.keys(this._eventListeners));
+    },
+
+    /**
      * Dispatches an Event at the View, invoking the affected EventListeners in the appropriate order.
      *
      * The normal event processing rules (including the capturing and optional bubbling phase) apply to events
@@ -230,7 +256,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @protected
      */
     _createDom: function (template) {
-        var root = document.createElement('div');
+        var root = document.createElement(this.tagName);
         if (template) {
             root.innerHTML = template;
         }
