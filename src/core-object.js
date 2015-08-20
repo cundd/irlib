@@ -47,6 +47,15 @@ IrLib.CoreObject = Class.extend({
     defineProperties: function (properties) {
         Object.defineProperties(this, properties);
         return this;
+    },
+
+    /**
+     * Returns a deep copy of this object
+     *
+     * @returns {*}
+     */
+    clone: function() {
+        return IrLib.Utility.GeneralUtility.clone(this, 1);
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
