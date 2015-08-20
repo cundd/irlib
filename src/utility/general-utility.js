@@ -135,6 +135,74 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      */
     isNumeric: function (value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
-    }
+    },
 
+    /**
+     * Returns a deep copy of the given object
+     *
+     * @param {*}obj
+     * @param {Number} depth
+     * @returns {*}
+     */
+    clone: function (obj, depth) {
+        var copy;
+        if (arguments.length < 2) {
+            depth = 10;
+        }
+
+        // Handle the 3 simple types, and null or undefined
+        if (null === obj || "object" !== typeof obj) {
+            return obj;
+        }
+
+        // Handle Date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        // Handle Array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                if (depth - 1 > 0) {
+                    copy[i] = _GeneralUtility.clone(obj[i], depth - 1);
+                } else {
+                    copy[i] = obj[i];
+                }
+            }
+            return copy;
+        }
+
+        // Handle Object
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) {
+                if (depth - 1 > 0) {
+                    copy[attr] = _GeneralUtility.clone(obj[attr], depth - 1);
+                } else {
+                    copy[attr] = obj[attr];
+                }
+            }
+        }
+        return copy;
+    },
+
+    /**
+     * Adds the class to the given element
+     *
+     * @param {*} element HTML node or selector
+     * @param {String} className
+     */
+    addClass: function (element, className) {
+        element = _GeneralUtility.domNode(element);
+        if (element) {
+            if (element.classList) {
+                element.classList.add(className);
+            } else {
+                element.className += ' ' + className;
+            }
+        }
+    }
 };
