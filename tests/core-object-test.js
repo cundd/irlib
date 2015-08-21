@@ -243,4 +243,25 @@ describe('CoreObject', function () {
             assert.strictEqual(instance.aKey, 1);
         });
     });
+    describe('clone()', function () {
+        it('should return a new instance of the same class', function () {
+            var instance = new NewSubclass(),
+                clone = instance.clone();
+            assert.instanceOf(clone, NewSubclass);
+        });
+        it('should return a new instance of the same class with copied properties', function () {
+            var instance = new NewSubclass(),
+                clone = instance.clone();
+
+            assert.instanceOf(clone, NewSubclass);
+            assert.strictEqual(clone.name, 'NewSubclass');
+
+            instance.name = 'Changed Name';
+            assert.strictEqual(clone.name, 'NewSubclass');
+
+            clone.name = 'Changed Name of clone';
+            assert.strictEqual(clone.name, 'Changed Name of clone');
+        });
+    });
+
 });

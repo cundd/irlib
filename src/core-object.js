@@ -50,12 +50,19 @@ IrLib.CoreObject = Class.extend({
     },
 
     /**
-     * Returns a deep copy of this object
+     * Returns a clone of this object
      *
      * @returns {*}
      */
     clone: function() {
-        return IrLib.Utility.GeneralUtility.clone(this, 1);
+        var source = this,
+            _clone = new (source.constructor)();
+        for (var attr in source) {
+            if (source.hasOwnProperty(attr)) {
+                _clone[attr] = source[attr];
+            }
+        }
+        return _clone;
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
