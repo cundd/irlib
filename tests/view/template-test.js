@@ -153,9 +153,6 @@ describe('View.Template', function () {
         });
         it('should throw for invalid input', function () {
             assert.throws(function () {
-                (new IrLib.View.Template()).setVariables(null);
-            });
-            assert.throws(function () {
                 (new IrLib.View.Template()).setVariables(false);
             });
             assert.throws(function () {
