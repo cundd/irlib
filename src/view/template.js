@@ -457,19 +457,31 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     //    return template;
     //},
 
+    /**
+     * Replace the placeholders for subviews with the actual view instances
+     */
     replaceSubviewPlaceholders: function () {
         var _dom = this._dom;
+
+
+        console.log('subviewPlaceholders before', this._subviewPlaceholders.keys());
+
+
         this._subviewPlaceholders.forEach(function (view, elementId) {
             var placeholder = _dom.querySelector('#' + elementId);
             if (placeholder && placeholder.parentNode) {
                 placeholder.parentNode.replaceChild(view.render(), placeholder);
                 view.addStoredEventListeners();
-
             } else {
-                IrLib.Logger.warn('Could not find subview placeholder #' + elementId);
+                //IrLib.Logger.warn('Could not find subview placeholder #' + elementId);
+                throw new ReferenceError('Could not find subview placeholder #' + elementId);
             }
         });
-    }, /**
+        this._subviewPlaceholders = new IrLib.Dictionary();
+        console.log('subviewPlaceholders after', this._subviewPlaceholders.keys());
+    },
+
+    /**
      * @inheritDoc
      */
     appendTo: function (element) {
@@ -587,5 +599,17 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this._templateParser = new IrLib.View.Parser.Parser();
         }
         return this._templateParser;
+    },
+
+    /**
+     * Returns a clone of this object
+     *
+     * @returns {*}
+     */
+    clone: function() {
+        var _clone = this._super();
+        _clone._subviewPlaceholders = new IrLib.Dictionary();
+        _clone._lastConditionStateStack = [];
+        return _clone;
     }
 });

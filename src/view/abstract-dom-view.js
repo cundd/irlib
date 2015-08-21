@@ -261,5 +261,24 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             root.innerHTML = template;
         }
         return root;
+    },
+
+    /**
+     * Returns a clone of this object
+     *
+     * @returns {*}
+     */
+    clone: function() {
+        var source = this,
+            _clone = new (source.constructor)();
+        for (var attr in source) {
+            if (source.hasOwnProperty(attr)) {
+                if (attr === '_dom' || attr === '_lastInsertedNode' || attr === '_eventListeners') {
+                    continue;
+                }
+                _clone[attr] = source[attr];
+            }
+        }
+        return _clone;
     }
 });
