@@ -199,7 +199,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 view.setVariables(this.variables);
 
                 if (this._renderSubviewsAsPlaceholders) {
-                    viewId = 'irLibView-' + (+(new Date()));
+                    viewId = 'irLibView-' + view.guid();
                     this._subviewPlaceholders[viewId] = view;
                     output = '<script id="' + viewId + '" type="text/x-placeholder"></script>';
                 } else {
@@ -462,23 +462,18 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     replaceSubviewPlaceholders: function () {
         var _dom = this._dom;
-
-
-        console.log('subviewPlaceholders before', this._subviewPlaceholders.keys());
-
-
         this._subviewPlaceholders.forEach(function (view, elementId) {
             var placeholder = _dom.querySelector('#' + elementId);
             if (placeholder && placeholder.parentNode) {
                 placeholder.parentNode.replaceChild(view.render(), placeholder);
                 view.addStoredEventListeners();
             } else {
-                //IrLib.Logger.warn('Could not find subview placeholder #' + elementId);
-                throw new ReferenceError('Could not find subview placeholder #' + elementId);
+                throw new ReferenceError(
+                    'Could not find subview placeholder #' + elementId
+                );
             }
         });
         this._subviewPlaceholders = new IrLib.Dictionary();
-        console.log('subviewPlaceholders after', this._subviewPlaceholders.keys());
     },
 
     /**
@@ -568,6 +563,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
         if (typeof value !== 'string') {
             return false;
         }
+        if (value.indexOf('<') !== -1 || value.indexOf('{') !== -1) {
+            return false;
+        }
         var firstChar = value.charAt(0);
         return firstChar === '#' || firstChar === '.' || /^[a-z]/i.test(firstChar);
     },
@@ -606,7 +604,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {*}
      */
-    clone: function() {
+    clone: function () {
         var _clone = this._super();
         _clone._subviewPlaceholders = new IrLib.Dictionary();
         _clone._lastConditionStateStack = [];

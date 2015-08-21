@@ -402,7 +402,7 @@ describe('View.Template', function () {
 
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
-            assert.match(result.innerHTML, new RegExp('<div><script id="irLibView-\\d{13}" type="text/x-placeholder"></script></div>'));
+            assert.match(result.innerHTML, new RegExp('<div><script id="irLibView-irLib-\\d+" type="text/x-placeholder"></script></div>'));
             //assert.strictEqual(result.innerHTML, '<div><h1>This <strong>worked</strong></h1></div>');
         });
         it('should render conditional in template', function () {
