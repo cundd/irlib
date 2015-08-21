@@ -182,12 +182,19 @@ IrLib.CoreObject = Class.extend({
     },
 
     /**
-     * Returns a deep copy of this object
+     * Returns a clone of this object
      *
      * @returns {*}
      */
     clone: function() {
-        return IrLib.Utility.GeneralUtility.clone(this, 1);
+        var source = this,
+            _clone = new (source.constructor)();
+        for (var attr in source) {
+            if (source.hasOwnProperty(attr)) {
+                _clone[attr] = source[attr];
+            }
+        }
+        return _clone;
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
@@ -766,6 +773,9 @@ IrLib.Dictionary = IrLib.CoreObject.extend({
                     'Initialization argument has to be of type object, ' + (typeof initializationValues) + ' given',
                     1435219260
                 );
+            }
+            if (initializationValues === null) {
+                initializationValues = {};
             }
             _initWithObject.call(this, initializationValues);
         }
@@ -1835,6 +1845,25 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             root.innerHTML = template;
         }
         return root;
+    },
+
+    /**
+     * Returns a clone of this object
+     *
+     * @returns {*}
+     */
+    clone: function() {
+        var source = this,
+            _clone = new (source.constructor)();
+        for (var attr in source) {
+            if (source.hasOwnProperty(attr)) {
+                if (attr === '_dom' || attr === '_lastInsertedNode' || attr === '_eventListeners') {
+                    continue;
+                }
+                _clone[attr] = source[attr];
+            }
+        }
+        return _clone;
     }
 });
 
@@ -2066,7 +2095,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 view.setVariables(this.variables);
 
                 if (this._renderSubviewsAsPlaceholders) {
-                    viewId = 'irLibView-' + (+(new Date()));
+                    viewId = 'irLibView-' + view.guid();
                     this._subviewPlaceholders[viewId] = view;
                     output = '<script id="' + viewId + '" type="text/x-placeholder"></script>';
                 } else {
@@ -2324,6 +2353,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     //    return template;
     //},
 
+    /**
+     * Replace the placeholders for subviews with the actual view instances
+     */
     replaceSubviewPlaceholders: function () {
         var _dom = this._dom;
         this._subviewPlaceholders.forEach(function (view, elementId) {
@@ -2331,12 +2363,16 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             if (placeholder && placeholder.parentNode) {
                 placeholder.parentNode.replaceChild(view.render(), placeholder);
                 view.addStoredEventListeners();
-
             } else {
-                IrLib.Logger.warn('Could not find subview placeholder #' + elementId);
+                throw new ReferenceError(
+                    'Could not find subview placeholder #' + elementId
+                );
             }
         });
-    }, /**
+        this._subviewPlaceholders = new IrLib.Dictionary();
+    },
+
+    /**
      * @inheritDoc
      */
     appendTo: function (element) {
@@ -2423,6 +2459,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
         if (typeof value !== 'string') {
             return false;
         }
+        if (value.indexOf('<') !== -1 || value.indexOf('{') !== -1) {
+            return false;
+        }
         var firstChar = value.charAt(0);
         return firstChar === '#' || firstChar === '.' || /^[a-z]/i.test(firstChar);
     },
@@ -2454,6 +2493,18 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this._templateParser = new IrLib.View.Parser.Parser();
         }
         return this._templateParser;
+    },
+
+    /**
+     * Returns a clone of this object
+     *
+     * @returns {*}
+     */
+    clone: function () {
+        var _clone = this._super();
+        _clone._subviewPlaceholders = new IrLib.Dictionary();
+        _clone._lastConditionStateStack = [];
+        return _clone;
     }
 });
 
@@ -2607,7 +2658,9 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
 
         _template.setContext(this);
         for (i = 0; i < contentLength; i++) {
+            //templateCopy = IrLib.Utility.GeneralUtility.clone(_template, 12);
             templateCopy = _template.clone();
+
             currentVariables = content[i];
             scope = {
                 _meta: {
@@ -2617,15 +2670,15 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
                 }
             };
             scope[_asKey] = currentVariables;
-            _template.setVariables(scope);
+            templateCopy.setVariables(scope);
 
             if(appendToNode) {
-                appendToNode.appendChild(_template.render());
-                if (_template instanceof IrLib.View.Template || typeof _template.replaceSubviewPlaceholders === 'function') {
-                    _template.replaceSubviewPlaceholders();
+                appendToNode.appendChild(templateCopy.render());
+                if (templateCopy instanceof IrLib.View.Template || typeof templateCopy.replaceSubviewPlaceholders === 'function') {
+                    templateCopy.replaceSubviewPlaceholders();
                 }
             } else {
-                renderedContent += _template.toString();
+                renderedContent += templateCopy.toString();
             }
         }
         return renderedContent;
@@ -2755,7 +2808,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      * Sets the View's context
      *
      * @param {IrLib.View.Interface} context
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     setContext: function (context) {
         this._context = context;

@@ -148,7 +148,9 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
 
         _template.setContext(this);
         for (i = 0; i < contentLength; i++) {
+            //templateCopy = IrLib.Utility.GeneralUtility.clone(_template, 12);
             templateCopy = _template.clone();
+
             currentVariables = content[i];
             scope = {
                 _meta: {
@@ -158,15 +160,15 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
                 }
             };
             scope[_asKey] = currentVariables;
-            _template.setVariables(scope);
+            templateCopy.setVariables(scope);
 
             if(appendToNode) {
-                appendToNode.appendChild(_template.render());
-                if (_template instanceof IrLib.View.Template || typeof _template.replaceSubviewPlaceholders === 'function') {
-                    _template.replaceSubviewPlaceholders();
+                appendToNode.appendChild(templateCopy.render());
+                if (templateCopy instanceof IrLib.View.Template || typeof templateCopy.replaceSubviewPlaceholders === 'function') {
+                    templateCopy.replaceSubviewPlaceholders();
                 }
             } else {
-                renderedContent += _template.toString();
+                renderedContent += templateCopy.toString();
             }
         }
         return renderedContent;
@@ -296,7 +298,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      * Sets the View's context
      *
      * @param {IrLib.View.Interface} context
-     * @returns {IrLib.View.Template}
+     * @returns {IrLib.View.Interface}
      */
     setContext: function (context) {
         this._context = context;

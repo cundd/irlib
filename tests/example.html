@@ -57,7 +57,8 @@
 
         <div class="content">
             {%Blackxpression view/textField%}
-            <!--{%view view/textField%}-->
+            {%view view/textField%}
+            {%view view/textField%}
             <br>
             {%view view/loopView%}
         </div>
@@ -75,7 +76,7 @@
             );
         },
         'view/loopView': IrLib.View.LoopView.extend({
-            template: 'view/textField',
+            template: 'hallo {{_meta.iteration}}',
             content: [
                 {},
                 {}
