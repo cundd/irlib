@@ -262,6 +262,24 @@ describe('CoreObject', function () {
             clone.name = 'Changed Name of clone';
             assert.strictEqual(clone.name, 'Changed Name of clone');
         });
+        it('should return a new instance with the inherited properties copied', function () {
+            var BaseClass = IrLib.CoreObject.extend({
+                baseProperty: 'red'
+            });
+            var SubClass = BaseClass.extend({});
+            var instance = new SubClass(),
+                clone = instance.clone();
+
+            assert.instanceOf(clone, IrLib.CoreObject);
+            assert.instanceOf(clone, SubClass);
+            assert.strictEqual(clone.baseProperty, 'red');
+
+            instance.baseProperty = 'blue';
+            assert.strictEqual(clone.baseProperty, 'red');
+
+            clone.baseProperty = 'blue';
+            assert.strictEqual(clone.baseProperty, 'blue');
+        });
     });
 
 });
