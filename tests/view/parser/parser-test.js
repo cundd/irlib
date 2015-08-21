@@ -22,9 +22,51 @@ describe('View.Parser.Parser', function () {
             assert.strictEqual(blocks[0].content, 'myVariable');
             assert.strictEqual(blocks[0].meta.isSafe, false);
         });
+        it('should return single block for unsafe variable in template with surrounding whitespace', function () {
+            var parser = new IrLib.View.Parser.Parser(),
+                blocks;
+            blocks = parser.parse('{{ myVariable }}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
+            assert.strictEqual(blocks[0].content, 'myVariable');
+            assert.strictEqual(blocks[0].meta.isSafe, false);
+
+            blocks = parser.parse('{{myVariable }}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
+            assert.strictEqual(blocks[0].content, 'myVariable');
+            assert.strictEqual(blocks[0].meta.isSafe, false);
+
+            blocks = parser.parse('{{ myVariable}}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
+            assert.strictEqual(blocks[0].content, 'myVariable');
+            assert.strictEqual(blocks[0].meta.isSafe, false);
+        });
         it('should return single block for safe variable template', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('{{{myVariable}}}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
+            assert.strictEqual(blocks[0].content, 'myVariable');
+            assert.strictEqual(blocks[0].meta.isSafe, true);
+        });
+        it('should return single block for safe variable template with surrounding whitespace', function () {
+            var parser = new IrLib.View.Parser.Parser(),
+                blocks;
+            blocks = parser.parse('{{{ myVariable }}}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
+            assert.strictEqual(blocks[0].content, 'myVariable');
+            assert.strictEqual(blocks[0].meta.isSafe, true);
+
+            blocks = parser.parse('{{{myVariable }}}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
+            assert.strictEqual(blocks[0].content, 'myVariable');
+            assert.strictEqual(blocks[0].meta.isSafe, true);
+
+            blocks = parser.parse('{{{ myVariable}}}');
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.VARIABLE);
             assert.strictEqual(blocks[0].content, 'myVariable');
@@ -86,9 +128,51 @@ describe('View.Parser.Parser', function () {
             assert.strictEqual(blocks[0].content, 'if condition');
             assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_START);
         });
+        it('should return single block for expression template with surrounding whitespace (if)', function () {
+            var parser = new IrLib.View.Parser.Parser(),
+                blocks;
+            blocks = parser.parse('{% if condition %}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'if condition');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_START);
+
+            blocks = parser.parse('{%if condition %}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'if condition');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_START);
+
+            blocks = parser.parse('{% if condition%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'if condition');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_START);
+        });
         it('should return single block if expression template (endif)', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('{%endif%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'endif');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_END);
+        });
+        it('should return single block if expression template with surrounding whitespace (endif)', function () {
+            var parser = new IrLib.View.Parser.Parser(),
+                blocks;
+            blocks = parser.parse('{% endif %}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'endif');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_END);
+
+            blocks = parser.parse('{%endif %}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'endif');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.CONDITIONAL_END);
+
+            blocks = parser.parse('{% endif%}');
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
             assert.strictEqual(blocks[0].content, 'endif');
@@ -121,6 +205,27 @@ describe('View.Parser.Parser', function () {
         it('should return single block for expression template (view)', function () {
             var parser = new IrLib.View.Parser.Parser();
             var blocks = parser.parse('{%view viewName%}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'view viewName');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.VIEW);
+        });
+        it('should return single block for expression template with surrounding whitespace (view)', function () {
+            var parser = new IrLib.View.Parser.Parser(),
+                blocks;
+            blocks = parser.parse('{% view viewName %}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'view viewName');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.VIEW);
+
+            blocks = parser.parse('{%view viewName %}');
+            assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
+            assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
+            assert.strictEqual(blocks[0].content, 'view viewName');
+            assert.strictEqual(blocks[0].meta.expressionType, IrLib.View.Parser.ExpressionType.VIEW);
+
+            blocks = parser.parse('{% view viewName%}');
             assert.instanceOf(blocks[0], IrLib.View.Parser.Block);
             assert.strictEqual(blocks[0].type, IrLib.View.Parser.BlockType.EXPRESSION);
             assert.strictEqual(blocks[0].content, 'view viewName');

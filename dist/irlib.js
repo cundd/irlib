@@ -3148,7 +3148,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     /**
      * Regular expression to match variable blocks
      */
-    PATTERN_VARIABLE: /^\{{2,3}[a-zA-Z0-9\-_\.]+}{2,3}$/,
+    PATTERN_VARIABLE: /^\{{2,3}\s*[a-zA-Z0-9\-_\.]+\s*}{2,3}$/,
 
     /**
      * Parses the given input string and returns a sequence of Blocks
@@ -3220,7 +3220,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
                 ) { // Case 1 = safe: {{{varName}}}
                     blocks[i] = new Block(
                         BlockType.VARIABLE,
-                        currentToken.substring(_BLOCK_DELIMITER_REPEAT_SAFE, currentTokenLength - _BLOCK_DELIMITER_REPEAT_SAFE),
+                        currentToken.substring(_BLOCK_DELIMITER_REPEAT_SAFE, currentTokenLength - _BLOCK_DELIMITER_REPEAT_SAFE).trim(),
                         {isSafe: true}
                     );
                 } else if (contentFirstCharacterIsBlockStart) { // Case 2 = invalid: {{varName}
@@ -3228,7 +3228,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
                 } else { // Case 3 = not safe: {{varName}}
                     blocks[i] = new Block(
                         BlockType.VARIABLE,
-                        currentContent,
+                        currentContent.trim(),
                         {isSafe: false}
                     );
                 }
@@ -3237,17 +3237,17 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
                 currentToken.substr(0, expressionLength) === _EXPRESSION_START &&
                 currentToken.substr(currentTokenLength - expressionLength) == _EXPRESSION_END
             ) {
-                var expressionType;
+                var expressionType, currentContentTrimmed;
                 currentContent = currentToken.substring(expressionLength, currentTokenLength - expressionLength);
-
-                if (ExpressionType.isKeyword(currentContent)) {
-                    expressionType = currentContent;
-                } else if (ExpressionType.isKeyword(currentContent.substring(0, currentContent.indexOf(' ')))) {
-                    expressionType = currentContent.substring(0, currentContent.indexOf(' '));
+                currentContentTrimmed = currentContent.trim();
+                if (ExpressionType.isKeyword(currentContentTrimmed)) {
+                    expressionType = currentContentTrimmed;
+                } else if (ExpressionType.isKeyword(currentContentTrimmed.substring(0, currentContentTrimmed.indexOf(' ')))) {
+                    expressionType = currentContentTrimmed.substring(0, currentContentTrimmed.indexOf(' '));
                 } else {
                     expressionType = ExpressionType.UNKNOWN;
                 }
-                blocks[i] = new Block(BlockType.EXPRESSION, currentContent, {
+                blocks[i] = new Block(BlockType.EXPRESSION, currentContentTrimmed, {
                     expressionType: expressionType
                 });
 
