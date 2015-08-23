@@ -1633,7 +1633,10 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
         this._super();
 
         if (typeof this.eventListeners === 'object') { // Check if a eventListeners variables are inherited
-            this._eventListeners = this.eventListeners;
+            var _this = this;
+            (new IrLib.Dictionary(this.eventListeners)).forEach(function(imp, key) {
+                _this.addEventListener(key, imp);
+            });
         } else {
             this._eventListeners = {};
         }
@@ -1754,7 +1757,9 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             patchedEvent = this._patchEvent(event);
             for (i = 0; i < imps.length; i++) {
                 currentImp = imps[i];
-                if (typeof currentImp === 'function') {
+                if (typeof currentImp === 'undefined') {
+                    throw new TypeError('Implementation for event type "' + event.type + '" is undefined');
+                } else if (typeof currentImp === 'function') {
                     currentImp(patchedEvent);
                 } else if (currentImp.handleEvent) {
                     currentImp.handleEvent.call(currentImp, patchedEvent);
@@ -1805,9 +1810,11 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @private
      */
     _addEventListeners: function (element, eventTypes) {
-        var i, type;
-        for (i = 0; i < eventTypes.length; i++) {
+        var eventTypesLength = eventTypes.length,
+            i, type;
+        for (i = 0; i < eventTypesLength; i++) {
             type = eventTypes[i];
+            console.log(type);
             element.addEventListener(type, this);
         }
     },
@@ -1816,6 +1823,9 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * Add the stored event listeners to the DOM Node
      */
     addStoredEventListeners: function() {
+        if (!this._dom) {
+            throw new ReferenceError('DOM is not render yet');
+        }
         this._addEventListeners(this._dom, Object.keys(this._eventListeners));
     },
 

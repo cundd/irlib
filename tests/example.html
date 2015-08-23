@@ -83,16 +83,24 @@
             ]
         }),
         'view/textField': IrLib.View.Template.extend({
-            template: '<input type="text">',
-            init: function () {
-                this._super();
-                this.addEventListener('keydown', function (e) {
-                    console.log(e)
-                });
-                this.addEventListener('click', function (e) {
-                    console.log(e)
-                });
+            eventListeners: {
+                'keydown': function(e) {
+                    console.log(e);
+                },
+                'click': function(e) {
+                    console.log(e);
+                }
             },
+            template: '<input type="text">',
+//            init: function () {
+//                this._super();
+//                this.addEventListener('keydown', function (e) {
+//                    console.log(e)
+//                });
+//                this.addEventListener('click', function (e) {
+//                    console.log(e)
+//                });
+//            },
 
 //            appendTo: function(e) {
 //                console.log('fff');

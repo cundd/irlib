@@ -930,7 +930,7 @@ describe('View.Template', function () {
     });
 
     if (TestRunner.name !== 'mocha-cli') {
-        describe('addEventListener()', function () {
+        describe.only('addEventListener()', function () {
             it('should bind event listeners', function () {
                 var view = new IrLib.View.Template('<div></div>'),
                     clicked = false,
@@ -945,6 +945,31 @@ describe('View.Template', function () {
                 });
 
                 view.dispatchEvent(buildEvent('click'));
+                assert.isTrue(clicked, 'Child element was not clicked');
+                assert.isFalse(keyPressed);
+                assert.equal(target, view);
+            });
+            it('should bind event listeners from inherited configuration', function () {
+                var clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    element = document.createElement('div'),
+                    view;
+
+                view = new (IrLib.View.Template.extend({
+                    template: '<div></div>',
+                    eventListeners: {
+                        drum: function (event) {
+                            target = event.irTarget;
+                            handler = this;
+                            clicked = true;
+                        }
+                    }
+                }))();
+
+                view.appendTo(element);
+                view.dispatchEvent(buildEvent('drum'));
                 assert.isTrue(clicked, 'Child element was not clicked');
                 assert.isFalse(keyPressed);
                 assert.equal(target, view);
