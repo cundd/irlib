@@ -930,7 +930,7 @@ describe('View.Template', function () {
     });
 
     if (TestRunner.name !== 'mocha-cli') {
-        describe.only('addEventListener()', function () {
+        describe('addEventListener()', function () {
             it('should bind event listeners', function () {
                 var view = new IrLib.View.Template('<div></div>'),
                     clicked = false,

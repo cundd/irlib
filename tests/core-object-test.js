@@ -249,6 +249,13 @@ describe('CoreObject', function () {
                 clone = instance.clone();
             assert.instanceOf(clone, NewSubclass);
         });
+        it('should return a new instance with a new guid', function () {
+            var instance = new NewSubclass(),
+                clone;
+            clone = instance.clone();
+            assert.instanceOf(clone, NewSubclass);
+            assert.isTrue(instance.guid() != clone.guid());
+        });
         it('should return a new instance of the same class with copied properties', function () {
             var instance = new NewSubclass(),
                 clone = instance.clone();

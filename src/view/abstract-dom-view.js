@@ -288,6 +288,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 _clone[attr] = source[attr];
             }
         }
+        _clone.__guid = IrLib.CoreObject.createGuid();
         return _clone;
     }
 });

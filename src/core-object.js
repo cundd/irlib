@@ -9,15 +9,16 @@ IrLib.CoreObject = Class.extend({
      */
     __guid: null,
 
+    init: function() {
+        this.__guid = IrLib.CoreObject.createGuid();
+    },
+
     /**
      * Returns the global unique ID of the object
      *
      * @returns {String}
      */
     guid: function () {
-        if (!this.__guid) {
-            this.__guid = 'irLib-' + (++IrLib.CoreObject.__lastGuid);
-        }
         return this.__guid;
     },
 
@@ -62,7 +63,11 @@ IrLib.CoreObject = Class.extend({
                 _clone[attr] = source[attr];
             }
         }
+        _clone.__guid = IrLib.CoreObject.createGuid();
         return _clone;
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
+IrLib.CoreObject.createGuid = function() {
+    return 'irLib-' + (++IrLib.CoreObject.__lastGuid);
+};

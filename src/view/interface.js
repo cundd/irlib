@@ -12,6 +12,7 @@ IrLib.View = IrLib.View || {};
  */
 IrLib.View.Interface = IrLib.CoreObject.extend({
     init: function (template, variables) {
+        this._super();
     },
 
     /**

@@ -199,7 +199,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 view.setVariables(this.variables);
 
                 if (this._renderSubviewsAsPlaceholders) {
+                    // TODO: Handle insertion of the same views again
                     viewId = 'irLibView-' + view.guid();
+                    //console.log(view.guid());
                     this._subviewPlaceholders[viewId] = view;
                     output = '<script id="' + viewId + '" type="text/x-placeholder"></script>';
                 } else {
@@ -462,8 +464,12 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     replaceSubviewPlaceholders: function () {
         var _dom = this._dom;
+
         this._subviewPlaceholders.forEach(function (view, elementId) {
             var placeholder = _dom.querySelector('#' + elementId);
+
+            //console.log(placeholder, elementId, view.render());
+
             if (placeholder && placeholder.parentNode) {
                 placeholder.parentNode.replaceChild(view.render(), placeholder);
                 view.addStoredEventListeners();

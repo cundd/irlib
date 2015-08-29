@@ -141,15 +141,16 @@ IrLib.CoreObject = Class.extend({
      */
     __guid: null,
 
+    init: function() {
+        this.__guid = IrLib.CoreObject.createGuid();
+    },
+
     /**
      * Returns the global unique ID of the object
      *
      * @returns {String}
      */
     guid: function () {
-        if (!this.__guid) {
-            this.__guid = 'irLib-' + (++IrLib.CoreObject.__lastGuid);
-        }
         return this.__guid;
     },
 
@@ -194,10 +195,14 @@ IrLib.CoreObject = Class.extend({
                 _clone[attr] = source[attr];
             }
         }
+        _clone.__guid = IrLib.CoreObject.createGuid();
         return _clone;
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
+IrLib.CoreObject.createGuid = function() {
+    return 'irLib-' + (++IrLib.CoreObject.__lastGuid);
+};
 
 
 }());
@@ -1347,6 +1352,7 @@ IrLib.View = IrLib.View || {};
  */
 IrLib.View.Interface = IrLib.CoreObject.extend({
     init: function (template, variables) {
+        this._super();
     },
 
     /**
@@ -1814,7 +1820,6 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             i, type;
         for (i = 0; i < eventTypesLength; i++) {
             type = eventTypes[i];
-            console.log(type);
             element.addEventListener(type, this);
         }
     },
@@ -1873,6 +1878,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 _clone[attr] = source[attr];
             }
         }
+        _clone.__guid = IrLib.CoreObject.createGuid();
         return _clone;
     }
 });
@@ -2105,7 +2111,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 view.setVariables(this.variables);
 
                 if (this._renderSubviewsAsPlaceholders) {
+                    // TODO: Handle insertion of the same views again
                     viewId = 'irLibView-' + view.guid();
+                    //console.log(view.guid());
                     this._subviewPlaceholders[viewId] = view;
                     output = '<script id="' + viewId + '" type="text/x-placeholder"></script>';
                 } else {
@@ -2368,8 +2376,12 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     replaceSubviewPlaceholders: function () {
         var _dom = this._dom;
+
         this._subviewPlaceholders.forEach(function (view, elementId) {
             var placeholder = _dom.querySelector('#' + elementId);
+
+            //console.log(placeholder, elementId, view.render());
+
             if (placeholder && placeholder.parentNode) {
                 placeholder.parentNode.replaceChild(view.render(), placeholder);
                 view.addStoredEventListeners();

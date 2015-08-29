@@ -5,7 +5,7 @@
     <title>IrLib example</title>
     <style>
         body {
-            font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial;
+            font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             background: #1f1f1f;
@@ -39,6 +39,25 @@
         .content {
             padding: 20px;
         }
+
+        .col {
+            display: inline-block;
+        }
+
+        .col-6 {
+            width: 50%;
+        }
+
+        .row {
+            display: block;
+        }
+
+        .row:before,
+        .row:after {
+            clear: both;
+            display: table;
+            content: " ";
+        }
     </style>
 </head>
 <body>
@@ -57,8 +76,14 @@
 
         <div class="content">
             {%Blackxpression view/textField%}
-            {%view view/textField%}
-            {%view view/textField%}
+            <div class="row">
+                <div class="col col-6">
+                    {%view view/textField%}
+                </div>
+                <div class="col col-6">
+                    {%view view/textField%}
+                </div>
+            </div>
             <br>
             {%view view/loopView%}
         </div>
@@ -84,10 +109,13 @@
         }),
         'view/textField': IrLib.View.Template.extend({
             eventListeners: {
-                'keydown': function(e) {
+                'change': function (e) {
+
+                },
+                'keydown': function (e) {
                     console.log(e);
                 },
-                'click': function(e) {
+                'click': function (e) {
                     console.log(e);
                 }
             },
@@ -129,6 +157,11 @@
                         this.view.assignVariable('saved', 0);
                         this.view.reload();
                     }
+                },
+
+                change: function (e) {
+                    console.log('Change', e);
+                    this.view.assignVariable('mul')
                 }
             }
         })
