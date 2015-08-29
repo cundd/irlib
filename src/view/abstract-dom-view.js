@@ -230,7 +230,6 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             i, type;
         for (i = 0; i < eventTypesLength; i++) {
             type = eventTypes[i];
-            console.log(type);
             element.addEventListener(type, this);
         }
     },
