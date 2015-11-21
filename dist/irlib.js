@@ -856,48 +856,6 @@ IrLib.Dictionary = IrLib.CoreObject.extend({
 
 
 /**
- * Created by daniel on 17.08.15.
- */
-IrLib.ServiceLocatorProxy = IrLib.CoreObject.extend({
-    needs: ['serviceLocator'],
-
-    /**
-     * @type {IrLib.ServiceLocator}
-     */
-    serviceLocator: null,
-
-    /**
-     * @type {String}
-     */
-    identifier: '',
-
-    init: function(identifier) {
-        this.identifier = identifier;
-    },
-
-    /**
-     * Returns the concrete implementation for the registered identifier
-     *
-     * @returns {*}
-     */
-    get: function() {
-        var implementation = this.serviceLocator.get(this.identifier);
-        return this.isProxy(implementation) ? null : implementation;
-    },
-
-    /**
-     * Returns if the given input is an instance of the service locator proxy
-     *
-     * @param {*} input
-     * @returns {boolean}
-     */
-    isProxy: function(input) {
-        return (input instanceof IrLib.ServiceLocator.Proxy);
-    }
-});
-
-
-/**
  * Created by COD on 03.06.15.
  */
 (function() {/*require('components\/service-locator-proxy');// */
@@ -2925,60 +2883,6 @@ IrLib.View.VariableViewInterface.prototype.assignVariable = function (key, value
  */
 IrLib.View.VariableViewInterface.prototype.getVariables = function () {
     throw new IrLib.MissingImplementationError('getVariables');
-};
-
-
-/**
- * Created by COD on 25.06.15.
- */
-
-/**
- * Factory class to create View instances
- *
- */
-IrLib.View.ViewFactory = {
-    /**
-     * Cache for resolved class identifiers
-     *
-     * @type {Object}
-     */
-    classIdentifierToConstructorMap: {},
-
-    create: function (classIdentifier) {
-        if (typeof classIdentifier !== 'string') {
-            throw new TypeError('Argument "classIdentifier" is not of type string');
-        }
-        var classIdentifierParts = classIdentifier.split('.');
-
-    },
-
-    /**
-     *
-     * @param {String[]} classIdentifierParts
-     * @private
-     */
-    _getConstructorForClassIdentifier: function (classIdentifierParts) {
-        var classIdentifierPartsLength = classIdentifierParts.length,
-            currentClassIdentifierPart, currentClassIdentifierPartFirstCharacter, currentRoot;
-
-        if (typeof window !== 'undefined') {
-            currentRoot = window;
-        } else if (typeof global !== 'undefined') {
-            currentRoot = global;
-        }
-        for (var i = 0; i < classIdentifierPartsLength; i++) {
-            currentClassIdentifierPart = classIdentifierParts[i];
-
-            // Check if the first character is uppercase
-            currentClassIdentifierPartFirstCharacter = currentClassIdentifierPart.charAt(0);
-            if (currentClassIdentifierPartFirstCharacter !== currentClassIdentifierPartFirstCharacter.toUpperCase()) {
-                return null;
-            }
-
-
-        }
-    }
-
 };
 
 
