@@ -216,7 +216,8 @@ module.exports = function(config) {
         //logLevel: config.LOG_INFO,
 
         sauceLabs: {
-            testName: 'irLib: Karma'
+            testName: 'irLib: Karma',
+            tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
         },
         captureTimeout: 120000,
         customLaunchers: customLaunchers,

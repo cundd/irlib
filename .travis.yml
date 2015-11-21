@@ -1,48 +1,47 @@
 language: node_js
 node_js:
-  - "0.12"
-  - "0.11"
-  - "iojs"
-
+- node
+- '4.1'
+- '4.0'
+- '0.12'
+- '0.11'
+- iojs
 env:
   matrix:
-    - KARMA=yes MOCHA=no BUILD=no
-#    - KARMA=no MOCHA=yes BUILD=no
-
+  - KARMA=yes MOCHA=no BUILD=no
   global:
-    - secure: GNNCvvSI2omJQXBzOcYgkEFKRej7zSUzt5VUz7t3TZnJ2WiZDqP5iT45f3AsqJVR5B+2KaXBSDNecpOSYZR0CcGMRp2gga937GSiXrcEJxF/Su1EjcPhSWoMC5/E1KxqvqERQRexKkMz6o7uGLCVjG5NfFO54tMBHFS/o3VVhdK9gTA+je/O5HqWe+6QFICt+Gf80xIAgOxK+HTVt5azfY8ySg20NTezew/Ts4YSmz/tA0D6zOUyrS6Lyj8E4LfytzcXWgsBojIYaEdoooiy2bsszJ4rYV7Y7iFjL8M66yHOaOPG/NxvjUWcZ2dKXmSdYtU7eRA5PK4Kz2ubiWd0I+nATj8N5SK7d/SWr6VoPRCje0wTyrOMWCX814hqCYn8Y24xmOTFKh56qAZMyBgxlRvxxBZP2HlTiBTgSlSuNTcpz5wvpa5jtLS0Q0h2bKO2m2Fm1C590dMVAVcyt6vdxCqTxT5oz6t8CNDz8zfOqBU+vOA9KEEvFHGVBj9Fj/6J8L1zAt05N4jZULBfaYt3W+B5cQter1O5KFMv+uQSeM4olGrFWQEX9X5hTmXaYsKSKVFOhMAqCgpyhGkvSTvSLvfTbGowOBBY7D+ki3bggbQheVqhMYvoaLp3xbnjL8XhFKw9MB4Lqk1pnHNGY/uYYYZsPaICedKIG+fPveafjGw=
-    - secure: Cz1QKlUi75xK9v/9U7kbB0rzkCYDof3quReYG1WYq2zzYTSw1vrf66/qD/xHf7JPTT5Q4CaeICz5YBtwtVu3e5UuPA9o5dBpCT693pbm8puabsr7xv5Y50wV+sQWUdJ7FqnMV2uPvFeqPXo07nODLFqH3EqGXfC7ogmwe/j5UlOzehl5CrmWXLRKVKOhlfDtZChjHZGbbbrr3BVG3S5/SI2sFf9KYPDLobuZepIXDhJF9pKB/aHtDvwhfSbKptIg+Rhbrn03StsOyOyYN8QfsygaGY6n8rf27yg5SuPP8SEmRoy+Gkbc810lV4B72DhGeIt9+Lkn1W67R5H1AaEToADUnft23aRkpJRRRKVyBeUBK5XS1X7I1sdXjOFq8OGiut/Ky38Gc1JjcdL7Qtop8os4tC9HRhUczJHTyPbSXFxsjinCXgotWeRqyHCszPeGTlJnsT94eq0JHnxiH7Ipl7dBeXKRF7Um9ngoq17mQZImlekAE3mgptDvLyJbyProVsFeSWkQd3okpAnVB5UkN44m/3gXjiGXM6CbidDsIvw6U4H1ZUTN89DL88LxD0t2U3D+KncxQ1Hbxwf0EEX98Kq9gNwShzUeA8gKH1Io6IFtkeiQbnkqrlaWmRfurZVHZQbWbfMcfN9c0OP3jC/t5m9y0fsTVeWcrkT2NphWygg=
-
+  - secure: aKLRXV5BM4braz2akfVCHO/nuBeZJqbgRzjaTCfIjzOkSPS4XHD9rjDkKlKMiG3GNmjVJ3ICt3dcYrPC2OJumQfXAvRXfSiliAmHxrGWphYTUsvyjtyHq5Y5Y3almALp0KxyARj36MScAqSkFTZhx+SD+tzlW/bKPZguaTkfoMh9008UdkRoSrEUPaci74b4RnTzOFLVOhTGHsf+8gYVgoYaS9akXc3YCC6dG2hpT1A1pQAmsARTtZydMdzUCP2PcoaVculMXkrcA/TRnK7uwYvTMVd0OyaL2QYXIhFqqLpH/9+zZjj5XkozTuiwaIZLGe5C70yfZKLgOEmznx6Qq8Wggzoz8sWmOYqxrSEVHnaQROF8GUY9njDY3Nva4fh2Y+DQUpjhZ89iBCdZjsxdLEp7a0LWIFQEn7nTJzirAKPiHC42YBQCI3pFe5NTRbShu67Sx9kNP+lU1YUQHw+txtd544LV+l0zcfe27gZ93tLen0KQvSeJq+Ah1IspLcVpGFM9TY5TqZxmzo2FFKIz+lZZVfbg6dUbyoL1mR3rWOO2q5Jg3gE10AFq5O0gmGjjkLglopUaH+k0p9wS1JwHXDi7uYmGC/DhFqHqqboXT+SXDq0J9kBv1fHMAKCoLndME6LVI/Gs+BnxixGjMaUnjgmWLehlgud4OO2VR+Kjdxw=
+  - secure: IGvtT2QHggc0kLPoO5CYpJYSxlaBLdu2jI3Zw2Br7T9Lmd/E1+EP7gjBeqj6opFu7Kizp7IU1+kEPFf7KQ0hD2TPDFiTtpZ3iRpgpQsn7GMT8rhR+r6U8c9Taeeuespe1cx0UjelyhvZddhrDP4odv+xFkcaa/2vryVcUv0dk54Fw1onrZtQj2M3liQL5dU37Qrp9HRf1dDCXj5h8EerTSFZI/yjguYr9w7b6v5VaFbOUO5075zVJjeOmvIK0IfkN18EdK9OG41KkOX3MNWtbQHRq9cJ+KJ7I6YFEY4qU2f+vGGRiVzjky+OXkeG059Yp5eeZVg12y8FtQklmjTjT0ylL9MtK0SopKUPZksABdy1voXfB5FQje+8+e/Sk1K5djzbsn12NJxKg4Wb49Om6wgumpfY7mpaXz+14dj5YTmcl0lEo6/QbyjKxQYT3RP/A7+t3LNpp+QYG9+CLEfC/vYe8/1VS1DZXXKy1MrIwFlMx0qcRjuZDTjLXBpJm0zgJ7SvF2fxoNdurYq0RJr2lsQTzI2og7Fm4ZDqGbaEJJA1h6Rne3drphhl7ZVh3Kj8Gclw4HyqrRtzmGwMERLbZo97ff1a+AmzMVHPmHDLdfA9AVYW4EVEqSwN0JawVrm6c34ReI7ieGBMoQcIO35XM+ZNNPGKKtF0CU4kD3Cj2ww=
 matrix:
   include:
-    - node_js: "iojs"
-      env: KARMA=yes MOCHA=no BUILD=no
-    - node_js: "iojs"
-      env: KARMA=no MOCHA=yes BUILD=no
-
+  - node_js: iojs
+    env: KARMA=yes MOCHA=no BUILD=no
+  - node_js: iojs
+    env: KARMA=no MOCHA=yes BUILD=no
 addons:
-  sauce_connect: true
-
+  sauce_connect:
+    username: cundd
+    access_key:
+      secure: The secure string output by `travis encrypt`
 sudo: false
-
 before_script:
-  - npm install -g grunt-cli;
-  - npm install;
+- npm install -g grunt-cli;
+- npm install;
 script:
-  - >
-    if [[ "$BUILD" == "yes" ]]; then
-      echo;
-      echo "Build";
-      grunt build;
-    fi
-  - >
-    if [[ "$KARMA" == "yes" ]]; then
-      echo;
-      echo "Running karma tests";
-      grunt karma:ci;
-    fi
-  - >
-    if [[ "$MOCHA" == "yes" ]]; then
-      echo;
-      grunt mochaTest;
-    fi
+- |
+  if [[ "$BUILD" == "yes" ]]; then
+    echo;
+    echo "Build";
+    grunt build;
+  fi
+- |
+  if [[ "$KARMA" == "yes" ]]; then
+    echo;
+    echo "Running karma tests";
+    grunt karma:ci;
+  fi
+- |-
+  if [[ "$MOCHA" == "yes" ]]; then
+    echo;
+    grunt mochaTest;
+  fi
