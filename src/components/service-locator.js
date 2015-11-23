@@ -1,8 +1,6 @@
 /**
  * Created by COD on 03.06.15.
  */
-require('components/service-locator-proxy');
-
 var GeneralUtility = IrLib.Utility.GeneralUtility;
 var _Error = IrLib.Error;
 IrLib.ServiceLocator = IrLib.CoreObject.extend({
