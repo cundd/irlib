@@ -1,0 +1,12 @@
+{
+    "name": "cundd/irlib",
+    "description": "General purpose JavaScript framework",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Corn",
+            "email": "info@cundd.net"
+        }
+    ],
+    "require": {}
+}
