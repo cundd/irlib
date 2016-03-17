@@ -49,6 +49,14 @@ describe('View.Template', function () {
             });
             assert.strictEqual(view._variables['aKey'], 'aValue');
         });
+        it('should inherit the variables', function () {
+            var view = new (IrLib.View.Template.extend({
+                variables: {
+                    'aKey': 'aValue'
+                }
+            }));
+            assert.strictEqual(view._variables['aKey'], 'aValue');
+        });
         it('should inherit the template (string)', function () {
             var template = '<div><h1>Heading</h1></div>',
                 view = new (IrLib.View.Template.extend({
@@ -642,7 +650,6 @@ describe('View.Template', function () {
 
             view.setComputed(computed);
 
-
             var result = view.render();
             assert.strictEqual(result.nodeType, ELEMENT_NODE);
             assert.strictEqual(result.innerHTML, '<div><h1>This worked</h1></div>');
@@ -960,6 +967,31 @@ describe('View.Template', function () {
                 view = new (IrLib.View.Template.extend({
                     template: '<div></div>',
                     eventListeners: {
+                        drum: function (event) {
+                            target = event.irTarget;
+                            handler = this;
+                            clicked = true;
+                        }
+                    }
+                }))();
+
+                view.appendTo(element);
+                view.dispatchEvent(buildEvent('drum'));
+                assert.isTrue(clicked, 'Child element was not clicked');
+                assert.isFalse(keyPressed);
+                assert.equal(target, view);
+            });
+            it('should bind event listeners from inherited events property', function () {
+                var clicked = false,
+                    keyPressed = false,
+                    handler = null,
+                    target = null,
+                    element = document.createElement('div'),
+                    view;
+
+                view = new (IrLib.View.Template.extend({
+                    template: '<div></div>',
+                    events: {
                         drum: function (event) {
                             target = event.irTarget;
                             handler = this;

@@ -1420,6 +1420,12 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
     init: function () {
         this._super();
 
+        if (typeof this.variables === 'object') {
+            this.setVariables(this.variables);
+        } else {
+            this.setVariables({});
+        }
+
         this.defineProperties({
             'variables': {
                 enumerable: true,
@@ -1588,11 +1594,16 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     _lastInsertedNode: null,
 
     init: function () {
+        var _this = this;
+
         this._super();
 
         if (typeof this.eventListeners === 'object') { // Check if a eventListeners variables are inherited
-            var _this = this;
             (new IrLib.Dictionary(this.eventListeners)).forEach(function(imp, key) {
+                _this.addEventListener(key, imp);
+            });
+        } else if (typeof this.events === 'object') { // Check if a events variables are inherited
+            (new IrLib.Dictionary(this.events)).forEach(function(imp, key) {
                 _this.addEventListener(key, imp);
             });
         } else {
@@ -1718,7 +1729,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
                 if (typeof currentImp === 'undefined') {
                     throw new TypeError('Implementation for event type "' + event.type + '" is undefined');
                 } else if (typeof currentImp === 'function') {
-                    currentImp(patchedEvent);
+                    currentImp.call(this, patchedEvent);
                 } else if (currentImp.handleEvent) {
                     currentImp.handleEvent.call(currentImp, patchedEvent);
                 }
@@ -1948,7 +1959,10 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
 
         this._subviewPlaceholders = new IrLib.Dictionary();
 
-        this.setVariables(variables || {});
+        if (arguments.length > 1) {
+            this.setVariables(variables);
+        }
+
         this.defineProperties({
             'template': {
                 enumerable: true,
