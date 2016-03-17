@@ -20,6 +20,12 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
     init: function () {
         this._super();
 
+        if (typeof this.variables === 'object') {
+            this.setVariables(this.variables);
+        } else {
+            this.setVariables({});
+        }
+
         this.defineProperties({
             'variables': {
                 enumerable: true,

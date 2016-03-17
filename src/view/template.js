@@ -84,7 +84,10 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
 
         this._subviewPlaceholders = new IrLib.Dictionary();
 
-        this.setVariables(variables || {});
+        if (arguments.length > 1) {
+            this.setVariables(variables);
+        }
+
         this.defineProperties({
             'template': {
                 enumerable: true,
