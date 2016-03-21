@@ -980,23 +980,30 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * Creates a new instance for the given service identifier
      *
      * @param {String} identifier
+     * @param {*} [additionalArgument]
      * @returns {Object}
      */
-    create: function (identifier) {
+    create: function (identifier, additionalArgument) {
         this._assertIdentifier(identifier);
 
-        var instance, _serviceFactoryCallback;
+        var withArgument = arguments.length > 1,
+            instance, _serviceFactoryCallback;
+
+        if (arguments.length > 2) {
+            throw new _Error('Too many arguments');
+        }
+
         _serviceFactoryCallback = this.serviceFactory[identifier];
         if (!_serviceFactoryCallback) {
             throw new _Error('Could not find service with identifier ' + identifier);
         }
         if (_serviceFactoryCallback.prototype && _serviceFactoryCallback.prototype.constructor) {
             instance = this.resolveDependencies(
-                new _serviceFactoryCallback(),
+                withArgument ? new _serviceFactoryCallback(additionalArgument) : new _serviceFactoryCallback(),
                 _serviceFactoryCallback
             );
         } else {
-            instance = _serviceFactoryCallback();
+            instance = withArgument ? _serviceFactoryCallback(additionalArgument) : _serviceFactoryCallback();
         }
 
         return instance;
