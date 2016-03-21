@@ -95,7 +95,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
     },
 
     /**
-     * Creates a new instance for the given service identifier
+     * Creates a new instance for the given service identifier and will invoke didResolveDependencies if it exists
      *
      * @param {String} identifier
      * @param {*} [additionalArgument]
@@ -122,6 +122,10 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
             );
         } else {
             instance = withArgument ? _serviceFactoryCallback(additionalArgument) : _serviceFactoryCallback();
+        }
+
+        if (typeof instance.didResolveDependencies === 'function') {
+            instance.didResolveDependencies();
         }
 
         return instance;

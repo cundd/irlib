@@ -202,6 +202,18 @@ describe('ServiceLocator', function () {
                 sl.get('undefinedService');
             });
         });
+        it('should invoke didResolveDependencies', function () {
+            var sl = new IrLib.ServiceLocator(),
+                didResolveDependenciesWasCalled = false;
+            sl.register('myService', NewClass.extend({
+                didResolveDependencies: function() {
+                    didResolveDependenciesWasCalled = true;
+                }
+            }));
+
+            sl.create('myService');
+            assert.ok(didResolveDependenciesWasCalled);
+        });
         it('should return new instance for constructor', function () {
             var sl = new IrLib.ServiceLocator();
             sl.register('myService', NewClass);
@@ -258,6 +270,18 @@ describe('ServiceLocator', function () {
 
             assert.ok(sl.create('myService') !== sl.create('myService'));
             assert.ok(sl.get('myService') !== sl.create('myService'));
+        });
+        it('should invoke didResolveDependencies', function () {
+            var sl = new IrLib.ServiceLocator(),
+                didResolveDependenciesWasCalled = false;
+            sl.register('myService', NewClass.extend({
+                didResolveDependencies: function() {
+                    didResolveDependenciesWasCalled = true;
+                }
+            }));
+
+            sl.create('myService');
+            assert.ok(didResolveDependenciesWasCalled);
         });
         it('should fail for undefined service identifier', function () {
             var sl = new IrLib.ServiceLocator();
