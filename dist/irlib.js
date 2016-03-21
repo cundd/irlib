@@ -141,7 +141,7 @@ IrLib.CoreObject = Class.extend({
      */
     __guid: null,
 
-    init: function() {
+    init: function () {
         this.__guid = IrLib.CoreObject.createGuid();
     },
 
@@ -187,7 +187,7 @@ IrLib.CoreObject = Class.extend({
      *
      * @returns {*}
      */
-    clone: function() {
+    clone: function () {
         var source = this,
             _clone = new (source.constructor)();
         for (var attr in source) {
@@ -197,10 +197,35 @@ IrLib.CoreObject = Class.extend({
         }
         _clone.__guid = IrLib.CoreObject.createGuid();
         return _clone;
+    },
+
+    /**
+     * Creates a callback function with bound this
+     *
+     * @param {Function|String} method
+     * @returns {Function}
+     */
+    bind: function (method) {
+        var _this = this,
+            impl;
+
+        if (typeof method === 'function') {
+            impl = method;
+        } else if (typeof _this[method] === 'function') {
+            impl = _this[method];
+        } else {
+            throw new IrLib.Error('Argument method must be either a method name or a function');
+        }
+
+        return function () {
+            var __preparedArguments = Array.prototype.slice.call(arguments);
+            __preparedArguments.push(this);
+            return impl.apply(_this, __preparedArguments);
+        };
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
-IrLib.CoreObject.createGuid = function() {
+IrLib.CoreObject.createGuid = function () {
     return 'irLib-' + (++IrLib.CoreObject.__lastGuid);
 };
 
@@ -1570,7 +1595,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @type {Object}
      */
-    _eventListeners: {},
+    _eventListeners: null,
 
     /**
      * Defines if a redraw is required
@@ -1598,6 +1623,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
 
         this._super();
 
+        this._eventListeners = {};
         if (typeof this.eventListeners === 'object') { // Check if a eventListeners variables are inherited
             (new IrLib.Dictionary(this.eventListeners)).forEach(function(imp, key) {
                 _this.addEventListener(key, imp);
@@ -1606,8 +1632,6 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             (new IrLib.Dictionary(this.events)).forEach(function(imp, key) {
                 _this.addEventListener(key, imp);
             });
-        } else {
-            this._eventListeners = {};
         }
 
         this.defineProperty(

@@ -9,7 +9,7 @@ IrLib.CoreObject = Class.extend({
      */
     __guid: null,
 
-    init: function() {
+    init: function () {
         this.__guid = IrLib.CoreObject.createGuid();
     },
 
@@ -55,7 +55,7 @@ IrLib.CoreObject = Class.extend({
      *
      * @returns {*}
      */
-    clone: function() {
+    clone: function () {
         var source = this,
             _clone = new (source.constructor)();
         for (var attr in source) {
@@ -65,9 +65,34 @@ IrLib.CoreObject = Class.extend({
         }
         _clone.__guid = IrLib.CoreObject.createGuid();
         return _clone;
+    },
+
+    /**
+     * Creates a callback function with bound this
+     *
+     * @param {Function|String} method
+     * @returns {Function}
+     */
+    bind: function (method) {
+        var _this = this,
+            impl;
+
+        if (typeof method === 'function') {
+            impl = method;
+        } else if (typeof _this[method] === 'function') {
+            impl = _this[method];
+        } else {
+            throw new IrLib.Error('Argument method must be either a method name or a function');
+        }
+
+        return function () {
+            var __preparedArguments = Array.prototype.slice.call(arguments);
+            __preparedArguments.push(this);
+            return impl.apply(_this, __preparedArguments);
+        };
     }
 });
 IrLib.CoreObject.__lastGuid = 0;
-IrLib.CoreObject.createGuid = function() {
+IrLib.CoreObject.createGuid = function () {
     return 'irLib-' + (++IrLib.CoreObject.__lastGuid);
 };
