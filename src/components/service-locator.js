@@ -86,23 +86,37 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
     get: function (identifier) {
         this._assertIdentifier(identifier);
 
-        var instance = this.services[identifier],
-            _serviceFactoryCallback;
+        var instance = this.services[identifier];
         if (!instance) {
-            _serviceFactoryCallback = this.serviceFactory[identifier];
-            if (!_serviceFactoryCallback) {
-                throw new _Error('Could not find service with identifier ' + identifier);
-            }
-            if (_serviceFactoryCallback.prototype && _serviceFactoryCallback.prototype.constructor) {
-                instance = this.resolveDependencies(
-                    new _serviceFactoryCallback(),
-                    _serviceFactoryCallback
-                );
-            } else {
-                instance = _serviceFactoryCallback();
-            }
+            instance = this.create(identifier);
             this.set(identifier, instance);
         }
+        return instance;
+    },
+
+    /**
+     * Creates a new instance for the given service identifier
+     *
+     * @param {String} identifier
+     * @returns {Object}
+     */
+    create: function (identifier) {
+        this._assertIdentifier(identifier);
+
+        var instance, _serviceFactoryCallback;
+        _serviceFactoryCallback = this.serviceFactory[identifier];
+        if (!_serviceFactoryCallback) {
+            throw new _Error('Could not find service with identifier ' + identifier);
+        }
+        if (_serviceFactoryCallback.prototype && _serviceFactoryCallback.prototype.constructor) {
+            instance = this.resolveDependencies(
+                new _serviceFactoryCallback(),
+                _serviceFactoryCallback
+            );
+        } else {
+            instance = _serviceFactoryCallback();
+        }
+
         return instance;
     },
 

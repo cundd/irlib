@@ -244,6 +244,56 @@ describe('ServiceLocator', function () {
         });
     });
 
+    describe('create()', function () {
+        it('should return a new instance on subsequent calls', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClass);
+
+            assert.ok(sl.create('myService') !== sl.create('myService'));
+            assert.ok(sl.get('myService') !== sl.create('myService'));
+        });
+        it('should fail for undefined service identifier', function () {
+            var sl = new IrLib.ServiceLocator();
+            assert.throws(function () {
+                sl.create('undefinedService');
+            });
+        });
+        it('should return new instance for constructor', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClass);
+            var newService = sl.create('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClass');
+            assert.ok(newService instanceof NewClass);
+        });
+        it('should return new instance for factory method', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myFactoryMethodProvidedService', function () {
+                return new NewClass();
+            });
+            var newService = sl.create('myFactoryMethodProvidedService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClass');
+            assert.ok(newService instanceof NewClass);
+        });
+        it('should not return set instance', function () {
+            var sl = new IrLib.ServiceLocator(),
+                instance = new NewClass();
+            sl.register('myInjectedInstance', NewClass);
+            sl.set('myInjectedInstance', instance);
+            assert.ok(sl.create('myInjectedInstance') !== instance);
+            assert.strictEqual(sl.get('myInjectedInstance'), instance);
+        });
+        it('should throw if not registered', function () {
+            var sl = new IrLib.ServiceLocator(),
+                instance = new NewClass();
+            sl.set('myInjectedInstance', instance);
+            assert.throws(function () {
+                sl.create('myInjectedInstance')
+            });
+        });
+    });
+
     describe('resolveDependencies()', function () {
         it('should resolve dependencies', function () {
             var sl = new IrLib.ServiceLocator();
