@@ -22,7 +22,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @type {Object}
      */
-    _eventListeners: {},
+    _eventListeners: null,
 
     /**
      * Defines if a redraw is required
@@ -50,6 +50,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
 
         this._super();
 
+        this._eventListeners = {};
         if (typeof this.eventListeners === 'object') { // Check if a eventListeners variables are inherited
             (new IrLib.Dictionary(this.eventListeners)).forEach(function(imp, key) {
                 _this.addEventListener(key, imp);
@@ -58,8 +59,6 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
             (new IrLib.Dictionary(this.events)).forEach(function(imp, key) {
                 _this.addEventListener(key, imp);
             });
-        } else {
-            this._eventListeners = {};
         }
 
         this.defineProperty(
