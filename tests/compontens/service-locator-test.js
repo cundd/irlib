@@ -30,6 +30,13 @@ describe('ServiceLocator', function () {
         NewClassWithDependencyWithDifferentName = IrLib.CoreObject.extend({
             'needs': ['serviceLocator:sl'],
             'name': 'NewClassWithDependencyWithDifferentName'
+        }),
+        NewClassWithConstructorArgument = IrLib.CoreObject.extend({
+            'name': 'NewClassWithConstructorArgument',
+            'arg': null,
+            'init': function (arg) {
+                this.arg = arg;
+            }
         });
 
     describe('register()', function () {
@@ -290,6 +297,22 @@ describe('ServiceLocator', function () {
             sl.set('myInjectedInstance', instance);
             assert.throws(function () {
                 sl.create('myInjectedInstance')
+            });
+        });
+        it('should accept one argument', function () {
+            var sl = new IrLib.ServiceLocator(),
+                instance;
+            sl.register('myService', NewClassWithConstructorArgument);
+
+            instance = sl.create('myService', 1209);
+            assert.equal(instance.arg, 1209);
+        });
+        it('should throw if more than one argument', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClassWithConstructorArgument);
+
+            assert.throws(function () {
+                sl.create('myService', 1, 2)
             });
         });
     });
