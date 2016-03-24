@@ -15,21 +15,21 @@ IrLib.Url = function (href) {
         var parser = document.createElement('a');
         parser.href = href;
 
-        this.protocol = parser.protocol; // => "http:"
+        this._protocol = parser.protocol; // => "http:"
         this._host = parser.host;     // => "example.com:3000"
         this._hostname = parser.hostname; // => "example.com"
         this._port = parser.port;     // => "3000"
-        this._pathname = parser.pathname; // => "/pathname/"
-        this.hash = parser.hash;     // => "#hash"
-        this.search = parser.search;   // => "?search=test"
+        this.setPathname(parser.pathname); // => "/pathname/"
+        this.setHash(parser.hash);     // => "#hash"
+        this.setSearch(parser.search);   // => "?search=test"
     } else {
-        this.protocol = '';
+        this._protocol = '';
         this._host = '';
         this._hostname = '';
         this._port = '';
         this._pathname = '';
-        this.hash = '';
-        this.search = '';
+        this._hash = '';
+        this._search = '';
     }
 
     Object.defineProperty(this, 'host', {
@@ -47,6 +47,18 @@ IrLib.Url = function (href) {
     Object.defineProperty(this, 'pathname', {
         get: this.getPathname,
         set: this.setPathname
+    });
+    Object.defineProperty(this, 'hash', {
+        get: this.getHash,
+        set: this.setHash
+    });
+    Object.defineProperty(this, 'protocol', {
+        get: this.getProtocol,
+        set: this.setProtocol
+    });
+    Object.defineProperty(this, 'search', {
+        get: this.getSearch,
+        set: this.setSearch
     });
 };
 
@@ -119,7 +131,7 @@ IrLib.Url.prototype = {
      * @returns {String}
      */
     getProtocol: function () {
-        return this.protocol;
+        return this._protocol;
     },
 
     /**
@@ -128,7 +140,7 @@ IrLib.Url.prototype = {
      * @param {String} newValue
      */
     setProtocol: function (newValue) {
-        this.protocol = newValue;
+        this._protocol = newValue;
     },
 
     /**
@@ -158,7 +170,7 @@ IrLib.Url.prototype = {
      * @returns {String}
      */
     getHash: function () {
-        return this.hash;
+        return this._hash;
     },
 
     /**
@@ -167,7 +179,10 @@ IrLib.Url.prototype = {
      * @param {String} newValue
      */
     setHash: function (newValue) {
-        this.hash = newValue;
+        if (newValue.charAt(0) !== '#') {
+            newValue = '#' + newValue;
+        }
+        this._hash = newValue;
     },
 
     /**
@@ -176,7 +191,7 @@ IrLib.Url.prototype = {
      * @returns {String}
      */
     getSearch: function () {
-        return this.search;
+        return this._search;
     },
 
     /**
@@ -185,7 +200,10 @@ IrLib.Url.prototype = {
      * @param {String} newValue
      */
     setSearch: function (newValue) {
-        this.search = newValue;
+        if (newValue[0] !== '?') {
+            newValue = '?' + newValue;
+        }
+        this._search = newValue;
     },
 
     /**
@@ -207,7 +225,7 @@ IrLib.Url.prototype = {
         var pageUrl = IrLib.Url.current();
         return (
         pageUrl.host == this.host &&
-        pageUrl.protocol === this.protocol &&
+        pageUrl._protocol === this._protocol &&
         pageUrl.pathname === this.pathname &&
         (ignoreSearch || pageUrl.search === this.search)
         );
@@ -238,10 +256,10 @@ IrLib.Url.prototype = {
      * @returns {string}
      */
     toString: function () {
-        return (this.protocol ? this.protocol + '//' : '') +
+        return (this._protocol ? this._protocol + '//' : '') +
             this.host +
             this.pathname +
             this.search +
-            this.hash;
+            this._hash;
     }
 };
