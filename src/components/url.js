@@ -9,56 +9,55 @@
  */
 IrLib.Url = function (href) {
     if (arguments.length > 0) {
-        if (href instanceof IrLib.Url) {
-            href = href + '';
-        }
         var parser = document.createElement('a');
-        parser.href = href;
+        parser.href = this._prepareDoubleStash('' + href);
 
-        this._protocol = parser.protocol; // => "http:"
-        this._host = parser.host;     // => "example.com:3000"
-        this._hostname = parser.hostname; // => "example.com"
-        this._port = parser.port;     // => "3000"
-        this.setPathname(parser.pathname); // => "/pathname/"
-        this.setHash(parser.hash);     // => "#hash"
-        this.setSearch(parser.search);   // => "?search=test"
+        this._protocol = parser.protocol;   // => "http:"
+        this._host = parser.host;           // => "example.com:3000"
+        this._hostname = parser.hostname;   // => "example.com"
+        this._port = parser.port;           // => "3000"
+        this.setPathname(parser.pathname);  // => "/pathname/"
+        this.setHash(parser.hash);          // => "#hash"
+        this.setSearch(parser.search);      // => "?search=test"
     } else {
         this._protocol = '';
         this._host = '';
         this._hostname = '';
         this._port = '';
-        this._pathname = '';
         this._hash = '';
         this._search = '';
+        this.setPathname('');
     }
 
-    Object.defineProperty(this, 'host', {
-        get: this.getHost,
-        set: this.setHost
-    });
-    Object.defineProperty(this, 'hostname', {
-        get: this.getHostname,
-        set: this.setHostname
-    });
-    Object.defineProperty(this, 'port', {
-        get: this.getPort,
-        set: this.setPort
-    });
-    Object.defineProperty(this, 'pathname', {
-        get: this.getPathname,
-        set: this.setPathname
-    });
-    Object.defineProperty(this, 'hash', {
-        get: this.getHash,
-        set: this.setHash
-    });
-    Object.defineProperty(this, 'protocol', {
-        get: this.getProtocol,
-        set: this.setProtocol
-    });
-    Object.defineProperty(this, 'search', {
-        get: this.getSearch,
-        set: this.setSearch
+    Object.defineProperties(this, {
+        'host': {
+            get: this.getHost,
+            set: this.setHost
+        },
+        'hostname': {
+            get: this.getHostname,
+            set: this.setHostname
+        },
+        'port': {
+            get: this.getPort,
+            set: this.setPort
+        },
+        'pathname': {
+            get: this.getPathname,
+            set: this.setPathname
+        },
+        'hash': {
+            get: this.getHash,
+            set: this.setHash
+        },
+        'protocol': {
+            get: this.getProtocol,
+            set: this.setProtocol
+        },
+        'search': {
+            get: this.getSearch,
+            set: this.setSearch
+        }
     });
 };
 
@@ -68,6 +67,9 @@ IrLib.Url = function (href) {
  * @returns {IrLib.Url}
  */
 IrLib.Url.current = function () {
+    if (typeof window === 'undefined') {
+        throw new IrLib.TypeError('window not defined in this context');
+    }
     return new IrLib.Url(window.location.href);
 };
 
@@ -158,7 +160,8 @@ IrLib.Url.prototype = {
      * @param {String} newValue
      */
     setPathname: function (newValue) {
-        if (newValue[0] !== '/') {
+        newValue = '' + newValue;
+        if (!newValue || newValue[0] !== '/') {
             newValue = '/' + newValue;
         }
         this._pathname = newValue;
@@ -179,7 +182,8 @@ IrLib.Url.prototype = {
      * @param {String} newValue
      */
     setHash: function (newValue) {
-        if (newValue.charAt(0) !== '#') {
+        newValue = '' + newValue;
+        if (newValue && newValue.charAt(0) !== '#') {
             newValue = '#' + newValue;
         }
         this._hash = newValue;
@@ -200,7 +204,8 @@ IrLib.Url.prototype = {
      * @param {String} newValue
      */
     setSearch: function (newValue) {
-        if (newValue[0] !== '?') {
+        newValue = '' + newValue;
+        if (newValue && newValue[0] !== '?') {
             newValue = '?' + newValue;
         }
         this._search = newValue;
@@ -224,10 +229,10 @@ IrLib.Url.prototype = {
     isSamePage: function (ignoreSearch) {
         var pageUrl = IrLib.Url.current();
         return (
-        pageUrl.host == this.host &&
-        pageUrl._protocol === this._protocol &&
-        pageUrl.pathname === this.pathname &&
-        (ignoreSearch || pageUrl.search === this.search)
+            pageUrl.host == this.host &&
+            pageUrl._protocol === this._protocol &&
+            pageUrl.pathname === this.pathname &&
+            (ignoreSearch || pageUrl.search === this.search)
         );
     },
 
@@ -261,5 +266,22 @@ IrLib.Url.prototype = {
             this.pathname +
             this.search +
             this._hash;
+    },
+
+    /**
+     * Adds the protocol if the URI starts with //
+     *
+     * @param {String} input
+     * @returns String}
+     * @private
+     */
+    _prepareDoubleStash: function (input) {
+        if (input.substr(0, 2) === '//') {
+            if (typeof window !== 'undefined') {
+                return window.location.protocol + input;
+            }
+            return 'http:' + input;
+        }
+        return input;
     }
 };
