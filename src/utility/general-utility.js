@@ -11,7 +11,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} element
      * @returns {Boolean}
      */
-    isDomNode: function (element) {
+    isDomNode(element) {
         return !!(element && element.nodeName);
     },
 
@@ -21,7 +21,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} element
      * @returns {HTMLElement}
      */
-    domNode: function (element) {
+    domNode(element) {
         if (_GeneralUtility.isDomNode(element)) {
             return element;
         }
@@ -43,7 +43,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} value
      * @returns {*}
      */
-    toArray: function (value) {
+    toArray(value) {
         if (typeof value === 'undefined') {
             return [];
         }
@@ -65,12 +65,12 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
     /**
      * Returns the value for the key path of the given object
      *
-     * @param {String} keyPath Collection of object keys concatenated with a dot (".")
+     * @param {string} keyPath Collection of object keys concatenated with a dot (".")
      * @param {Object} object Root object to fetch the property
      * @param {Boolean} [graceful] Do not throw an exception for unresolved key paths
      * @returns {*}
      */
-    valueForKeyPathOfObject: function (keyPath, object, graceful) {
+    valueForKeyPathOfObject(keyPath, object, graceful) {
         if (typeof keyPath !== 'string') {
             throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
@@ -99,11 +99,11 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * Sets the value for the key path of the given object
      *
      * @param {*} value New value to set
-     * @param {String} keyPath Collection of object keys concatenated with a dot (".")
+     * @param {string} keyPath Collection of object keys concatenated with a dot (".")
      * @param {Object} object Root object to set the property
      * @returns {*}
      */
-    setValueForKeyPathOfObject: function (value, keyPath, object) {
+    setValueForKeyPathOfObject(value, keyPath, object) {
         if (typeof keyPath !== 'string') {
             throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
@@ -133,7 +133,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} value
      * @returns {boolean}
      */
-    isNumeric: function (value) {
+    isNumeric(value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
     },
 
@@ -144,7 +144,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {Number} depth
      * @returns {*}
      */
-    clone: function (obj, depth) {
+    clone(obj, depth) {
         var copy;
         if (arguments.length < 2) {
             depth = 10;
@@ -193,9 +193,9 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * Adds the class to the given element
      *
      * @param {*} element HTML node or selector
-     * @param {String} className
+     * @param {string} className
      */
-    addClass: function (element, className) {
+    addClass(element, className) {
         element = _GeneralUtility.domNode(element);
         if (element) {
             if (element.classList) {

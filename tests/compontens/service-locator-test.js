@@ -34,7 +34,7 @@ describe('ServiceLocator', function () {
         NewClassWithConstructorArgument = IrLib.CoreObject.extend({
             'name': 'NewClassWithConstructorArgument',
             'arg': null,
-            'init': function (arg) {
+            'init'(arg) {
                 this.arg = arg;
             }
         });

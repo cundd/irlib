@@ -26,7 +26,7 @@ IrLib.View.VariableViewInterface.prototype.setVariables = function (data) {
 /**
  * Adds the variable with the given key and value
  *
- * @param {String} key
+ * @param {string} key
  * @param {*} value
  * @returns {IrLib.View.Interface}
  */

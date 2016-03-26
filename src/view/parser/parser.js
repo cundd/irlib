@@ -45,10 +45,10 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     /**
      * Parses the given input string and returns a sequence of Blocks
      *
-     * @param {String} input
+     * @param {string} input
      * @return {Block[]}
      */
-    parse: function (input) {
+    parse(input) {
         if (typeof input !== 'string') {
             throw new TypeError('Expected argument "input" to be of type string, ' + (typeof input) + ' given');
         }
@@ -64,7 +64,7 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
      * @return {Block[]}
      * @private
      */
-    _analyze: function (tokens) {
+    _analyze(tokens) {
         var Block = IrLib.View.Parser.Block,
             BlockType = IrLib.View.Parser.BlockType,
             ExpressionType = IrLib.View.Parser.ExpressionType,
@@ -157,11 +157,11 @@ IrLib.View.Parser.Parser = IrLib.View.Parser.Interface.extend({
     /**
      * Splits the input into an array of tokens
      *
-     * @param {String} input
+     * @param {string} input
      * @returns {String[]}
      * @private
      */
-    _tokenize: function (input) {
+    _tokenize(input) {
         var inputLength = input.length,
             _BLOCK_START_CHAR = this.BLOCK_START_CHAR,
             _BLOCK_END_CHAR = this.BLOCK_END_CHAR,

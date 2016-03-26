@@ -1,79 +1,77 @@
 /**
  * Created by COD on 03.06.15.
  */
-require('class');
 
-IrLib.CoreObject = Class.extend({
-    /**
-     * @type {String}
-     */
-    __guid: null,
+export default class CoreObject {
+    __guid:string;
+    static __lastGuid:number = 0;
 
-    init: function () {
-        this.__guid = IrLib.CoreObject.createGuid();
-    },
+
+    constructor() {
+        this.__guid = CoreObject.createGuid();
+    }
 
     /**
      * Returns the global unique ID of the object
      *
-     * @returns {String}
+     * @returns {string}
      */
-    guid: function () {
+    guid() {
         return this.__guid;
-    },
+    }
 
     /**
      * Defines a new property with the given key and descriptor
      *
-     * @param {String} key
+     * @param {string} key
      * @param {Object} descriptor
-     * @returns {IrLib.CoreObject}
+     * @returns {CoreObject}
      * @see Object.defineProperty()
      */
-    defineProperty: function (key, descriptor) {
-        if (descriptor.overwrite === false && this[key]) {
+    defineProperty(key:string, descriptor:PropertyDescriptor) {
+        if (descriptor['overwrite'] === false && this[key]) {
             return this;
         }
         Object.defineProperty(this, key, descriptor);
         return this;
-    },
+    }
 
     /**
      * Defines new properties form the given properties
      *
-     * @param {Object} properties
-     * @returns {IrLib.CoreObject}
+     * @param {PropertyDescriptorMap} properties
+     * @returns {CoreObject}
      * @see Object.defineProperties()
      */
-    defineProperties: function (properties) {
+    defineProperties(properties:PropertyDescriptorMap) {
         Object.defineProperties(this, properties);
         return this;
-    },
+    }
 
     /**
      * Returns a clone of this object
      *
      * @returns {*}
      */
-    clone: function () {
-        var source = this,
-            _clone = new (source.constructor)();
+    clone() {
+        var _clone = new (<any>this.constructor()),
+            source = this;
         for (var attr in source) {
             if (source.hasOwnProperty(attr)) {
                 _clone[attr] = source[attr];
             }
         }
-        _clone.__guid = IrLib.CoreObject.createGuid();
+        _clone.__guid = CoreObject.createGuid();
         return _clone;
-    },
+    }
 
     /**
      * Creates a callback function with bound this
      *
-     * @param {Function|String} method
+     * @param {Function|string} method
      * @returns {Function}
      */
-    bind: function (method) {
+    bind(method):Function {
         var _this = this,
             impl;
 
@@ -82,7 +80,7 @@ IrLib.CoreObject = Class.extend({
         } else if (typeof _this[method] === 'function') {
             impl = _this[method];
         } else {
-            throw new IrLib.Error('Argument method must be either a method name or a function');
+            throw new Error('Argument method must be either a method name or a function');
         }
 
         return function () {
@@ -91,8 +89,9 @@ IrLib.CoreObject = Class.extend({
             return impl.apply(_this, __preparedArguments);
         };
     }
-});
-IrLib.CoreObject.__lastGuid = 0;
-IrLib.CoreObject.createGuid = function () {
-    return 'irLib-' + (++IrLib.CoreObject.__lastGuid);
-};
+
+    static createGuid():string {
+        return 'irLib-' + (++CoreObject.__lastGuid);
+    }
+}
+

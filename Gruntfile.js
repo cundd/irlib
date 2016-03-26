@@ -7,7 +7,7 @@ module.exports = function (grunt) {
                 command: 'neuter-plus -v --input includes.js --output ../<%= pkg.main %> --wrapBefore "(function() {" --wrapAfter "}());"',
                 options: {
                     execOptions: {
-                        cwd: 'src'
+                        cwd: 'dist'
                     }
                 }
             }

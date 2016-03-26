@@ -8,19 +8,19 @@ var assert = chai.assert;
 describe('CoreObject', function () {
     var NewClass = IrLib.CoreObject.extend({
         'name': 'NewClass',
-        getANumber: function () {
+        getANumber() {
             return 2;
         },
-        getAnimal: function () {
+        getAnimal() {
             return 'Elephant';
         },
-        getName: function () {
+        getName() {
             return this.name;
         }
     });
     var NewSubclass = NewClass.extend({
         'name': 'NewSubclass',
-        getAnimal: function () {
+        getAnimal() {
             return 'Wolf';
         }
     });
@@ -90,7 +90,7 @@ describe('CoreObject', function () {
             var instance = new NewClass(), getterCalled = 0;
 
             instance.defineProperty('aKey', {
-                get: function () {
+                get() {
                     return ++getterCalled;
                 }
             });
@@ -105,7 +105,7 @@ describe('CoreObject', function () {
             var instance = new NewClass(), setterCalled = 0;
 
             instance.defineProperty('aKey', {
-                set: function (value) {
+                set(value) {
                     ++setterCalled;
                 }
             });
@@ -161,12 +161,12 @@ describe('CoreObject', function () {
 
             instance.defineProperties({
                 'aKey': {
-                    get: function () {
+                    get() {
                         return ++getterCalled;
                     }
                 },
                 'anotherKey': {
-                    get: function () {
+                    get() {
                         return ++anotherKeyGetterCalled;
                     }
                 }
@@ -191,12 +191,12 @@ describe('CoreObject', function () {
 
             instance.defineProperties({
                 'aKey': {
-                    set: function (value) {
+                    set(value) {
                         ++setterCalled;
                     }
                 },
                 'anotherKey': {
-                    set: function (value) {
+                    set(value) {
                         ++anotherKeySetterCalled;
                     }
                 }

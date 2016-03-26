@@ -6,7 +6,7 @@
 
 (function(exports){
     var IrLib = exports;
-
+    
     require('config');
     require('core-object');
     require('error/*');

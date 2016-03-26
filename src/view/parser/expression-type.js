@@ -18,8 +18,8 @@ IrLib.View.Parser.ExpressionType = {
     /**
      * Returns the keyword if it is a valid type, or UNKNOWN otherwise
      *
-     * @param {String} keyword
-     * @returns {String}
+     * @param {string} keyword
+     * @returns {string}
      */
     getTypeForKeyword: function(keyword) {
         return this.isKeyword(keyword) ? keyword : this.UNKNOWN;
@@ -28,7 +28,7 @@ IrLib.View.Parser.ExpressionType = {
     /**
      * Returns if the given value is a valid type
      *
-     * @param {String} keyword
+     * @param {string} keyword
      * @returns {Boolean}
      */
     isKeyword: function(keyword) {

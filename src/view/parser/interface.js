@@ -13,7 +13,7 @@ IrLib.View.Parser.Interface = IrLib.CoreObject.extend({
     /**
      * Parses the given input string and returns a sequence of Blocks
      *
-     * @param {String} input
+     * @param {string} input
      * @return {Block[]}
      */
     parse: function(input) {

@@ -13,7 +13,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     /**
      * Tag name for the HTML node that encapsulates the generated nodes
      *
-     * @type {String}
+     * @type {string}
      */
     tagName: 'div',
 
@@ -45,7 +45,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      */
     _lastInsertedNode: null,
 
-    init: function () {
+    constructor() {
         var _this = this;
 
         this._super();
@@ -75,7 +75,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @return {Node|HTMLElement}
      */
-    render: function () {
+    render() {
         if (this._needsRedraw) {
             delete this._dom;
             var _template = this.template;
@@ -94,7 +94,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @returns {Boolean}
      */
-    getNeedsRedraw: function () {
+    getNeedsRedraw() {
         return this._needsRedraw;
     },
 
@@ -103,7 +103,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @returns {Boolean}
      */
-    isVisible: function () {
+    isVisible() {
         var element = this._dom;
         return !!(element && element.parentNode && document.body.contains(element));
     },
@@ -114,7 +114,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Node|HTMLElement} element
      * @returns {IrLib.View.Interface}
      */
-    appendTo: function (element) {
+    appendTo(element) {
         if (!element || typeof element.appendChild !== 'function') {
             throw new TypeError('Given element is not a valid DOM Node');
         }
@@ -138,7 +138,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Boolean} [force]
      * @returns {IrLib.View.Interface}
      */
-    reload: function (force) {
+    reload(force) {
         var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null);
         if (!lastParent) {
             throw new ReferenceError('Can not reload because the view does not seem to be in the DOM');
@@ -155,7 +155,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @returns {IrLib.View.Interface}
      */
-    remove: function () {
+    remove() {
         var lastInsertedNode = this._lastInsertedNode;
         if (lastInsertedNode && lastInsertedNode.parentNode) {
             lastInsertedNode.parentNode.removeChild(lastInsertedNode);
@@ -169,7 +169,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      *
      * @param {Event} event
      */
-    handleEvent: function (event) {
+    handleEvent(event) {
         var imps = this._eventListeners[event.type],
             patchedEvent, currentImp, i;
 
@@ -197,7 +197,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @returns {Event}
      * @private
      */
-    _patchEvent: function (event) {
+    _patchEvent(event) {
         event.irTarget = this;
         return event;
     },
@@ -205,11 +205,11 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
     /**
      * Adds the given event listener to the View
      *
-     * @param {String} type
+     * @param {string} type
      * @param {EventListener|Function} listener
      * @param {Boolean} [useCapture] Currently ignored
      */
-    addEventListener: function (type, listener, useCapture) {
+    addEventListener(type, listener, useCapture) {
         var _eventListeners = this._eventListeners;
         if (!_eventListeners[type]) {
             _eventListeners[type] = [listener];
@@ -229,7 +229,7 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {String[]} eventTypes
      * @private
      */
-    _addEventListeners: function (element, eventTypes) {
+    _addEventListeners(element, eventTypes) {
         var eventTypesLength = eventTypes.length,
             i, type;
         for (i = 0; i < eventTypesLength; i++) {
@@ -257,18 +257,18 @@ IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
      * @param {Event} event
      * @return {Boolean}
      */
-    dispatchEvent: function (event) {
+    dispatchEvent(event) {
         this.render().dispatchEvent(event);
     },
 
     /**
      * Creates the Document Object Model for the given template string
      *
-     * @param {String} [template]
+     * @param {string} [template]
      * @returns {Node|HTMLElement}
      * @protected
      */
-    _createDom: function (template) {
+    _createDom(template) {
         var root = document.createElement(this.tagName);
         if (template) {
             root.innerHTML = template;

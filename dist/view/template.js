@@ -1,337 +1,3 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-/**
- * Created by COD on 03.06.15.
- */
-// export namespace IrLib {
-//     Config = {};
-// }
-/**
- * Created by COD on 03.06.15.
- */
-/**
- * Created by daniel on 25/03/16.
- */
-/**
- * Created by COD on 04.07.14.
- */
-/**
- * Object representation of an URL
- *
- * @param {string} href
- * @constructor
- */
-/**
- * Created by COD on 25.06.15.
- */
-// 'view/interface');
-// require('view/abstract-variable-view');
-require('view/interface');
-/**
- * An abstract view with DOM support
- *
- * @implements EventListener
- * @abstract
- */
-IrLib.View.AbstractDomView = IrLib.View.AbstractContextAwareView.extend({
-    /**
-     * Tag name for the HTML node that encapsulates the generated nodes
-     *
-     * @type {string}
-     */
-    tagName: 'div',
-    /**
-     * Registry of event listeners
-     *
-     * @type {Object}
-     */
-    _eventListeners: null,
-    /**
-     * Defines if a redraw is required
-     *
-     * @type {Boolean}
-     */
-    _needsRedraw: true,
-    /**
-     * DOM element
-     *
-     * @type {Node|HTMLElement}
-     */
-    _dom: null,
-    /**
-     * Last inserted node which should be replaced
-     *
-     * @type {Node}
-     */
-    _lastInsertedNode: null,
-    constructor: function () {
-        var _this = this;
-        this._super();
-        this._eventListeners = {};
-        if (typeof this.eventListeners === 'object') {
-            (new IrLib.Dictionary(this.eventListeners)).forEach(function (imp, key) {
-                _this.addEventListener(key, imp);
-            });
-        }
-        else if (typeof this.events === 'object') {
-            (new IrLib.Dictionary(this.events)).forEach(function (imp, key) {
-                _this.addEventListener(key, imp);
-            });
-        }
-        this.defineProperty('needsRedraw', {
-            enumerable: true,
-            get: this.getNeedsRedraw
-        });
-    },
-    /**
-     * Renders the template
-     *
-     * @return {Node|HTMLElement}
-     */
-    render: function () {
-        if (this._needsRedraw) {
-            delete this._dom;
-            var _template = this.template;
-            if (!_template) {
-                throw new ReferenceError('Template not specified');
-            }
-            this._dom = this._createDom(this.toString());
-            this._needsRedraw = false;
-        }
-        return this._dom;
-    },
-    /**
-     * Returns if a redraw is required
-     *
-     * @returns {Boolean}
-     */
-    getNeedsRedraw: function () {
-        return this._needsRedraw;
-    },
-    /**
-     * Returns if the View is in the visible DOM
-     *
-     * @returns {Boolean}
-     */
-    isVisible: function () {
-        var element = this._dom;
-        return !!(element && element.parentNode && document.body.contains(element));
-    },
-    /**
-     * Appends the View to the given DOM element, while replacing the previously rendered element
-     *
-     * @param {Node|HTMLElement} element
-     * @returns {IrLib.View.Interface}
-     */
-    appendTo: function (element) {
-        if (!element || typeof element.appendChild !== 'function') {
-            throw new TypeError('Given element is not a valid DOM Node');
-        }
-        this.render();
-        if (this._lastInsertedNode) {
-            element.replaceChild(this._dom, this._lastInsertedNode);
-        }
-        else {
-            element.appendChild(this._dom);
-        }
-        this._lastInsertedNode = this._dom;
-        this.addStoredEventListeners();
-        return this;
-    },
-    /**
-     * Reloads the Views output in the DOM
-     *
-     * @param {Boolean} [force]
-     * @returns {IrLib.View.Interface}
-     */
-    reload: function (force) {
-        var lastParent = this._dom ? this._dom.parentNode : (this._lastInsertedNode ? this._lastInsertedNode.parentNode : null);
-        if (!lastParent) {
-            throw new ReferenceError('Can not reload because the view does not seem to be in the DOM');
-        }
-        if (force || this._needsRedraw) {
-            this._needsRedraw = true;
-            this.appendTo(lastParent);
-        }
-        return this;
-    },
-    /**
-     * Removes the element from it's parent
-     *
-     * @returns {IrLib.View.Interface}
-     */
-    remove: function () {
-        var lastInsertedNode = this._lastInsertedNode;
-        if (lastInsertedNode && lastInsertedNode.parentNode) {
-            lastInsertedNode.parentNode.removeChild(lastInsertedNode);
-            this._lastInsertedNode = null;
-        }
-        return this;
-    },
-    /**
-     * Handle the DOM event
-     *
-     * @param {Event} event
-     */
-    handleEvent: function (event) {
-        var imps = this._eventListeners[event.type], patchedEvent, currentImp, i;
-        if (imps) {
-            patchedEvent = this._patchEvent(event);
-            for (i = 0; i < imps.length; i++) {
-                currentImp = imps[i];
-                if (typeof currentImp === 'undefined') {
-                    throw new TypeError('Implementation for event type "' + event.type + '" is undefined');
-                }
-                else if (typeof currentImp === 'function') {
-                    currentImp.call(this, patchedEvent);
-                }
-                else if (currentImp.handleEvent) {
-                    currentImp.handleEvent.call(currentImp, patchedEvent);
-                }
-            }
-        }
-        else {
-            IrLib.Logger.log(event);
-        }
-    },
-    /**
-     * Create a patches version of the event and set it's target to the View
-     *
-     * @param {Event} event
-     * @returns {Event}
-     * @private
-     */
-    _patchEvent: function (event) {
-        event.irTarget = this;
-        return event;
-    },
-    /**
-     * Adds the given event listener to the View
-     *
-     * @param {string} type
-     * @param {EventListener|Function} listener
-     * @param {Boolean} [useCapture] Currently ignored
-     */
-    addEventListener: function (type, listener, useCapture) {
-        var _eventListeners = this._eventListeners;
-        if (!_eventListeners[type]) {
-            _eventListeners[type] = [listener];
-        }
-        if (_eventListeners[type].indexOf(listener) === -1) {
-            _eventListeners[type].push(listener);
-        }
-        this._addEventListeners(this.render(), [type]);
-    },
-    /**
-     * Add event listeners for each given event types to the element
-     *
-     * @param {HTMLElement} element
-     * @param {String[]} eventTypes
-     * @private
-     */
-    _addEventListeners: function (element, eventTypes) {
-        var eventTypesLength = eventTypes.length, i, type;
-        for (i = 0; i < eventTypesLength; i++) {
-            type = eventTypes[i];
-            element.addEventListener(type, this);
-        }
-    },
-    /**
-     * Add the stored event listeners to the DOM Node
-     */
-    addStoredEventListeners: function () {
-        if (!this._dom) {
-            throw new ReferenceError('DOM is not render yet');
-        }
-        this._addEventListeners(this._dom, Object.keys(this._eventListeners));
-    },
-    /**
-     * Dispatches an Event at the View, invoking the affected EventListeners in the appropriate order.
-     *
-     * The normal event processing rules (including the capturing and optional bubbling phase) apply to events
-     * dispatched manually with dispatchEvent().
-     *
-     * @param {Event} event
-     * @return {Boolean}
-     */
-    dispatchEvent: function (event) {
-        this.render().dispatchEvent(event);
-    },
-    /**
-     * Creates the Document Object Model for the given template string
-     *
-     * @param {string} [template]
-     * @returns {Node|HTMLElement}
-     * @protected
-     */
-    _createDom: function (template) {
-        var root = document.createElement(this.tagName);
-        if (template) {
-            root.innerHTML = template;
-        }
-        return root;
-    },
-    /**
-     * Returns a clone of this object
-     *
-     * @returns {*}
-     */
-    clone: function () {
-        var source = this, _clone = new (source.constructor)();
-        for (var attr in source) {
-            if (source.hasOwnProperty(attr)) {
-                if (attr === '_dom' || attr === '_lastInsertedNode' || attr === '_eventListeners') {
-                    continue;
-                }
-                _clone[attr] = source[attr];
-            }
-        }
-        _clone.__guid = IrLib.CoreObject.createGuid();
-        return _clone;
-    }
-});
-/**
- * Created by COD on 25.06.15.
- */
-IrLib.View = IrLib.View || {};
-/**
- * Defines a common interface for context aware Views
- *
- * @interface
- */
-IrLib.View.ContextInterface = function () {
-};
-IrLib.View.ContextInterface.prototype.setContext = function () {
-    throw new IrLib.MissingImplementationError('setContext');
-};
-IrLib.View.ContextInterface.prototype.getContext = function () {
-    throw new IrLib.MissingImplementationError('getContext');
-};
-/**
- * Created by COD on 25.06.15.
- */
-// require('view/template');
-/**
- * Created by COD on 25.06.15.
- */
-IrLib.View = IrLib.View || {};
-/**
- * Current template block information
- *
- * @param {Number} index
- * @param {Block[]} blockStream
- * @constructor
- */
-IrLib.View.State = function (index, blockStream) {
-    this.index = index | 0;
-    this.blockStream = blockStream;
-};
-/**
- * Created by COD on 25.06.15.
- */
 /**
  * Created by COD on 25.06.15.
  */
@@ -390,7 +56,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @type {Boolean}
      */
     _renderSubviewsAsPlaceholders: false,
-    constructor: function (template, variables) {
+    constructor(template, variables) {
         this._super(template, variables);
         if (arguments.length > 0) {
             if (typeof template !== 'string') {
@@ -426,7 +92,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {string}
      */
-    toString: function () {
+    toString() {
         return this._renderBlocks();
     },
     /**
@@ -434,7 +100,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @return {Node|HTMLElement}
      */
-    render: function () {
+    render() {
         if (this._needsRedraw) {
             delete this._dom;
             var _template = this.template;
@@ -453,7 +119,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {string}
      */
-    _renderBlocks: function () {
+    _renderBlocks() {
         var BlockType = IrLib.View.Parser.BlockType, State = IrLib.View.State, templateBlocks = this.getTemplateBlocks(), templateBlocksLength = templateBlocks.length, inline_escapeHtml = this._escapeHtml, inline_resolveVariable = this._resolveVariable.bind(this), inline_renderExpression = this._renderExpression.bind(this), renderedTemplate = '', currentVariableValue, currentMeta, currentTemplateBlock, index;
         for (index = 0; index < templateBlocksLength; index++) {
             /** @var {IrLib.View.Parser.Block} currentTemplateBlock */
@@ -489,7 +155,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {string}
      * @private
      */
-    _renderExpression: function (block, state) {
+    _renderExpression(block, state) {
         var ExpressionType = IrLib.View.Parser.ExpressionType, expressionParts = block.content.split(' '), lastConditionStateStack = this._lastConditionStateStack, meta = block.meta, output, view, viewId;
         switch (meta.expressionType) {
             case ExpressionType.VIEW:
@@ -550,7 +216,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {boolean}
      * @private
      */
-    _evaluateConditionValue: function (conditionValue) {
+    _evaluateConditionValue(conditionValue) {
         return ((Array.isArray(conditionValue) && conditionValue.length > 0) ||
             (typeof conditionValue === 'object' && Object.keys(conditionValue).length > 0) || !!conditionValue);
     },
@@ -562,7 +228,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @param {IrLib.View.State} state
      * @private
      */
-    _scanToEndExpression: function (startExpression, endExpression, state) {
+    _scanToEndExpression(startExpression, endExpression, state) {
         var blockStream = state.blockStream, blockStreamLength = blockStream.length, EXPRESSION = IrLib.View.Parser.BlockType.EXPRESSION, EXPRESSION_TYPE_ELSE = IrLib.View.Parser.ExpressionType.ELSE, nestingDepth = 1, i = state.index, balanced = false, block, expressionType;
         for (; i < blockStreamLength; i++) {
             /** @type {IrLib.View.Parser.Block} */
@@ -597,7 +263,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {*}
      * @private
      */
-    _resolveVariable: function (keyPath) {
+    _resolveVariable(keyPath) {
         var result;
         try {
             result = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this.getVariables(), false);
@@ -622,7 +288,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {*}
      * @private
      */
-    _resolveAndEvaluateComputed: function (key) {
+    _resolveAndEvaluateComputed(key) {
         var _computed = this.computed, registeredComputed;
         if (!_computed) {
             return undefined;
@@ -640,7 +306,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {IrLib.View.SubViewInterface}
      * @private
      */
-    _resolveView: function (viewIdentifier) {
+    _resolveView(viewIdentifier) {
         var _serviceLocator = this.serviceLocator, view;
         if (!_serviceLocator) {
             throw new ReferenceError('Service Locator must be set to resolve views for identifier "' + viewIdentifier + '"');
@@ -662,7 +328,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {string}
      * @private
      */
-    _escapeHtml: function (string) {
+    _escapeHtml(string) {
         var entityMap = {
             '&': '&amp;',
             '<': '&lt;',
@@ -735,7 +401,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Replace the placeholders for subviews with the actual view instances
      */
-    replaceSubviewPlaceholders: function () {
+    replaceSubviewPlaceholders() {
         var _dom = this._dom;
         this._subviewPlaceholders.forEach(function (view, elementId) {
             var placeholder = _dom.querySelector('#' + elementId);
@@ -753,7 +419,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * @inheritDoc
      */
-    appendTo: function (element) {
+    appendTo(element) {
         this._super(element);
         this.replaceSubviewPlaceholders();
     },
@@ -763,7 +429,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @param {Object|IrLib.Dictionary} data
      * @returns {IrLib.View.Interface}
      */
-    setComputed: function (data) {
+    setComputed(data) {
         if (typeof data !== 'object') {
             throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
         }
@@ -781,7 +447,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.Dictionary}
      */
-    getComputed: function () {
+    getComputed() {
         return this._computed;
     },
     /**
@@ -790,7 +456,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @param {string} template
      * @returns {IrLib.View.Template}
      */
-    setTemplate: function (template) {
+    setTemplate(template) {
         var templateTemporary = template.trim();
         if (this._isSelector(templateTemporary)) {
             this._template = this._getTemplateForSelector(templateTemporary);
@@ -807,7 +473,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {string}
      */
-    getTemplate: function () {
+    getTemplate() {
         return this._template;
     },
     /**
@@ -815,7 +481,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.View.Parser.Block[]}
      */
-    getTemplateBlocks: function () {
+    getTemplateBlocks() {
         if (!this._templateBlocks) {
             var templateParser = this.getTemplateParser();
             this._templateBlocks = templateParser.parse(this._template);
@@ -829,7 +495,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {boolean}
      * @private
      */
-    _isSelector: function (value) {
+    _isSelector(value) {
         if (typeof value !== 'string') {
             return false;
         }
@@ -846,7 +512,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {string}
      * @private
      */
-    _getTemplateForSelector: function (selector) {
+    _getTemplateForSelector(selector) {
         var templateElement = document.querySelector(selector), templateHtml;
         if (!templateElement) {
             return null;
@@ -859,7 +525,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.View.Parser.Interface}
      */
-    getTemplateParser: function () {
+    getTemplateParser() {
         if (!this._templateParser) {
             this._templateParser = new IrLib.View.Parser.Parser();
         }
@@ -870,52 +536,11 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {*}
      */
-    clone: function () {
+    clone() {
         var _clone = this._super();
         _clone._subviewPlaceholders = new IrLib.Dictionary();
         _clone._lastConditionStateStack = [];
         return _clone;
     }
 });
-/**
- * Created by COD on 25.06.15.
- */
-IrLib.View = IrLib.View || {};
-/**
- * Defines a common interface for Views with variables
- *
- * @interface
- */
-IrLib.View.VariableViewInterface = function () {
-};
-/**
- * Sets the variables
- *
- * @param {Object|IrLib.Dictionary} data
- * @returns {IrLib.View.Interface}
- */
-IrLib.View.VariableViewInterface.prototype.setVariables = function (data) {
-    throw new IrLib.MissingImplementationError('setVariables');
-};
-/**
- * Adds the variable with the given key and value
- *
- * @param {string} key
- * @param {*} value
- * @returns {IrLib.View.Interface}
- */
-IrLib.View.VariableViewInterface.prototype.assignVariable = function (key, value) {
-    throw new IrLib.MissingImplementationError('assignVariable');
-};
-/**
- * Returns the currently assigned variables
- *
- * @returns {IrLib.Dictionary}
- */
-IrLib.View.VariableViewInterface.prototype.getVariables = function () {
-    throw new IrLib.MissingImplementationError('getVariables');
-};
-/**
- * Created by COD on 25.06.15.
- */
-//# sourceMappingURL=irlib.js.map
+//# sourceMappingURL=template.js.map

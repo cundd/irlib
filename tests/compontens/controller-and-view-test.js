@@ -57,9 +57,9 @@ describe('Controller+View', function () {
     //    it('should return all keys of the controllers "events" property', function () {
     //        var controller = new (IrLib.Controller.extend({
     //            events: {
-    //                'click': function () {
+    //                'click'() {
     //                },
-    //                'keydown': function () {
+    //                'keydown'() {
     //                }
     //            }
     //        }));
@@ -80,12 +80,12 @@ describe('Controller+View', function () {
                 controller = new (IrLib.Controller.extend({
                     view: view,
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -115,13 +115,13 @@ describe('Controller+View', function () {
                 controller = new (IrLib.Controller.extend({
                     view: view,
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.target;
                             irTarget = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -148,12 +148,12 @@ describe('Controller+View', function () {
                 controller = new (IrLib.Controller.extend({
                     view: view,
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked++;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -178,12 +178,12 @@ describe('Controller+View', function () {
 
                 controller = new (IrLib.Controller.extend({
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -214,13 +214,13 @@ describe('Controller+View', function () {
 
                 controller = new (IrLib.Controller.extend({
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.target;
                             irTarget = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -247,12 +247,12 @@ describe('Controller+View', function () {
 
                 controller = new (IrLib.Controller.extend({
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked++;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -281,12 +281,12 @@ describe('Controller+View', function () {
                 controller = new (IrLib.Controller.extend({
                     view: view,
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -316,13 +316,13 @@ describe('Controller+View', function () {
                 controller = new (IrLib.Controller.extend({
                     view: view,
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.target;
                             irTarget = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -349,12 +349,12 @@ describe('Controller+View', function () {
                 controller = new (IrLib.Controller.extend({
                     view: view,
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked++;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -379,12 +379,12 @@ describe('Controller+View', function () {
 
                 controller = new (IrLib.Controller.extend({
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -415,13 +415,13 @@ describe('Controller+View', function () {
 
                 controller = new (IrLib.Controller.extend({
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.target;
                             irTarget = event.irTarget;
                             handler = this;
                             clicked = true;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -448,12 +448,12 @@ describe('Controller+View', function () {
 
                 controller = new (IrLib.Controller.extend({
                     events: {
-                        'click': function (event) {
+                        'click'(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked++;
                         },
-                        'keydown': function () {
+                        'keydown'() {
                             keyPressed = true;
                         }
                     }
@@ -484,12 +484,12 @@ describe('Controller+View', function () {
     //        controller = new (IrLib.Controller.extend({
     //            view: view,
     //            events: {
-    //                'click': function (event) {
+    //                'click'(event) {
     //                    target = event.target;
     //                    handler = this;
     //                    clicked = true;
     //                },
-    //                'keydown': function () {
+    //                'keydown'() {
     //                    keyPressed = true;
     //                }
     //            }
@@ -514,12 +514,12 @@ describe('Controller+View', function () {
     //        controller = new (IrLib.Controller.extend({
     //            view: view,
     //            events: {
-    //                'click': function (event) {
+    //                'click'(event) {
     //                    target = event.target;
     //                    handler = this;
     //                    clicked = true;
     //                },
-    //                'keydown': function () {
+    //                'keydown'() {
     //                    keyPressed = true;
     //                }
     //

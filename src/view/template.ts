@@ -21,7 +21,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Template to render
      *
-     * @type {String}
+     * @type {string}
      */
     _template: '',
 
@@ -66,7 +66,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      */
     _renderSubviewsAsPlaceholders: false,
 
-    init: function (template, variables) {
+    constructor(template, variables) {
         this._super(template, variables);
 
         if (arguments.length > 0) { // Check if the template argument is given
@@ -105,9 +105,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Returns the string representation of the rendered template
      *
-     * @returns {String}
+     * @returns {string}
      */
-    toString: function () {
+    toString() {
         return this._renderBlocks();
     },
 
@@ -116,7 +116,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @return {Node|HTMLElement}
      */
-    render: function () {
+    render() {
         if (this._needsRedraw) {
             delete this._dom;
             var _template = this.template;
@@ -135,9 +135,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Replace the variables inside the given template
      *
-     * @returns {String}
+     * @returns {string}
      */
-    _renderBlocks: function () {
+    _renderBlocks() {
         var BlockType = IrLib.View.Parser.BlockType,
             State = IrLib.View.State,
             templateBlocks = this.getTemplateBlocks(),
@@ -185,10 +185,10 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @param {IrLib.View.Parser.Block} block
      * @param {IrLib.View.State} state
-     * @returns {String}
+     * @returns {string}
      * @private
      */
-    _renderExpression: function (block, state) {
+    _renderExpression(block, state) {
         var ExpressionType = IrLib.View.Parser.ExpressionType,
             expressionParts = block.content.split(' '),
             lastConditionStateStack = this._lastConditionStateStack,
@@ -261,7 +261,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {boolean}
      * @private
      */
-    _evaluateConditionValue: function (conditionValue) {
+    _evaluateConditionValue(conditionValue) {
         return (
             (Array.isArray(conditionValue) && conditionValue.length > 0) ||
             (typeof conditionValue === 'object' && Object.keys(conditionValue).length > 0) || !!conditionValue
@@ -276,7 +276,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @param {IrLib.View.State} state
      * @private
      */
-    _scanToEndExpression: function (startExpression, endExpression, state) {
+    _scanToEndExpression(startExpression, endExpression, state) {
         var blockStream = state.blockStream,
             blockStreamLength = blockStream.length,
             EXPRESSION = IrLib.View.Parser.BlockType.EXPRESSION,
@@ -315,11 +315,11 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Resolve the variable for the given key path
      *
-     * @param {String} keyPath
+     * @param {string} keyPath
      * @returns {*}
      * @private
      */
-    _resolveVariable: function (keyPath) {
+    _resolveVariable(keyPath) {
         var result;
         try {
             result = IrLib.Utility.GeneralUtility.valueForKeyPathOfObject(keyPath, this.getVariables(), false);
@@ -342,11 +342,11 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Resolve the variable for the given key path
      *
-     * @param {String} key
+     * @param {string} key
      * @returns {*}
      * @private
      */
-    _resolveAndEvaluateComputed: function (key) {
+    _resolveAndEvaluateComputed(key) {
         var _computed = this.computed,
             registeredComputed;
         if (!_computed) {
@@ -362,11 +362,11 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Resolve the requested View
      *
-     * @param {String} viewIdentifier
+     * @param {string} viewIdentifier
      * @returns {IrLib.View.SubViewInterface}
      * @private
      */
-    _resolveView: function (viewIdentifier) {
+    _resolveView(viewIdentifier) {
         var _serviceLocator = this.serviceLocator,
             view;
 
@@ -386,11 +386,11 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Escapes the given input
      *
-     * @param {String} string
+     * @param {string} string
      * @returns {string}
      * @private
      */
-    _escapeHtml: function (string) {
+    _escapeHtml(string) {
         var entityMap = {
             '&': '&amp;',
             '<': '&lt;',
@@ -407,10 +407,10 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     ///**
     // * Renders the actions inside the given template
     // *
-    // * @param {String} template
-    // * @returns {String}
+    // * @param {string} template
+    // * @returns {string}
     // */
-    //_renderActions: function (template) {
+    //_renderActions(template) {
     //    var actionRegularExpression = /\s\{\{action:([\w\-]*)}}\s/g,
     //        _document = $(document),
     //        matches = [], found, i, _this;
@@ -465,7 +465,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Replace the placeholders for subviews with the actual view instances
      */
-    replaceSubviewPlaceholders: function () {
+    replaceSubviewPlaceholders() {
         var _dom = this._dom;
 
         this._subviewPlaceholders.forEach(function (view, elementId) {
@@ -488,7 +488,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * @inheritDoc
      */
-    appendTo: function (element) {
+    appendTo(element) {
         this._super(element);
         this.replaceSubviewPlaceholders();
     },
@@ -499,7 +499,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @param {Object|IrLib.Dictionary} data
      * @returns {IrLib.View.Interface}
      */
-    setComputed: function (data) {
+    setComputed(data) {
         if (typeof data !== 'object') {
             throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
         }
@@ -517,17 +517,17 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.Dictionary}
      */
-    getComputed: function () {
+    getComputed() {
         return this._computed;
     },
 
     /**
      * Sets the template
      *
-     * @param {String} template
+     * @param {string} template
      * @returns {IrLib.View.Template}
      */
-    setTemplate: function (template) {
+    setTemplate(template) {
         var templateTemporary = template.trim();
         if (this._isSelector(templateTemporary)) {
             this._template = this._getTemplateForSelector(templateTemporary);
@@ -542,9 +542,9 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Returns the template
      *
-     * @returns {String}
+     * @returns {string}
      */
-    getTemplate: function () {
+    getTemplate() {
         return this._template;
     },
 
@@ -553,7 +553,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.View.Parser.Block[]}
      */
-    getTemplateBlocks: function () {
+    getTemplateBlocks() {
         if (!this._templateBlocks) {
             var templateParser = this.getTemplateParser();
             this._templateBlocks = templateParser.parse(this._template);
@@ -568,7 +568,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      * @returns {boolean}
      * @private
      */
-    _isSelector: function (value) {
+    _isSelector(value) {
         if (typeof value !== 'string') {
             return false;
         }
@@ -582,11 +582,11 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     /**
      * Returns the template for the given selector
      *
-     * @param {String} selector
-     * @returns {String}
+     * @param {string} selector
+     * @returns {string}
      * @private
      */
-    _getTemplateForSelector: function (selector) {
+    _getTemplateForSelector(selector) {
         var templateElement = document.querySelector(selector),
             templateHtml;
         if (!templateElement) {
@@ -601,7 +601,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {IrLib.View.Parser.Interface}
      */
-    getTemplateParser: function () {
+    getTemplateParser() {
         if (!this._templateParser) {
             this._templateParser = new IrLib.View.Parser.Parser();
         }
@@ -613,7 +613,7 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
      *
      * @returns {*}
      */
-    clone: function () {
+    clone() {
         var _clone = this._super();
         _clone._subviewPlaceholders = new IrLib.Dictionary();
         _clone._lastConditionStateStack = [];

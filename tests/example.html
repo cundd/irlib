@@ -94,7 +94,7 @@
     var sl = new IrLib.ServiceLocator();
 
     sl.registerMultiple({
-        appView: function () {
+        appView() {
             return sl.resolveDependencies(
                     new IrLib.View.Template('#my-template', {saved: 0}),
                     IrLib.View.Template
@@ -109,18 +109,18 @@
         }),
         'view/textField': IrLib.View.Template.extend({
             eventListeners: {
-                'change': function (e) {
+                'change'(e) {
 
                 },
-                'keydown': function (e) {
+                'keydown'(e) {
                     console.log(e);
                 },
-                'click': function (e) {
+                'click'(e) {
                     console.log(e);
                 }
             },
             template: '<input type="text">',
-//            init: function () {
+//            constructor() {
 //                this._super();
 //                this.addEventListener('keydown', function (e) {
 //                    console.log(e)
@@ -144,7 +144,7 @@
         appController: IrLib.Controller.extend({
             needs: ['appView:view'],
             events: {
-                click: function (e) {
+                click(e) {
 //                    IrLib.Logger.log('Clicked element', e.target);
 //                    IrLib.Logger.log('attached to view', e.irTarget);
 
@@ -159,7 +159,7 @@
                     }
                 },
 
-                change: function (e) {
+                change(e) {
                     console.log('Change', e);
                     this.view.assignVariable('mul')
                 }

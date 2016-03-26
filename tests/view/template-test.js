@@ -642,7 +642,7 @@ describe('View.Template', function () {
         it('should build a DOM element and replace computed variables', function () {
             var view = new IrLib.View.Template('<div><h1>{{headline}}</h1></div>'),
                 computed = {
-                    headline: function () {
+                    headline() {
                         return 'This worked'
                     }
                 },
@@ -659,7 +659,7 @@ describe('View.Template', function () {
                 view = new (IrLib.View.Template.extend({
                     template: template,
                     computed: {
-                        headline: function () {
+                        headline() {
                             return 'This worked'
                         }
                     }
@@ -675,7 +675,7 @@ describe('View.Template', function () {
                 view = new (IrLib.View.Template.extend({
                     template: template,
                     computed: {
-                        headline: function () {
+                        headline() {
                             return this.variables.what + ' worked'
                         }
                     }
@@ -698,7 +698,7 @@ describe('View.Template', function () {
 
             view.variables = {
                 meta: {
-                    headline: function () {
+                    headline() {
                         return 'This worked';
                     }
                 }
@@ -717,7 +717,7 @@ describe('View.Template', function () {
             view.variables = {
                 what: 'This',
                 meta: {
-                    headline: function (view) {
+                    headline(view) {
                         return view.variables.what + ' worked';
                     }
                 }
@@ -967,7 +967,7 @@ describe('View.Template', function () {
                 view = new (IrLib.View.Template.extend({
                     template: '<div></div>',
                     eventListeners: {
-                        drum: function (event) {
+                        drum(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked = true;
@@ -992,7 +992,7 @@ describe('View.Template', function () {
                 view = new (IrLib.View.Template.extend({
                     template: '<div></div>',
                     events: {
-                        drum: function (event) {
+                        drum(event) {
                             target = event.irTarget;
                             handler = this;
                             clicked = true;

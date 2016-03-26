@@ -4,7 +4,7 @@
 /**
  * Object representation of an URL
  *
- * @param {String} href
+ * @param {string} href
  * @constructor
  */
 IrLib.Url = function (href) {
@@ -76,17 +76,17 @@ IrLib.Url.current = function () {
 IrLib.Url.prototype = {
     /**
      * Returns the host
-     * @returns {String}
+     * @returns {string}
      */
-    getHost: function () {
+    getHost() {
         return this._host;
     },
 
     /**
      * Sets the host
-     * @returns {String}
+     * @returns {string}
      */
-    setHost: function (newValue) {
+    setHost(newValue) {
         var hostDefinitionParts = newValue.split(':');
         this._host = newValue;
         this._hostname = hostDefinitionParts[0];
@@ -95,34 +95,34 @@ IrLib.Url.prototype = {
 
     /**
      * Returns the hostname
-     * @returns {String}
+     * @returns {string}
      */
-    getHostname: function () {
+    getHostname() {
         return this._hostname;
     },
 
     /**
      * Sets the hostname
-     * @returns {String}
+     * @returns {string}
      */
-    setHostname: function (newValue) {
+    setHostname(newValue) {
         this._hostname = newValue;
         this._host = newValue + ':' + this._port;
     },
 
     /**
      * Returns the port
-     * @returns {String}
+     * @returns {string}
      */
-    getPort: function () {
+    getPort() {
         return this._port;
     },
 
     /**
      * Sets the port
-     * @returns {String}
+     * @returns {string}
      */
-    setPort: function (newValue) {
+    setPort(newValue) {
         this._port = newValue;
         this._host = this._hostname + ':' + newValue;
     },
@@ -130,36 +130,36 @@ IrLib.Url.prototype = {
     /**
      * Returns the protocol
      *
-     * @returns {String}
+     * @returns {string}
      */
-    getProtocol: function () {
+    getProtocol() {
         return this._protocol;
     },
 
     /**
      * Sets the protocol
      *
-     * @param {String} newValue
+     * @param {string} newValue
      */
-    setProtocol: function (newValue) {
+    setProtocol(newValue) {
         this._protocol = newValue;
     },
 
     /**
      * Returns the pathname
      *
-     * @returns {String}
+     * @returns {string}
      */
-    getPathname: function () {
+    getPathname() {
         return this._pathname;
     },
 
     /**
      * Sets the pathname
      *
-     * @param {String} newValue
+     * @param {string} newValue
      */
-    setPathname: function (newValue) {
+    setPathname(newValue) {
         newValue = '' + newValue;
         if (!newValue || newValue[0] !== '/') {
             newValue = '/' + newValue;
@@ -170,18 +170,18 @@ IrLib.Url.prototype = {
     /**
      * Returns the hash
      *
-     * @returns {String}
+     * @returns {string}
      */
-    getHash: function () {
+    getHash() {
         return this._hash;
     },
 
     /**
      * Sets the hash
      *
-     * @param {String} newValue
+     * @param {string} newValue
      */
-    setHash: function (newValue) {
+    setHash(newValue) {
         newValue = '' + newValue;
         if (newValue && newValue.charAt(0) !== '#') {
             newValue = '#' + newValue;
@@ -192,18 +192,18 @@ IrLib.Url.prototype = {
     /**
      * Returns the search
      *
-     * @returns {String}
+     * @returns {string}
      */
-    getSearch: function () {
+    getSearch() {
         return this._search;
     },
 
     /**
      * Sets the search
      *
-     * @param {String} newValue
+     * @param {string} newValue
      */
-    setSearch: function (newValue) {
+    setSearch(newValue) {
         newValue = '' + newValue;
         if (newValue && newValue[0] !== '?') {
             newValue = '?' + newValue;
@@ -216,7 +216,7 @@ IrLib.Url.prototype = {
      *
      * @returns {boolean}
      */
-    isLocal: function () {
+    isLocal() {
         return window.location.host == this.host;
     },
 
@@ -226,7 +226,7 @@ IrLib.Url.prototype = {
      * @param {boolean} [ignoreSearch] If set to TRUE the URL's search/query part will not be compared
      * @returns {boolean}
      */
-    isSamePage: function (ignoreSearch) {
+    isSamePage(ignoreSearch) {
         var pageUrl = IrLib.Url.current();
         return (
             pageUrl.host == this.host &&
@@ -241,7 +241,7 @@ IrLib.Url.prototype = {
      *
      * @returns {boolean}
      */
-    isCurrent: function () {
+    isCurrent() {
         return this.isEqualTo(IrLib.Url.current());
     },
 
@@ -251,7 +251,7 @@ IrLib.Url.prototype = {
      * @param {String|IrLib.Url} url
      * @returns {boolean}
      */
-    isEqualTo: function (url) {
+    isEqualTo(url) {
         return ("" + url) == ("" + this);
     },
 
@@ -260,7 +260,7 @@ IrLib.Url.prototype = {
      *
      * @returns {string}
      */
-    toString: function () {
+    toString() {
         return (this._protocol ? this._protocol + '//' : '') +
             this.host +
             this.pathname +
@@ -271,11 +271,11 @@ IrLib.Url.prototype = {
     /**
      * Adds the protocol if the URI starts with //
      *
-     * @param {String} input
+     * @param {string} input
      * @returns String}
      * @private
      */
-    _prepareDoubleStash: function (input) {
+    _prepareDoubleStash(input) {
         if (input.substr(0, 2) === '//') {
             if (typeof window !== 'undefined') {
                 return window.location.protocol + input;
