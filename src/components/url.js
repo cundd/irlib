@@ -25,14 +25,19 @@ IrLib.Url = function (href) {
         return input;
     };
     if (arguments.length > 0) {
-        var parser = document.createElement('a');
+        var parser = document.createElement('a'),
+            location = typeof window !== 'undefined' ? window.location : {};
         parser.href = this._prepareDoubleStash('' + href);
 
-        this._protocol = parser.protocol;   // => "http:"
-        this._host = parser.host;           // => "example.com:3000"
-        this._hostname = parser.hostname;   // => "example.com"
-        this._port = parser.port;           // => "3000"
-        this.setPathname(parser.pathname);  // => "/pathname/"
+        IrLib.Logger.log(parser.host);
+        IrLib.Logger.log(parser.hostname);
+        IrLib.Logger.log(parser.protocol);
+
+        this._protocol = parser.protocol && parser.protocol !== ':' ? parser.protocol : location.protocol;   // => "http:"
+        this._port = parser.port || location.port;           // => "3000"
+        this._hostname = parser.hostname || location.hostname;   // => "example.com"
+        this._host = parser.host || (this._port ? this._hostname + ':' + this._port : this._hostname);           // => "example.com:3000"
+        this.setPathname(parser.pathname || location.pathname);  // => "/pathname/"
         this.setHash(parser.hash);          // => "#hash"
         this.setSearch(parser.search);      // => "?search=test"
     } else {
