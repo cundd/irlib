@@ -1110,6 +1110,22 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
  * @constructor
  */
 IrLib.Url = function (href) {
+    /**
+     * Adds the protocol if the URI starts with //
+     *
+     * @param {String} input
+     * @returns String}
+     * @private
+     */
+    this._prepareDoubleStash = function (input) {
+        if (input.substr(0, 2) === '//') {
+            if (typeof window !== 'undefined') {
+                return window.location.protocol + input;
+            }
+            return 'http:' + input;
+        }
+        return input;
+    };
     if (arguments.length > 0) {
         var parser = document.createElement('a');
         parser.href = this._prepareDoubleStash('' + href);
@@ -1368,23 +1384,6 @@ IrLib.Url.prototype = {
             this.pathname +
             this.search +
             this._hash;
-    },
-
-    /**
-     * Adds the protocol if the URI starts with //
-     *
-     * @param {String} input
-     * @returns String}
-     * @private
-     */
-    _prepareDoubleStash: function (input) {
-        if (input.substr(0, 2) === '//') {
-            if (typeof window !== 'undefined') {
-                return window.location.protocol + input;
-            }
-            return 'http:' + input;
-        }
-        return input;
     }
 };
 
