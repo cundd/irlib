@@ -1131,9 +1131,9 @@ IrLib.Url = function (href) {
             location = typeof window !== 'undefined' ? window.location : {};
         parser.href = this._prepareDoubleStash('' + href);
 
-        IrLib.Logger.log(parser.host);
-        IrLib.Logger.log(parser.hostname);
-        IrLib.Logger.log(parser.protocol);
+        // IrLib.Logger.log(parser.host);
+        // IrLib.Logger.log(parser.hostname);
+        // IrLib.Logger.log(parser.protocol);
 
         this._protocol = parser.protocol && parser.protocol !== ':' ? parser.protocol : location.protocol;   // => "http:"
         this._port = parser.port || location.port;           // => "3000"
