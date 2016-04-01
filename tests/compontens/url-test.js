@@ -236,7 +236,7 @@ describe('Url', function () {
                 failureMessageProperty = failureMessage + ' and property ';
 
             if (false === (testData.skipForMochaCli && isMochaCli())) {
-                assert.isTrue(isValidUrl(url), failureMessage);
+                assert.isTrue(isValidUrl(url), failureMessage + ' with result ' + url.toString());
                 assert.strictEqual(url.pathname, testData.pathname, failureMessageProperty + 'pathname');
                 assert.strictEqual(url.protocol, testData.protocol, failureMessageProperty + 'protocol');
                 assert.strictEqual(url.hash, isMochaCli() ? '' : testData.hash, failureMessageProperty + 'hash');
