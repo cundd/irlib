@@ -139,6 +139,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
         var contentLength = content.length,
             _template = this.getTemplateView(),
             _asKey = this.getAsKey(),
+            _computed = this._computed,
             renderedContent = '',
             templateCopy, currentVariables, scope, i;
 
@@ -147,6 +148,10 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
         }
 
         _template.setContext(this);
+        if (_computed) {
+            _template.setComputed(_computed);
+        }
+
         for (i = 0; i < contentLength; i++) {
             //templateCopy = IrLib.Utility.GeneralUtility.clone(_template, 12);
             templateCopy = _template.clone();
@@ -162,7 +167,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
             scope[_asKey] = currentVariables;
             templateCopy.setVariables(scope);
 
-            if(appendToNode) {
+            if (appendToNode) {
                 appendToNode.appendChild(templateCopy.render());
                 if (templateCopy instanceof IrLib.View.Template || typeof templateCopy.replaceSubviewPlaceholders === 'function') {
                     templateCopy.replaceSubviewPlaceholders();

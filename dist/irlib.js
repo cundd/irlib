@@ -1545,6 +1545,13 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
      */
     _variables: null,
 
+    /**
+     * Dictionary of computed variables
+     *
+     * @type {IrLib.Dictionary}
+     */
+    _computed: null,
+
     init: function () {
         this._super();
 
@@ -1554,11 +1561,20 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
             this.setVariables({});
         }
 
+        if (typeof this.computed === 'object') { // Check if a computed variables are inherited
+            this.setComputed(this.computed);
+        }
+
         this.defineProperties({
             'variables': {
                 enumerable: true,
                 get: this.getVariables,
                 set: this.setVariables
+            },
+            'computed': {
+                enumerable: true,
+                get: this.getComputed,
+                set: this.setComputed
             }
         });
     },
@@ -1609,6 +1625,34 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
      */
     getVariables: function () {
         return this._variables;
+    },
+
+    /**
+     * Sets the registered computed variables
+     *
+     * @param {Object|IrLib.Dictionary} data
+     * @returns {IrLib.View.Interface}
+     */
+    setComputed: function (data) {
+        if (typeof data !== 'object') {
+            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
+        }
+        if (data instanceof IrLib.Dictionary) {
+            this._computed = data;
+        } else {
+            this._computed = new IrLib.Dictionary(data);
+        }
+        this._needsRedraw = true;
+        return this;
+    },
+
+    /**
+     * Returns the registered computed variables
+     *
+     * @returns {IrLib.Dictionary}
+     */
+    getComputed: function () {
+        return this._computed;
     }
 });
 
@@ -2035,13 +2079,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     _templateBlocks: null,
 
     /**
-     * Dictionary of computed variables
-     *
-     * @type {IrLib.Dictionary}
-     */
-    _computed: null,
-
-    /**
      * Template parser instance
      *
      * @type {IrLib.View.Parser.Interface}
@@ -2080,10 +2117,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this.setTemplate(this.template.slice(0));
         }
 
-        if (typeof this.computed === 'object') { // Check if a computed variables are inherited
-            this.setComputed(this.computed);
-        }
-
         this._subviewPlaceholders = new IrLib.Dictionary();
 
         if (arguments.length > 1) {
@@ -2095,11 +2128,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 enumerable: true,
                 get: this.getTemplate,
                 set: this.setTemplate
-            },
-            'computed': {
-                enumerable: true,
-                get: this.getComputed,
-                set: this.setComputed
             }
         });
     },
@@ -2496,34 +2524,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     },
 
     /**
-     * Sets the registered computed variables
-     *
-     * @param {Object|IrLib.Dictionary} data
-     * @returns {IrLib.View.Interface}
-     */
-    setComputed: function (data) {
-        if (typeof data !== 'object') {
-            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
-        }
-        if (data instanceof IrLib.Dictionary) {
-            this._computed = data;
-        } else {
-            this._computed = new IrLib.Dictionary(data);
-        }
-        this._needsRedraw = true;
-        return this;
-    },
-
-    /**
-     * Returns the registered computed variables
-     *
-     * @returns {IrLib.Dictionary}
-     */
-    getComputed: function () {
-        return this._computed;
-    },
-
-    /**
      * Sets the template
      *
      * @param {String} template
@@ -2764,6 +2764,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
         var contentLength = content.length,
             _template = this.getTemplateView(),
             _asKey = this.getAsKey(),
+            _computed = this._computed,
             renderedContent = '',
             templateCopy, currentVariables, scope, i;
 
@@ -2772,6 +2773,10 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
         }
 
         _template.setContext(this);
+        if (_computed) {
+            _template.setComputed(_computed);
+        }
+
         for (i = 0; i < contentLength; i++) {
             //templateCopy = IrLib.Utility.GeneralUtility.clone(_template, 12);
             templateCopy = _template.clone();
@@ -2787,7 +2792,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
             scope[_asKey] = currentVariables;
             templateCopy.setVariables(scope);
 
-            if(appendToNode) {
+            if (appendToNode) {
                 appendToNode.appendChild(templateCopy.render());
                 if (templateCopy instanceof IrLib.View.Template || typeof templateCopy.replaceSubviewPlaceholders === 'function') {
                     templateCopy.replaceSubviewPlaceholders();

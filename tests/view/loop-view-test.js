@@ -381,6 +381,32 @@ describe('View.LoopView', function () {
                 ''
             );
         });
+        it('should repeat the template and replace computed variables', function () {
+            var view = new IrLib.View.LoopView(
+                '<section><div>{{headline}}</div></section>',
+                [
+                    {content: 'Content 1'},
+                    {content: 'Content 2'},
+                    {content: 'Content 3'}
+                ]
+                ),
+                computed = {
+                    headline: function () {
+                        return this.variables['this'].content + ' worked'
+                    }
+                };
+
+            view.setComputed(computed);
+
+            var result = view.toString();
+            assert.strictEqual(
+                result,
+                '<section><div>Content 1 worked</div></section>' +
+                '<section><div>Content 2 worked</div></section>' +
+                '<section><div>Content 3 worked</div></section>' +
+                ''
+            );
+        });
     });
 
     describe('render()', function () {

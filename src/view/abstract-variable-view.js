@@ -17,6 +17,13 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
      */
     _variables: null,
 
+    /**
+     * Dictionary of computed variables
+     *
+     * @type {IrLib.Dictionary}
+     */
+    _computed: null,
+
     init: function () {
         this._super();
 
@@ -26,11 +33,20 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
             this.setVariables({});
         }
 
+        if (typeof this.computed === 'object') { // Check if a computed variables are inherited
+            this.setComputed(this.computed);
+        }
+
         this.defineProperties({
             'variables': {
                 enumerable: true,
                 get: this.getVariables,
                 set: this.setVariables
+            },
+            'computed': {
+                enumerable: true,
+                get: this.getComputed,
+                set: this.setComputed
             }
         });
     },
@@ -81,5 +97,33 @@ IrLib.View.AbstractVariableView = IrLib.View.Interface.extend({
      */
     getVariables: function () {
         return this._variables;
+    },
+
+    /**
+     * Sets the registered computed variables
+     *
+     * @param {Object|IrLib.Dictionary} data
+     * @returns {IrLib.View.Interface}
+     */
+    setComputed: function (data) {
+        if (typeof data !== 'object') {
+            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
+        }
+        if (data instanceof IrLib.Dictionary) {
+            this._computed = data;
+        } else {
+            this._computed = new IrLib.Dictionary(data);
+        }
+        this._needsRedraw = true;
+        return this;
+    },
+
+    /**
+     * Returns the registered computed variables
+     *
+     * @returns {IrLib.Dictionary}
+     */
+    getComputed: function () {
+        return this._computed;
     }
 });

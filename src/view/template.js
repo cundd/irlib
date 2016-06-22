@@ -33,13 +33,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     _templateBlocks: null,
 
     /**
-     * Dictionary of computed variables
-     *
-     * @type {IrLib.Dictionary}
-     */
-    _computed: null,
-
-    /**
      * Template parser instance
      *
      * @type {IrLib.View.Parser.Interface}
@@ -78,10 +71,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
             this.setTemplate(this.template.slice(0));
         }
 
-        if (typeof this.computed === 'object') { // Check if a computed variables are inherited
-            this.setComputed(this.computed);
-        }
-
         this._subviewPlaceholders = new IrLib.Dictionary();
 
         if (arguments.length > 1) {
@@ -93,11 +82,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
                 enumerable: true,
                 get: this.getTemplate,
                 set: this.setTemplate
-            },
-            'computed': {
-                enumerable: true,
-                get: this.getComputed,
-                set: this.setComputed
             }
         });
     },
@@ -491,34 +475,6 @@ IrLib.View.Template = IrLib.View.AbstractDomView.extend({
     appendTo: function (element) {
         this._super(element);
         this.replaceSubviewPlaceholders();
-    },
-
-    /**
-     * Sets the registered computed variables
-     *
-     * @param {Object|IrLib.Dictionary} data
-     * @returns {IrLib.View.Interface}
-     */
-    setComputed: function (data) {
-        if (typeof data !== 'object') {
-            throw new TypeError('Initialization argument has to be of type object, ' + (typeof data) + ' given');
-        }
-        if (data instanceof IrLib.Dictionary) {
-            this._computed = data;
-        } else {
-            this._computed = new IrLib.Dictionary(data);
-        }
-        this._needsRedraw = true;
-        return this;
-    },
-
-    /**
-     * Returns the registered computed variables
-     *
-     * @returns {IrLib.Dictionary}
-     */
-    getComputed: function () {
-        return this._computed;
     },
 
     /**
