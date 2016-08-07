@@ -5,6 +5,20 @@
 'use strict';
 var assert = chai.assert;
 
+
+var buildWebPackClass = function (exports) {
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+    exports.default = function WebPackCreatedClass() {
+        _classCallCheck(this, WebPackCreatedClass);
+        this.name = 'WebPackCreatedClass';
+        this.needs = ['classWithDependency'];
+    };
+};
+
 describe('ServiceLocator', function () {
     var ef = function () {
         },
@@ -395,7 +409,18 @@ describe('ServiceLocator', function () {
             assert.ok(newService instanceof NewClassWithDependencyWithDifferentName);
             assert.strictEqual(newService.sl, sl);
         });
-
+        it('should resolve nested dependencies for WebPack create class', function () {
+            var exp = {};
+            buildWebPackClass(exp);
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', exp.default);
+            sl.register('classWithDependency', NewClassWithDependency);
+            var newService = sl.get('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'WebPackCreatedClass');
+            assert.isObject(newService.classWithDependency);
+            assert.strictEqual(newService.classWithDependency.serviceLocator, sl);
+        });
         it('should resolve nested dependencies with static method', function () {
             var sl = new IrLib.ServiceLocator();
             sl.register('myService', NewClassStaticDependencyMethodWithNestedDependency);
@@ -406,7 +431,6 @@ describe('ServiceLocator', function () {
             assert.isObject(newService.classWithDependency);
             assert.strictEqual(newService.classWithDependency.serviceLocator, sl);
         });
-
         it('should resolve nested dependencies with static method with different name', function () {
             var sl = new IrLib.ServiceLocator();
             sl.register('myService', NewClassWithStaticDependencyMethodWithDifferentName);
