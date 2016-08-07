@@ -37,7 +37,21 @@ describe('ServiceLocator', function () {
             'init': function (arg) {
                 this.arg = arg;
             }
-        });
+        }),
+        NewClassStaticDependencyMethodWithNestedDependency = function () {
+            this.name = 'NewClassStaticDependencyMethodWithNestedDependency';
+        },
+        NewClassWithStaticDependencyMethodWithDifferentName = function () {
+            this.name = 'NewClassWithStaticDependencyMethodWithDifferentName';
+        };
+
+
+    NewClassStaticDependencyMethodWithNestedDependency.needs = function () {
+        return ['classWithDependency'];
+    };
+    NewClassWithStaticDependencyMethodWithDifferentName.needs = function () {
+        return ['serviceLocator:sl'];
+    };
 
     describe('register()', function () {
         it('should fail for wrong identifier type (number)', function () {
@@ -206,7 +220,7 @@ describe('ServiceLocator', function () {
             var sl = new IrLib.ServiceLocator(),
                 didResolveDependenciesWasCalled = false;
             sl.register('myService', NewClass.extend({
-                didResolveDependencies: function() {
+                didResolveDependencies: function () {
                     didResolveDependenciesWasCalled = true;
                 }
             }));
@@ -275,7 +289,7 @@ describe('ServiceLocator', function () {
             var sl = new IrLib.ServiceLocator(),
                 didResolveDependenciesWasCalled = false;
             sl.register('myService', NewClass.extend({
-                didResolveDependencies: function() {
+                didResolveDependencies: function () {
                     didResolveDependenciesWasCalled = true;
                 }
             }));
@@ -379,6 +393,28 @@ describe('ServiceLocator', function () {
             assert.isNotNull(newService);
             assert.equal(newService.name, 'NewClassWithDependencyWithDifferentName');
             assert.ok(newService instanceof NewClassWithDependencyWithDifferentName);
+            assert.strictEqual(newService.sl, sl);
+        });
+
+        it('should resolve nested dependencies with static method', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClassStaticDependencyMethodWithNestedDependency);
+            sl.register('classWithDependency', NewClassWithDependency);
+            var newService = sl.get('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClassStaticDependencyMethodWithNestedDependency');
+            assert.isObject(newService.classWithDependency);
+            assert.strictEqual(newService.classWithDependency.serviceLocator, sl);
+        });
+
+        it('should resolve nested dependencies with static method with different name', function () {
+            var sl = new IrLib.ServiceLocator();
+            sl.register('myService', NewClassWithStaticDependencyMethodWithDifferentName);
+            sl.register('classWithDependency', NewClassWithDependency);
+            var newService = sl.get('myService');
+            assert.isNotNull(newService);
+            assert.equal(newService.name, 'NewClassWithStaticDependencyMethodWithDifferentName');
+            assert.isObject(newService.sl);
             assert.strictEqual(newService.sl, sl);
         });
     });

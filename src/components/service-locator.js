@@ -139,9 +139,17 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @returns {Object}
      */
     resolveDependencies: function (instance, serviceClass) {
+        var dependencies = null;
+
         if (serviceClass.prototype && typeof serviceClass.prototype.needs === 'object') {
-            var dependencies = serviceClass.prototype.needs,
-                dependenciesLength = dependencies.length,
+            dependencies = serviceClass.prototype.needs;
+        }
+        if (serviceClass.needs && typeof serviceClass.needs === 'function') {
+            dependencies = serviceClass.needs();
+        }
+
+        if (dependencies) {
+            var dependenciesLength = dependencies.length,
                 dependency, dependencyProperty, dependencyIdentifier, i;
 
             if (++this.recursionLevel > 1000) {
