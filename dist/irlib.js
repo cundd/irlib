@@ -915,6 +915,53 @@ IrLib.Dictionary = IrLib.CoreObject.extend({
 
 
 /**
+ * Class representing a file system path
+ * @param {String} path
+ * @constructor
+ */
+IrLib.Path = function (path) {
+    this.absolute = false;
+    if (!path) {
+        this.components = [];
+    }
+    else {
+        if (path.charAt(0) === '/') {
+            this.absolute = true;
+        }
+        this.components = path.split('/').filter(function (item) {
+            return !!item;
+        });
+    }
+};
+
+/**
+ * Returns a string representation of the path
+ *
+ * @returns {string}
+ */
+IrLib.Path.prototype.toString = function () {
+    return (this.absolute ? '/' : '') + this.components.join('/');
+};
+
+/**
+ * Returns if the path is absolute
+ *
+ * @returns {boolean}
+ */
+IrLib.Path.prototype.isAbsolute = function () {
+    return this.absolute;
+};
+
+/**
+ * Returns if the path is relative
+ *
+ * @returns {boolean}
+ */
+IrLib.Path.prototype.isRelative = function () {
+    return !this.absolute;
+};
+
+/**
  * Created by COD on 03.06.15.
  */
 var GeneralUtility = IrLib.Utility.GeneralUtility;
@@ -1055,9 +1102,17 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @returns {Object}
      */
     resolveDependencies: function (instance, serviceClass) {
-        if (serviceClass.prototype && typeof serviceClass.prototype.needs === 'object') {
-            var dependencies = serviceClass.prototype.needs,
-                dependenciesLength = dependencies.length,
+        var dependencies = null;
+
+        if (instance && typeof instance.needs === 'object') {
+            dependencies = instance.needs;
+        }
+        if (serviceClass.needs && typeof serviceClass.needs === 'function') {
+            dependencies = serviceClass.needs();
+        }
+
+        if (dependencies) {
+            var dependenciesLength = dependencies.length,
                 dependency, dependencyProperty, dependencyIdentifier, i;
 
             if (++this.recursionLevel > 1000) {
