@@ -2812,7 +2812,7 @@ IrLib.View.LoopView = IrLib.View.AbstractDomView.extend({
      */
     setContent: function (content) {
         if (!Array.isArray(content)) {
-            throw new TypeError('Argument "content" has to be of type object, ' + (typeof content) + ' given');
+            throw new TypeError('Argument "content" has to be of type array, ' + (typeof content) + ' given');
         }
         this._content = content;
         this._needsRedraw = true;
