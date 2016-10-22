@@ -28,6 +28,12 @@ Service Locator
 var sl = new IrLib.ServiceLocator();
 ```
 
+### Retrieve an instance
+
+```javascript
+var controller = sl.get('registeredKey');
+```
+
 ### Import a ES6 module and register it
 
 ```javascript
