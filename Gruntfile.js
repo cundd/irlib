@@ -2,15 +2,8 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
 
-        shell: {
-            neuterPlus: {
-                command: 'neuter-plus -v --input includes.js --output ../<%= pkg.main %> --wrapBefore "(function() {" --wrapAfter "}());"',
-                options: {
-                    execOptions: {
-                        cwd: 'src'
-                    }
-                }
-            }
+        webpack: {
+            default: require('./webpack.config.js')
         },
 
         karma: {
@@ -42,13 +35,13 @@ module.exports = function (grunt) {
         },
 
         jshint: {
-            esnext: true,
-            files: ['Gruntfile.js', 'src/**/*.js']
+            files: ['Gruntfile.js', 'src/**/*.js'],
+            jshintrc: true
         },
 
         watch: {
             files: ['<%= jshint.files %>', 'tests/**/*.js'],
-            tasks: ['jshint', 'shell', 'mochaTest']
+            tasks: ['webpack', 'mochaTest']
         }
     });
 
@@ -56,10 +49,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-mocha-test');
-    grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-webpack');
 
-    grunt.registerTask('test', ['jshint', 'shell', 'mochaTest', 'karma:unit']);
-    grunt.registerTask('build', ['jshint', 'shell']);
-    grunt.registerTask('default', ['jshint', 'shell', 'mochaTest']);
+    grunt.registerTask('test', ['webpack', 'mochaTest', 'karma:unit']);
+    grunt.registerTask('build', ['jshint', 'webpack']);
+    grunt.registerTask('default', ['jshint', 'webpack', 'mochaTest']);
 
 };

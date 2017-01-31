@@ -2,18 +2,16 @@
  * Created by COD on 03.06.15.
  */
 
-IrLib.Utility = IrLib.Utility || {};
-
-var _GeneralUtility = IrLib.Utility.GeneralUtility = {
+export default class GeneralUtility {
     /**
      * Returns if the given element is a HTML node
      *
      * @param {*} element
      * @returns {Boolean}
      */
-    isDomNode: function (element) {
+    static isDomNode(element) {
         return !!(element && element.nodeName);
-    },
+    }
 
     /**
      * Returns the matching HTML node
@@ -21,15 +19,15 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} element
      * @returns {HTMLElement}
      */
-    domNode: function (element) {
-        if (_GeneralUtility.isDomNode(element)) {
+    static domNode(element) {
+        if (GeneralUtility.isDomNode(element)) {
             return element;
         }
         if (typeof element === 'string') {
             return document.querySelector(element);
         }
         return null;
-    },
+    }
 
     /**
      * Tries to transform the given value into an array
@@ -43,7 +41,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} value
      * @returns {*}
      */
-    toArray: function (value) {
+    static toArray(value) {
         if (typeof value === 'undefined') {
             return [];
         }
@@ -60,7 +58,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             return valueCollection;
         }
         return [value];
-    },
+    }
 
     /**
      * Returns the value for the key path of the given object
@@ -70,7 +68,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {Boolean} [graceful] Do not throw an exception for unresolved key paths
      * @returns {*}
      */
-    valueForKeyPathOfObject: function (keyPath, object, graceful) {
+    static valueForKeyPathOfObject(keyPath, object, graceful) {
         if (typeof keyPath !== 'string') {
             throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
@@ -93,7 +91,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             currentValue = currentValue[currentKeyPathPart];
         }
         return currentValue;
-    },
+    }
 
     /**
      * Sets the value for the key path of the given object
@@ -103,7 +101,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {Object} object Root object to set the property
      * @returns {*}
      */
-    setValueForKeyPathOfObject: function (value, keyPath, object) {
+    static setValueForKeyPathOfObject(value, keyPath, object) {
         if (typeof keyPath !== 'string') {
             throw new TypeError('Key path must be of type string, ' + (typeof keyPath) + ' given');
         }
@@ -117,7 +115,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             keyPathToParent = keyPath.substr(0, lastIndexOfDot);
             childKey = keyPath.substr(lastIndexOfDot + 1);
 
-            parentObject = _GeneralUtility.valueForKeyPathOfObject(keyPathToParent, object);
+            parentObject = GeneralUtility.valueForKeyPathOfObject(keyPathToParent, object);
         }
         if (typeof parentObject !== 'object') {
             throw new TypeError(
@@ -125,7 +123,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             );
         }
         parentObject[childKey] = value;
-    },
+    }
 
     /**
      * Returns if the given value is numeric
@@ -133,9 +131,9 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} value
      * @returns {boolean}
      */
-    isNumeric: function (value) {
+    static isNumeric(value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
-    },
+    }
 
     /**
      * Returns a deep copy of the given object
@@ -144,7 +142,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {Number} depth
      * @returns {*}
      */
-    clone: function (obj, depth) {
+    static clone(obj, depth) {
         var copy;
         if (arguments.length < 2) {
             depth = 10;
@@ -167,7 +165,7 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             copy = [];
             for (var i = 0, len = obj.length; i < len; i++) {
                 if (depth - 1 > 0) {
-                    copy[i] = _GeneralUtility.clone(obj[i], depth - 1);
+                    copy[i] = GeneralUtility.clone(obj[i], depth - 1);
                 } else {
                     copy[i] = obj[i];
                 }
@@ -180,14 +178,14 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
         for (var attr in obj) {
             if (obj.hasOwnProperty(attr)) {
                 if (depth - 1 > 0) {
-                    copy[attr] = _GeneralUtility.clone(obj[attr], depth - 1);
+                    copy[attr] = GeneralUtility.clone(obj[attr], depth - 1);
                 } else {
                     copy[attr] = obj[attr];
                 }
             }
         }
         return copy;
-    },
+    }
 
     /**
      * Adds the class to the given element
@@ -195,8 +193,8 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
      * @param {*} element HTML node or selector
      * @param {String} className
      */
-    addClass: function (element, className) {
-        element = _GeneralUtility.domNode(element);
+    static addClass(element, className) {
+        element = GeneralUtility.domNode(element);
         if (element) {
             if (element.classList) {
                 element.classList.add(className);
@@ -205,4 +203,4 @@ var _GeneralUtility = IrLib.Utility.GeneralUtility = {
             }
         }
     }
-};
+}

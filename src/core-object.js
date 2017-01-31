@@ -1,26 +1,23 @@
 /**
  * Created by COD on 03.06.15.
  */
-require('class');
-
-export default class CoreObject {
-    /**
-     * @type {number}
-     * @private
-     */
-    static __lastGuid = 0;
-
+class CoreObject {
     /**
      * Builds a new UID
      * @returns {string}
      */
-    static createGuid = function () {
+    static createGuid() {
         return 'irLib-' + (++CoreObject.__lastGuid);
     };
 
     constructor() {
         this.__guid = CoreObject.createGuid();
         this.init();
+    }
+
+    init() {
+        throw new Error('Init will not be called anymore');
+
     }
 
     /**
@@ -103,3 +100,11 @@ export default class CoreObject {
         };
     }
 }
+
+/**
+ * @type {number}
+ * @private
+ */
+CoreObject.__lastGuid = 0;
+
+export default CoreObject;

@@ -4,21 +4,30 @@
 /*jslint unparam: true */
 /*global window, require, exports */
 
-import Config from './config';
 
-(function(exports){
-    var IrLib = exports;
+export * from './config';
+export * from './core-object';
+export * from './error/error';
+export * from './error/missing-implementation-error';
+export * from './error/type-error';
 
-    require('config');
-    require('core-object');
-    require('error/*');
-    require('utility/*');
-    require('components/*');
-    require('view/interface');
-    require('view/*');
-    require('view/parser/*');
+// import Config from './config';
+//
+// (function(exports){
+//     var IrLib = exports;
+//
+//     require('config');
+//     require('core-object');
+//     require('error/*');
+//     require('utility/*');
+//     require('components/*');
+//     require('view/interface');
+//     require('view/*');
+//     require('view/parser/*');
+//
+// })(typeof exports === 'undefined'? this.IrLib = {}: exports);
+//
+// // require('additional files')
+//
 
-})(typeof exports === 'undefined'? this.IrLib = {}: exports);
-
-// require('additional files')
 

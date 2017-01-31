@@ -1,33 +1,36 @@
 /**
  * Created by COD on 03.06.15.
  */
-var GeneralUtility = IrLib.Utility.GeneralUtility;
+import GeneralUtility from './../utility/general-utility';
+
 var _Error = IrLib.Error;
-IrLib.ServiceLocator = IrLib.CoreObject.extend({
-    /**
-     * @type {Object}
-     */
-    services: null,
-
-    /**
-     * @type {Object}
-     */
-    serviceFactory: null,
-
-    /**
-     * @type {Number}
-     */
-    recursionLevel: 0,
+export default class ServiceLocator {
 
     /**
      * Initialize the Service Locator
      */
-    init: function () {
+    constructor() {
+        /**
+         * @type {Object}
+         */
         this.services = {};
+
+            /**
+             * @type {Object}
+             */
+            this.serviceFactory= {};
+
+            /**
+             * @type {Number}
+             */
+            this.recursionLevel= 0;
+
+
+            this.services = {};
         this.serviceFactory = {};
 
         this.set('serviceLocator', this);
-    },
+    }
 
     /**
      * Register multiple factory/constructor-identifier combinations
@@ -35,7 +38,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {Object} configuration
      * @returns {IrLib.ServiceLocator}
      */
-    registerMultiple: function (configuration) {
+    registerMultiple(configuration) {
         var identifiers = Object.keys(configuration),
             identifier, i;
         for (i = 0; i < identifiers.length; i++) {
@@ -43,7 +46,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
             this.register(identifier, configuration[identifier]);
         }
         return this;
-    },
+    }
 
     /**
      * Register the factory/constructor for the given service identifier
@@ -52,13 +55,13 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {Function} constructor
      * @returns {IrLib.ServiceLocator}
      */
-    register: function (identifier, constructor) {
+    register(identifier, constructor) {
         this._assertIdentifier(identifier);
         this._assertFactory(constructor);
 
         this.serviceFactory[identifier] = constructor;
         return this;
-    },
+    }
 
     /**
      * Sets the instance for the given service identifier
@@ -67,12 +70,12 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {Object} instance
      * @returns {IrLib.ServiceLocator}
      */
-    set: function (identifier, instance) {
+    set(identifier, instance) {
         this._assertIdentifier(identifier);
 
         this.services[identifier] = instance;
         return this;
-    },
+    }
 
     /**
      * Returns the instance for the given service identifier
@@ -83,7 +86,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {String} identifier
      * @returns {Object}
      */
-    get: function (identifier) {
+    get(identifier) {
         this._assertIdentifier(identifier);
 
         var instance = this.services[identifier];
@@ -92,7 +95,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
             this.set(identifier, instance);
         }
         return instance;
-    },
+    }
 
     /**
      * Creates a new instance for the given service identifier and will invoke didResolveDependencies if it exists
@@ -101,7 +104,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {*} [additionalArgument]
      * @returns {Object}
      */
-    create: function (identifier, additionalArgument) {
+    create(identifier, additionalArgument) {
         this._assertIdentifier(identifier);
 
         var withArgument = arguments.length > 1,
@@ -129,7 +132,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
         }
 
         return instance;
-    },
+    }
 
     /**
      * Resolves the dependencies defined in the prototype's "needs" property
@@ -138,7 +141,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {Class} serviceClass
      * @returns {Object}
      */
-    resolveDependencies: function (instance, serviceClass) {
+    resolveDependencies(instance, serviceClass) {
         var dependencies = null;
 
         if (instance && typeof instance.needs === 'object') {
@@ -164,7 +167,7 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
             this.recursionLevel--;
         }
         return instance;
-    },
+    }
 
     /**
      * Tests if the given name is a valid service identifier
@@ -172,11 +175,11 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {*} identifier
      * @private
      */
-    _assertIdentifier: function (identifier) {
+    _assertIdentifier(identifier) {
         if (typeof identifier !== 'string') {
             throw new _Error('Given service name is not of type string', 1433683510);
         }
-    },
+    }
 
     /**
      * Tests if the given value is a valid service factory
@@ -184,9 +187,9 @@ IrLib.ServiceLocator = IrLib.CoreObject.extend({
      * @param {*} constructor
      * @private
      */
-    _assertFactory: function (constructor) {
+    _assertFactory(constructor) {
         if (typeof constructor !== 'function') {
             throw new _Error('Given service constructor is not callable', 1433683511);
         }
     }
-});
+}

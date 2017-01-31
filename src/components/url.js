@@ -7,7 +7,7 @@
  * @param {String} href
  * @constructor
  */
-IrLib.Url = function (href) {
+export default class Url {= function (href) {
     /**
      * Adds the protocol if the URI starts with //
      *
