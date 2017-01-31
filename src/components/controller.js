@@ -1,6 +1,7 @@
 /**
  * Created by COD on 03.06.15.
  */
+import CoreObject from "../core-object";
 
 var GeneralUtility = IrLib.Utility.GeneralUtility;
 var _Error = IrLib.Error;
@@ -8,25 +9,33 @@ var _Error = IrLib.Error;
 /**
  * @implements EventListener
  */
-IrLib.Controller = IrLib.CoreObject.extend({
-    /**
-     * @type {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String}
-     */
-    _view: null,
+export default class Controller extends CoreObject {
+    constructor() {
+        /**
+         * @type {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String}
+         */
+        this._view = null;
 
-    /**
-     * List of all registered events
-     *
-     * @type {String[]}
-     */
-    _registeredEvents: [],
+        /**
+         * List of all registered events
+         *
+         * @type {String[]}
+         */
+        this._registeredEvents = [];
+
+        /**
+         * Registered event handler methods
+         * @type {{}}
+         */
+        this.events = {}
+    }
 
     /**
      * Initialize the controller
      *
      * @param {HTMLElement|String} [view] A dom node or selector
      */
-    init: function (view) {
+    init(view) {
         if (arguments.length > 0) { // Check if the view argument is given
             this.setView(view);
         } else if (this.view) { // Check if a view is inherited
@@ -37,7 +46,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
             get: this.getView,
             set: this.setView
         });
-    },
+    }
 
     /**
      * Handle the DOM event
@@ -45,12 +54,13 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * @param {Event} event
      * @returns {*}
      */
-    handleEvent: function (event) {
-        var controller = this,
-            type = event.type,
-            target = event.target,
-            _events = controller.events,
-            targetsTargetAttribute, imp;
+    handleEvent(event) {
+        let controller = this;
+        const type = event.type;
+        const target = event.target;
+        let _events = controller.events;
+        let targetsTargetAttribute;
+        let imp;
 
         // Workaround for jsdom based unit tests
         if (!_events && typeof event.irController === 'object') {
@@ -65,8 +75,8 @@ IrLib.Controller = IrLib.CoreObject.extend({
 
         // If the data-irlib-target attribute is set look for a matching implementation
         if (targetsTargetAttribute) {
-            var matchingImpName = Object.keys(_events).filter(function (eventIdentifier) {
-                var eventIdentifierParts = eventIdentifier.split(':');
+            const matchingImpName = Object.keys(_events).filter(function (eventIdentifier) {
+                const eventIdentifierParts = eventIdentifier.split(':');
 
                 return eventIdentifierParts.length > 1 &&
                     eventIdentifierParts[1] === targetsTargetAttribute && // Matching target attribute
@@ -90,37 +100,37 @@ IrLib.Controller = IrLib.CoreObject.extend({
             return false;
         }
         return true;
-    },
+    }
 
     /**
      * Sets the view
      *
      * @param {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String} view A View object, dom node or selector
      */
-    setView: function (view) {
+    setView(view) {
         this._assertView(view);
         if (typeof view === 'string') { // If the view is a selector
             this._view = GeneralUtility.domNode(view);
         } else {
             this._view = view;
         }
-    },
+    }
 
     /**
      * Returns the view
      *
      * @returns {IrLib.View.Interface|IrLib.View.Template|HTMLElement|String}
      */
-    getView: function () {
+    getView() {
         return this._view;
-    },
+    }
 
     /**
      * Register the Controller as event listener for each event
      *
      * @returns {IrLib.Controller}
      */
-    catchAllViewEvents: function () {
+    catchAllViewEvents() {
         var registeredEvents = this._registeredEvents,
             inline_splitEventIdentifier = this._splitEventIdentifier,
             _view = this.view,
@@ -144,7 +154,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
             IrLib.Logger.warn('Can not catch all events because the view not set');
         }
         return this;
-    },
+    }
 
     /**
      * Register the Controller as event listener for each of the callbacks defined in
@@ -152,7 +162,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
      *
      * @returns {IrLib.Controller}
      */
-    initializeEventListeners: function () {
+    initializeEventListeners() {
         var registeredEvents = this._registeredEvents,
             inline_splitEventIdentifier = this._splitEventIdentifier,
             _view = this.view,
@@ -167,12 +177,12 @@ IrLib.Controller = IrLib.CoreObject.extend({
             IrLib.Logger.warn('Can not add event listener because the view not set');
         }
         return this;
-    },
+    }
 
     /**
      * Removes the event listeners
      */
-    removeEventListeners: function () {
+    removeEventListeners() {
         var registeredEvents = this._registeredEvents,
             _view = this.view,
             i;
@@ -184,23 +194,23 @@ IrLib.Controller = IrLib.CoreObject.extend({
         } else {
             IrLib.Logger.warn('Can not remove event listeners because the view not set');
         }
-    },
+    }
 
     /**
      * Returns the event names
      *
      * @returns {Array}
      */
-    eventNames: function () {
+    eventNames() {
         return Object.keys(this.events);
-    },
+    }
 
     /**
      * Actually add the event listeners listed in _registeredEvents to the View
      *
      * @private
      */
-    _addListenersForRegisteredEventTypes: function () {
+    _addListenersForRegisteredEventTypes() {
         var registeredEvents = this._registeredEvents,
             registeredEventsLength = registeredEvents.length,
             _view = this.view,
@@ -210,7 +220,7 @@ IrLib.Controller = IrLib.CoreObject.extend({
                 _view.addEventListener(registeredEvents[i], this, false);
             }
         }
-    },
+    }
 
     /**
      * Split the given event identifier into it's type and action-target parts
@@ -223,9 +233,9 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * @returns {String[]}
      * @private
      */
-    _splitEventIdentifier: function (eventIdentifier) {
+    _splitEventIdentifier(eventIdentifier) {
         return eventIdentifier.split ? eventIdentifier.split(':') : eventIdentifier;
-    },
+    }
 
     /**
      * Tests if the given value is a view
@@ -233,20 +243,15 @@ IrLib.Controller = IrLib.CoreObject.extend({
      * @param {*} view
      * @private
      */
-    _assertView: function (view) {
+    _assertView(view) {
         if (!view) {
             throw new _Error('No view given', 1433355412);
         }
 
-        var ViewInterface = IrLib.View && IrLib.View.Interface ? IrLib.View.Interface : function () {
-        };
+        var ViewInterface = IrLib.View && IrLib.View.Interface ? IrLib.View.Interface() : {};
         if (!GeneralUtility.domNode(view) && !(view instanceof ViewInterface)) {
             throw new _Error('No view given', 1433355412, view);
         }
-    },
-
-    /**
-     * Registered event handler methods
-     */
-    events: {}
-});
+    }
+}
+    

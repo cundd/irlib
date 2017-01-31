@@ -42,6 +42,7 @@ module.exports = function (grunt) {
         },
 
         jshint: {
+            esnext: true,
             files: ['Gruntfile.js', 'src/**/*.js']
         },
 

@@ -15,3 +15,4 @@ IrLib.MissingImplementationError.prototype = {
             this.message;
     }
 };
+

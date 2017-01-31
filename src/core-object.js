@@ -3,69 +3,80 @@
  */
 require('class');
 
-IrLib.CoreObject = Class.extend({
+export default class CoreObject {
     /**
-     * @type {String}
+     * @type {number}
+     * @private
      */
-    __guid: null,
+    static __lastGuid = 0;
 
-    init: function () {
-        this.__guid = IrLib.CoreObject.createGuid();
-    },
+    /**
+     * Builds a new UID
+     * @returns {string}
+     */
+    static createGuid = function () {
+        return 'irLib-' + (++CoreObject.__lastGuid);
+    };
+
+    constructor() {
+        this.__guid = CoreObject.createGuid();
+        this.init();
+    }
 
     /**
      * Returns the global unique ID of the object
      *
      * @returns {String}
      */
-    guid: function () {
+    guid() {
         return this.__guid;
-    },
+    }
 
     /**
      * Defines a new property with the given key and descriptor
      *
      * @param {String} key
      * @param {Object} descriptor
-     * @returns {IrLib.CoreObject}
+     * @returns {CoreObject}
      * @see Object.defineProperty()
      */
-    defineProperty: function (key, descriptor) {
+    defineProperty(key, descriptor) {
         if (descriptor.overwrite === false && this[key]) {
             return this;
         }
         Object.defineProperty(this, key, descriptor);
         return this;
-    },
+    }
 
     /**
      * Defines new properties form the given properties
      *
      * @param {Object} properties
-     * @returns {IrLib.CoreObject}
+     * @returns {CoreObject}
      * @see Object.defineProperties()
      */
-    defineProperties: function (properties) {
+    defineProperties(properties) {
         Object.defineProperties(this, properties);
         return this;
-    },
+    }
 
     /**
      * Returns a clone of this object
      *
-     * @returns {*}
+     * @returns {CoreObject}
      */
-    clone: function () {
-        var source = this,
-            _clone = new (source.constructor)();
-        for (var attr in source) {
+    clone() {
+        const source = this;
+        const _clone = new (source.constructor)();
+        for (let attr in source) {
             if (source.hasOwnProperty(attr)) {
                 _clone[attr] = source[attr];
             }
         }
         _clone.__guid = IrLib.CoreObject.createGuid();
+
         return _clone;
-    },
+    }
 
     /**
      * Creates a callback function with bound this
@@ -73,9 +84,9 @@ IrLib.CoreObject = Class.extend({
      * @param {Function|String} method
      * @returns {Function}
      */
-    bind: function (method) {
-        var _this = this,
-            impl;
+    bind(method) {
+        const _this = this;
+        let impl;
 
         if (typeof method === 'function') {
             impl = method;
@@ -86,13 +97,9 @@ IrLib.CoreObject = Class.extend({
         }
 
         return function () {
-            var __preparedArguments = Array.prototype.slice.call(arguments);
+            const __preparedArguments = Array.prototype.slice.call(arguments);
             __preparedArguments.push(this);
             return impl.apply(_this, __preparedArguments);
         };
     }
-});
-IrLib.CoreObject.__lastGuid = 0;
-IrLib.CoreObject.createGuid = function () {
-    return 'irLib-' + (++IrLib.CoreObject.__lastGuid);
-};
+}

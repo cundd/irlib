@@ -4,6 +4,8 @@
 /*jslint unparam: true */
 /*global window, require, exports */
 
+import Config from './config';
+
 (function(exports){
     var IrLib = exports;
 
